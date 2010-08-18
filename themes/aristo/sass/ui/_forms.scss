@@ -1,0 +1,75 @@
+$border-radius: 3px;
+
+/* Checkbox
+----------------------------------*/
+input[type="checkbox"] {
+  -khtml-appearance: none;
+  background: sprite-image("aristo/aristo-checkbox-o.png") no-repeat;
+  width: 15px;
+  height: 16px;
+  
+  &:checked {
+    background: sprite-image("aristo/aristo-checkbox-x.png") no-repeat;
+  }
+}
+
+/* Radio button
+----------------------------------*/
+input[type="radio"] {
+  -khtml-appearance: none;
+  background: sprite-image("aristo/aristo-radio-o.png") no-repeat;
+  width: 17px;
+  height: 17px;
+  
+  &:checked {
+    border: none;
+    background: sprite-image("aristo/aristo-radio-x.png") no-repeat;
+  }
+}
+
+/* Text fields
+----------------------------------*/
+input, textarea {
+  @extend .regular-font;
+  line-height: 1;
+  padding: 4px;
+}
+
+/* Textarea
+----------------------------------*/
+textarea {
+  /* To give the same inset shadows as input[type='text'] */
+  @include appearance(textfield);
+  resize: none;
+  padding: 4px;
+  /* 
+    Hack to make the same size as text inputs,
+    since their native border isn't taken into
+    account when calculating width.
+  */
+  padding-right: 6px;
+}
+
+/* Search field
+----------------------------------*/
+input[type=search] {
+  -moz-appearance: searchfield;
+  padding: 0;
+}
+
+/* Select boxes
+----------------------------------*/
+select {
+  @extend .regular-font;
+  @include appearance;
+  @include border-radius($border-radius);
+  @include box-sizing(border-box);
+  @include text-shadow(#fff, 0, 1px, 1px);
+  
+  background: inline-image("aristo/aristo-select-arrow-bg.png") no-repeat, inline-image("aristo/aristo-select-bg.png") 0 0 repeat-x;
+  border: 1px solid #bdbdbd;
+  border-width: 0 0 0 1px;
+  color: #4f4f4f;
+  padding: 0 40px 0 13px;
+  height: $line-height;
+}

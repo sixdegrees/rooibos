@@ -1,0 +1,21 @@
+@mixin appearance($value: none) {
+  -webkit-appearance: $value;
+  -khtml-appearance: $value;
+  -moz-appearance: $value;
+}
+
+@mixin inline-block {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+}
+
+@include global-reset;
+@include reset-html5;
+
+html, body { height: 100%; }
+fieldset, img { border: 0; }
+img { vertical-align: bottom; }
+
+.txtC { text-align: center; }
+.txtR { text-align: right; }

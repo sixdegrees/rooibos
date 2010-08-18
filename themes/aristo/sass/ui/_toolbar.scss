@@ -1,0 +1,7 @@
+.toolbar {
+  @include box-sizing(border-box);
+  @include linear-gradient(color-stops(#e2e2e2, #c7c7c7), top);
+  
+  border-bottom: 1px solid #737373;
+  height: $line-height * 2.5;
+}

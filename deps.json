@@ -1,0 +1,7 @@
+{
+  "js/vendor/jquery.js": "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js",
+  "js/vendor/flexify.js": "http://plugins.jquery.com/files/flexify-1.1-uncompressed.js.txt",
+  "js/vendor/modernizr.js": "http://www.modernizr.com/downloadfulljs/",
+  "js/vendor/jquery-ui.js": "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js",
+  "js/vendor/sammy.js": "http://github.com/quirkey/sammy/raw/v0.5.4/lib/sammy.js"
+}

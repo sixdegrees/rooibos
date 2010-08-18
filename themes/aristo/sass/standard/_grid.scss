@@ -1,0 +1,20 @@
+@mixin box-flex($flex: $default-box-flex) {
+  @include experimental(box-flex, $flex, -moz, -webkit, not -o, not -ms, not -khtml, official);
+}
+
+#application {
+  width: 100%;
+  height: 100%;
+}
+
+.vbox {
+  @include display-box;
+  @include box-orient(vertical);
+}
+
+.hbox {
+  @include display-box;
+  @include box-orient(horizontal);
+}
+
+.flex { @include box-flex(1); }

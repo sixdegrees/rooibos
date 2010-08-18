@@ -1,0 +1,22 @@
+$aristo_font_family: Arial, 'Liberation Sans', FreeSans, sans-serif;
+$line-height: 24px;
+
+.regular-font {
+  font-family: $aristo_font_family;
+  font-size: 12px;
+  line-height: $line-height;
+  font-weight: normal;
+}
+
+.bold-font {
+  @extend .regular-font;
+  font-weight: bold;
+}
+
+body { @extend .regular-font; }
+
+p {
+  bottom: 6px;
+  line-height: $line-height;
+  position: relative;
+}

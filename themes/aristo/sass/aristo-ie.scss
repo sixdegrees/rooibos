@@ -1,0 +1,48 @@
+@mixin gradient-filter($top-color, $bottom-color) {
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#{$top-color}, endColorstr=#{$bottom-color});
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#{$top-color}, endColorstr=#{$bottom-color})";
+}
+
+.ui-button {
+  @include gradient-filter(#E9E9E9, #B8B8B7);
+  
+  &.ui-state-active, &:active {
+    @include gradient-filter(#B6B6B6, #E6E6E6);
+  }
+  
+  &.default {
+    @include gradient-filter(#B2D9F0, #78A1BC);
+    
+    &:active {
+      @include gradient-filter(#76A0B9, #B0D7EF);
+    }
+  }
+}
+
+.navbar {
+  @include gradient-filter(#c7cfd5, #a8b2ba);
+}
+
+.ui-outline .ui-accordion-content a.selected {
+  @include gradient-filter(#75a4d9, #2a6ab4);
+}
+
+.toolbar {
+  @include gradient-filter(#e2e2e2, #c7c7c7);
+}
+
+.ui-dialog {
+  border-radius: none;
+
+  .ui-dialog-titlebar {
+    @include gradient-filter(#e3e3e3, #c3c3c3);
+  }
+  
+  .ui-dialog-content {
+    background: #fff;
+  }
+  
+  .ui-dialog-buttonpane {
+    @include gradient-filter(#e3e3e3, #c3c3c3);
+  }
+}

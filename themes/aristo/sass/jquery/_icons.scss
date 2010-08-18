@@ -1,0 +1,17 @@
+/* Icon
+----------------------------------*/
+.ui-icon {
+  display: block;
+  text-indent: -99999px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+}
+
+/* Aristo Icons
+----------------------------------*/
+.ui-icon-triangle-1-e { background: inline-image("aristo/aristo-arrow-right.png") no-repeat; }
+.ui-icon-triangle-1-s { background: inline-image("aristo/aristo-arrow-down.png") no-repeat; }
+.ui-icon-closethick { background: inline-image("aristo/aristo-button-close.png") no-repeat; }
+.ui-icon-closethick:hover { background: inline-image("aristo/aristo-button-close-hover.png") no-repeat; }

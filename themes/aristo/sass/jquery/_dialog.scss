@@ -1,0 +1,66 @@
+$border-radius: 6px;
+
+/* Overlay
+----------------------------------*/
+.ui-widget-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: #000 50% 50% repeat; opacity: .50; filter:Alpha(Opacity=50);
+}
+
+/* Dialog
+----------------------------------*/
+.ui-dialog {
+  @include border-radius($border-radius);
+  @include box-shadow(#212121, 0, 0, 30px);
+  
+  background: #fff;
+  position: absolute;
+  overflow: hidden;
+  
+  /* Title Bar
+  ----------------------------------*/
+  .ui-dialog-titlebar {
+    @include border-radius($border-radius $border-radius 0 0);
+    @include box-shadow(#f5f5f5, 0, 1px, 1px, inset);
+    @include box-sizing(border-box);
+    @include linear-gradient(color-stops(#e3e3e3, #c3c3c3), top);
+    
+    border-bottom: 1px solid #979797;
+    color: #2c2c2c;
+    height: $line-height;
+    position: relative;
+    text-align: center;
+    
+    .ui-dialog-title {
+      @extend .bold-font;
+      @include text-shadow(#fff, 0, 1px, 1px);
+    }
+    
+    .ui-dialog-titlebar-close .ui-icon {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+    }
+  }
+  
+  /* Content
+  ----------------------------------*/
+  .ui-dialog-content {
+    padding: 12px 12px 0 12px;
+  }
+  
+  /* Button Pane
+  ----------------------------------*/
+  .ui-dialog-buttonpane {
+    @include border-radius(0 0 $border-radius $border-radius);
+    @include box-sizing(border-box);
+    @include linear-gradient(color-stops(#e3e3e3, #c3c3c3), top);
+    
+    border-top: 1px solid #979797;
+    height: $line-height * 1.5;
+    padding: 5px 6px 6px 6px;
+    
+    .ui-button:first-child { @extend .default; }
+    button { float: right; margin-left: $line-height / 4; }
+  }
+}

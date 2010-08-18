@@ -1,0 +1,37 @@
+$border-radius: 3px;
+
+.navbar {
+  @extend .bold-font;
+  @include box-sizing(border-box);
+  @include linear-gradient(color-stops(#c7cfd5, #a8b2ba), top);
+  @include text-shadow(#fff, 0, 1px, 1px);
+  
+  border-bottom: 1px solid #858c92;
+  border-top: 1px solid #d9dee2;
+  color: #2b3033;
+  font-size: 14px;
+  height: $line-height * 1.5;
+  padding: 5px 12px;
+  
+  .back.ui-button {
+    @include border-radius(0 $border-radius $border-radius 0);
+    border-left: 0;
+    .ui-button-text { padding-left: 6px; }
+    margin-left: 12px;
+    
+    &:before {
+      content: "\00a0";
+      display: block;
+      position: absolute;
+      left: -11px;
+      top: -1px;
+      width: 12px;
+      height: $line-height;
+      background: inline-image("aristo/aristo-back-button.png") no-repeat;
+    }
+    
+    &:active:before {
+      background: inline-image("aristo/aristo-back-button-hover.png") no-repeat;
+    }
+  }
+}
