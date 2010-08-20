@@ -5,9 +5,7 @@
 //= require "vendor/hashchange"
 //= require "vendor/sammy"
 //= require "vendor/mustache"
-//= require "vendor/sammy.mustache"
 //= require "ui/outline"
-//= require "ui/controls"
 
 jQuery.fn.extend({
 	display: function( url, params, callback ) {
