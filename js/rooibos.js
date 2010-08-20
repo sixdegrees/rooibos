@@ -76,11 +76,11 @@ jQuery.fn.extend({
           if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
           /* Flexible box model compatibility */
           if (!jQuery.browser.webkit && !jQuery.browser.mozilla) {
-            $(".vbox").flow("vertical");
-            $(".hbox").flow("horizontal");
-            $(".vbox > .flex").flex("height", 1).children().flex("height", 1);
-            $(".hbox > .flex").flex("width", 1).children().flex("width", 1);
-            $(document).flexify();
+            self.find(".vbox").flow("vertical");
+            self.find(".hbox").flow("horizontal");
+            self.find(".vbox > .flex").flex("height", 1).children().flex("height", 1);
+            self.find(".hbox > .flex").flex("width", 1).children().flex("width", 1);
+            jQuery(document).flexify();
           } 
 				}
 
