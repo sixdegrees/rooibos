@@ -55,6 +55,13 @@ jQuery.fn.extend({
 					self.html(Mustache.to_html(res.responseText));
 					self.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
           self.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
+          self.find(".dialog").hide().each(function() {
+            var el = this;
+            self.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
+              e.preventDefault();
+              jQuery(el).dialog(jQuery(this).metadata());
+            });
+          });
           self.find(".outline").outline();
 				}
 

@@ -8,7 +8,9 @@
       var self = this;
       $(window).hashchange(function() {
         self.element.find(".ui-accordion-content a").removeClass("selected");
-        self.element.find(".ui-accordion-content a[href=" + location.hash + "]").addClass("selected");
+        var el = self.element.find(".ui-accordion-content a[href=" + location.hash + "]");
+        el.addClass("selected");
+        self.activate(self.element.find(".ui-accordion-content").index(el.parent().parent().parent()));
       }).hashchange();
     }
   });
