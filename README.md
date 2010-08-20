@@ -12,7 +12,10 @@ Create great webapps without a hassle.
 
 # Compatibility
 
-* WebKit (Safari, Chrome) and Firefox. IE compatibility is coming (IE8 may be good).
+* WebKit (Safari, Chrome) and Firefox
+* IE8 is almost good
+* There will be a compatibility layer for IE7 but I don't guarantee anything
+* Opera... Don't have plans for it
 
 # Development
 
