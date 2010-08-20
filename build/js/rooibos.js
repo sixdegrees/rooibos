@@ -16974,6 +16974,308 @@ $.extend( $.ui.tabs.prototype, {
 });
 
 })( jQuery );
+/*
+ * Metadata - jQuery plugin for parsing metadata from elements
+ *
+ * Copyright (c) 2006 John Resig, Yehuda Katz, J�örn Zaefferer, Paul McLanahan
+ *
+ * Dual licensed under the MIT and GPL licenses:
+ *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
+ *
+ * Revision: $Id: jquery.metadata.js 3640 2007-10-11 18:34:38Z pmclanahan $
+ *
+ */
+
+/**
+ * Sets the type of metadata to use. Metadata is encoded in JSON, and each property
+ * in the JSON will become a property of the element itself.
+ *
+ * There are four supported types of metadata storage:
+ *
+ *   attr:  Inside an attribute. The name parameter indicates *which* attribute.
+ *
+ *   class: Inside the class attribute, wrapped in curly braces: { }
+ *
+ *   elem:  Inside a child element (e.g. a script tag). The
+ *          name parameter indicates *which* element.
+ *   html5: Values are stored in data-* attributes.
+ *
+ * The metadata for an element is loaded the first time the element is accessed via jQuery.
+ *
+ * As a result, you can define the metadata type, use $(expr) to load the metadata into the elements
+ * matched by expr, then redefine the metadata type and run another $(expr) for other elements.
+ *
+ * @name $.metadata.setType
+ *
+ * @example <p id="one" class="some_class {item_id: 1, item_label: 'Label'}">This is a p</p>
+ * @before $.metadata.setType("class")
+ * @after $("#one").metadata().item_id == 1; $("#one").metadata().item_label == "Label"
+ * @desc Reads metadata from the class attribute
+ *
+ * @example <p id="one" class="some_class" data="{item_id: 1, item_label: 'Label'}">This is a p</p>
+ * @before $.metadata.setType("attr", "data")
+ * @after $("#one").metadata().item_id == 1; $("#one").metadata().item_label == "Label"
+ * @desc Reads metadata from a "data" attribute
+ *
+ * @example <p id="one" class="some_class"><script>{item_id: 1, item_label: 'Label'}</script>This is a p</p>
+ * @before $.metadata.setType("elem", "script")
+ * @after $("#one").metadata().item_id == 1; $("#one").metadata().item_label == "Label"
+ * @desc Reads metadata from a nested script element
+ *
+ * @example <p id="one" class="some_class" data-item_id="1" data-item_label="Label">This is a p</p>
+ * @before $.metadata.setType("html5")
+ * @after $("#one").metadata().item_id == 1; $("#one").metadata().item_label == "Label"
+ * @desc Reads metadata from a series of data-* attributes
+ *
+ * @param String type The encoding type
+ * @param String name The name of the attribute to be used to get metadata (optional)
+ * @cat Plugins/Metadata
+ * @descr Sets the type of encoding to be used when loading metadata for the first time
+ * @type undefined
+ * @see metadata()
+ */
+
+(function($) {
+
+$.extend({
+  metadata : {
+    defaults : {
+      type: 'class',
+      name: 'metadata',
+      cre: /({.*})/,
+      single: 'metadata'
+    },
+    setType: function( type, name ){
+      this.defaults.type = type;
+      this.defaults.name = name;
+    },
+    get: function( elem, opts ){
+      var settings = $.extend({},this.defaults,opts);
+      if ( !settings.single.length ) settings.single = 'metadata';
+
+      var data = $.data(elem, settings.single);
+      if ( data ) return data;
+
+      data = "{}";
+
+      var getData = function(data) {
+        if(typeof data != "string") return data;
+
+        if( data.indexOf('{') < 0 ) {
+          data = eval("(" + data + ")");
+        }
+      }
+
+      var getObject = function(data) {
+        if(typeof data != "string") return data;
+
+        data = eval("(" + data + ")");
+        return data;
+      }
+
+      if ( settings.type == "html5" ) {
+        var object = {};
+        $( elem.attributes ).each(function() {
+          var name = this.nodeName;
+          if(name.match(/^data-/)) name = name.replace(/^data-/, '');
+          else return true;
+          object[name] = getObject(this.nodeValue);
+        });
+      } else {
+        if ( settings.type == "class" ) {
+          var m = settings.cre.exec( elem.className );
+          if ( m )
+            data = m[1];
+        } else if ( settings.type == "elem" ) {
+          if( !elem.getElementsByTagName ) return;
+          var e = elem.getElementsByTagName(settings.name);
+          if ( e.length )
+            data = $.trim(e[0].innerHTML);
+        } else if ( elem.getAttribute != undefined ) {
+          var attr = elem.getAttribute( settings.name );
+          if ( attr )
+            data = attr;
+        }
+        object = getObject(data.indexOf("{") < 0 ? "{" + data + "}" : data);
+      }
+
+      $.data( elem, settings.single, object );
+      return object;
+    }
+  }
+});
+
+/**
+ * Returns the metadata object for the first member of the jQuery object.
+ *
+ * @name metadata
+ * @descr Returns element's metadata object
+ * @param Object opts An object contianing settings to override the defaults
+ * @type jQuery
+ * @cat Plugins/Metadata
+ */
+$.fn.metadata = function( opts ){
+  return $.metadata.get( this[0], opts );
+};
+
+})(jQuery);
+
+jQuery.metadata.setType("attr", "data");
+/*!
+ * jQuery hashchange event - v1.3 - 7/21/2010
+ * http://benalman.com/projects/jquery-hashchange-plugin/
+ *
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
+
+
+(function($,window,undefined){
+  '$:nomunge'; // Used by YUI compressor.
+
+  var str_hashchange = 'hashchange',
+
+    doc = document,
+    fake_onhashchange,
+    special = $.event.special,
+
+    doc_mode = doc.documentMode,
+    supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
+
+  function get_fragment( url ) {
+    url = url || location.href;
+    return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
+  };
+
+
+  $.fn[ str_hashchange ] = function( fn ) {
+    return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
+  };
+
+
+
+
+  $.fn[ str_hashchange ].delay = 50;
+  /*
+  $.fn[ str_hashchange ].domain = null;
+  $.fn[ str_hashchange ].src = null;
+  */
+
+
+  special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
+
+    setup: function() {
+      if ( supports_onhashchange ) { return false; }
+
+      $( fake_onhashchange.start );
+    },
+
+    teardown: function() {
+      if ( supports_onhashchange ) { return false; }
+
+      $( fake_onhashchange.stop );
+    }
+
+  });
+
+  fake_onhashchange = (function(){
+    var self = {},
+      timeout_id,
+
+      last_hash = get_fragment(),
+
+      fn_retval = function(val){ return val; },
+      history_set = fn_retval,
+      history_get = fn_retval;
+
+    self.start = function() {
+      timeout_id || poll();
+    };
+
+    self.stop = function() {
+      timeout_id && clearTimeout( timeout_id );
+      timeout_id = undefined;
+    };
+
+    function poll() {
+      var hash = get_fragment(),
+        history_hash = history_get( last_hash );
+
+      if ( hash !== last_hash ) {
+        history_set( last_hash = hash, history_hash );
+
+        $(window).trigger( str_hashchange );
+
+      } else if ( history_hash !== last_hash ) {
+        location.href = location.href.replace( /#.*/, '' ) + history_hash;
+      }
+
+      timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
+    };
+
+    $.browser.msie && !supports_onhashchange && (function(){
+
+      var iframe,
+        iframe_src;
+
+      self.start = function(){
+        if ( !iframe ) {
+          iframe_src = $.fn[ str_hashchange ].src;
+          iframe_src = iframe_src && iframe_src + get_fragment();
+
+          iframe = $('<iframe tabindex="-1" title="empty"/>').hide()
+
+            .one( 'load', function(){
+              iframe_src || history_set( get_fragment() );
+              poll();
+            })
+
+            .attr( 'src', iframe_src || 'javascript:0' )
+
+            .insertAfter( 'body' )[0].contentWindow;
+
+          doc.onpropertychange = function(){
+            try {
+              if ( event.propertyName === 'title' ) {
+                iframe.document.title = doc.title;
+              }
+            } catch(e) {}
+          };
+
+        }
+      };
+
+      self.stop = fn_retval;
+
+      history_get = function() {
+        return get_fragment( iframe.location.href );
+      };
+
+      history_set = function( hash, history_hash ) {
+        var iframe_doc = iframe.document,
+          domain = $.fn[ str_hashchange ].domain;
+
+        if ( hash !== history_hash ) {
+          iframe_doc.title = doc.title;
+
+          iframe_doc.open();
+
+          domain && iframe_doc.write( '<script>document.domain="' + domain + '"</script>' );
+
+          iframe_doc.close();
+
+          iframe.location.hash = hash;
+        }
+      };
+
+    })();
+
+    return self;
+  })();
+
+})(jQuery,this);
 
 (function($) {
 
@@ -17767,17 +18069,660 @@ $.extend( $.ui.tabs.prototype, {
   $.sammy = window.Sammy = Sammy;
 
 })(jQuery);
+/*
+  mustache.js — Logic-less templates in JavaScript
+
+  See http://mustache.github.com/ for more info.
+*/
+
+var Mustache = function() {
+  var Renderer = function() {};
+
+  Renderer.prototype = {
+    otag: "{{",
+    ctag: "}}",
+    pragmas: {},
+    buffer: [],
+    pragmas_implemented: {
+      "IMPLICIT-ITERATOR": true
+    },
+    context: {},
+
+    render: function(template, context, partials, in_recursion) {
+      if(!in_recursion) {
+        this.context = context;
+        this.buffer = []; // TODO: make this non-lazy
+      }
+
+      if(!this.includes("", template)) {
+        if(in_recursion) {
+          return template;
+        } else {
+          this.send(template);
+          return;
+        }
+      }
+
+      template = this.render_pragmas(template);
+      var html = this.render_section(template, context, partials);
+      if(in_recursion) {
+        return this.render_tags(html, context, partials, in_recursion);
+      }
+
+      this.render_tags(html, context, partials, in_recursion);
+    },
+
+    /*
+      Sends parsed lines
+    */
+    send: function(line) {
+      if(line != "") {
+        this.buffer.push(line);
+      }
+    },
+
+    /*
+      Looks for %PRAGMAS
+    */
+    render_pragmas: function(template) {
+      if(!this.includes("%", template)) {
+        return template;
+      }
+
+      var that = this;
+      var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
+            this.ctag);
+      return template.replace(regex, function(match, pragma, options) {
+        if(!that.pragmas_implemented[pragma]) {
+          throw({message:
+            "This implementation of mustache doesn't understand the '" +
+            pragma + "' pragma"});
+        }
+        that.pragmas[pragma] = {};
+        if(options) {
+          var opts = options.split("=");
+          that.pragmas[pragma][opts[0]] = opts[1];
+        }
+        return "";
+      });
+    },
+
+    /*
+      Tries to find a partial in the curent scope and render it
+    */
+    render_partial: function(name, context, partials) {
+      name = this.trim(name);
+      if(!partials || partials[name] === undefined) {
+        throw({message: "unknown_partial '" + name + "'"});
+      }
+      if(typeof(context[name]) != "object") {
+        return this.render(partials[name], context, partials, true);
+      }
+      return this.render(partials[name], context[name], partials, true);
+    },
+
+    /*
+      Renders inverted (^) and normal (#) sections
+    */
+    render_section: function(template, context, partials) {
+      if(!this.includes("#", template) && !this.includes("^", template)) {
+        return template;
+      }
+
+      var that = this;
+      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+              "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
+              "\\s*", "mg");
+
+      return template.replace(regex, function(match, type, name, content) {
+        var value = that.find(name, context);
+        if(type == "^") { // inverted section
+          if(!value || that.is_array(value) && value.length === 0) {
+            return that.render(content, context, partials, true);
+          } else {
+            return "";
+          }
+        } else if(type == "#") { // normal section
+          if(that.is_array(value)) { // Enumerable, Let's loop!
+            return that.map(value, function(row) {
+              return that.render(content, that.create_context(row),
+                partials, true);
+            }).join("");
+          } else if(that.is_object(value)) { // Object, Use it as subcontext!
+            return that.render(content, that.create_context(value),
+              partials, true);
+          } else if(typeof value === "function") {
+            return value.call(context, content, function(text) {
+              return that.render(text, context, partials, true);
+            });
+          } else if(value) { // boolean section
+            return that.render(content, context, partials, true);
+          } else {
+            return "";
+          }
+        }
+      });
+    },
+
+    /*
+      Replace {{foo}} and friends with values from our view
+    */
+    render_tags: function(template, context, partials, in_recursion) {
+      var that = this;
+
+      var new_regex = function() {
+        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
+          that.ctag + "+", "g");
+      };
+
+      var regex = new_regex();
+      var tag_replace_callback = function(match, operator, name) {
+        switch(operator) {
+        case "!": // ignore comments
+          return "";
+        case "=": // set new delimiters, rebuild the replace regexp
+          that.set_delimiters(name);
+          regex = new_regex();
+          return "";
+        case ">": // render partial
+          return that.render_partial(name, context, partials);
+        case "{": // the triple mustache is unescaped
+          return that.find(name, context);
+        default: // escape the value
+          return that.escape(that.find(name, context));
+        }
+      };
+      var lines = template.split("\n");
+      for(var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+        if(!in_recursion) {
+          this.send(lines[i]);
+        }
+      }
+
+      if(in_recursion) {
+        return lines.join("\n");
+      }
+    },
+
+    set_delimiters: function(delimiters) {
+      var dels = delimiters.split(" ");
+      this.otag = this.escape_regex(dels[0]);
+      this.ctag = this.escape_regex(dels[1]);
+    },
+
+    escape_regex: function(text) {
+      if(!arguments.callee.sRE) {
+        var specials = [
+          '/', '.', '*', '+', '?', '|',
+          '(', ')', '[', ']', '{', '}', '\\'
+        ];
+        arguments.callee.sRE = new RegExp(
+          '(\\' + specials.join('|\\') + ')', 'g'
+        );
+      }
+      return text.replace(arguments.callee.sRE, '\\$1');
+    },
+
+    /*
+      find `name` in current `context`. That is find me a value
+      from the view object
+    */
+    find: function(name, context) {
+      name = this.trim(name);
+
+      function is_kinda_truthy(bool) {
+        return bool === false || bool === 0 || bool;
+      }
+
+      var value;
+      if(is_kinda_truthy(context[name])) {
+        value = context[name];
+      } else if(is_kinda_truthy(this.context[name])) {
+        value = this.context[name];
+      }
+
+      if(typeof value === "function") {
+        return value.apply(context);
+      }
+      if(value !== undefined) {
+        return value;
+      }
+      return "";
+    },
+
+
+    /* includes tag */
+    includes: function(needle, haystack) {
+      return haystack.indexOf(this.otag + needle) != -1;
+    },
+
+    /*
+      Does away with nasty characters
+    */
+    escape: function(s) {
+      s = String(s === null ? "" : s);
+      return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
+        switch(s) {
+        case "&": return "&amp;";
+        case "\\": return "\\\\";
+        case '"': return '\"';
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        default: return s;
+        }
+      });
+    },
+
+    create_context: function(_context) {
+      if(this.is_object(_context)) {
+        return _context;
+      } else {
+        var iterator = ".";
+        if(this.pragmas["IMPLICIT-ITERATOR"]) {
+          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
+        }
+        var ctx = {};
+        ctx[iterator] = _context;
+        return ctx;
+      }
+    },
+
+    is_object: function(a) {
+      return a && typeof a == "object";
+    },
+
+    is_array: function(a) {
+      return Object.prototype.toString.call(a) === '[object Array]';
+    },
+
+    /*
+      Gets rid of leading and trailing whitespace
+    */
+    trim: function(s) {
+      return s.replace(/^\s*|\s*$/g, "");
+    },
+
+    /*
+      Why, why, why? Because IE. Cry, cry cry.
+    */
+    map: function(array, fn) {
+      if (typeof array.map == "function") {
+        return array.map(fn);
+      } else {
+        var r = [];
+        var l = array.length;
+        for(var i = 0; i < l; i++) {
+          r.push(fn(array[i]));
+        }
+        return r;
+      }
+    }
+  };
+
+  return({
+    name: "mustache.js",
+    version: "0.3.0",
+
+    /*
+      Turns a template and view into HTML
+    */
+    to_html: function(template, view, partials, send_fun) {
+      var renderer = new Renderer();
+      if(send_fun) {
+        renderer.send = send_fun;
+      }
+      renderer.render(template, view, partials);
+      if(!send_fun) {
+        return renderer.buffer.join("\n");
+      }
+    }
+  });
+}();
+(function($) {
+
+if (!window.Mustache) {
+
+  /*
+    mustache.js — Logic-less templates in JavaScript
+
+    See http://mustache.github.com/ for more info.
+  */
+
+  var Mustache = function() {
+    var Renderer = function() {};
+
+    Renderer.prototype = {
+      otag: "{{",
+      ctag: "}}",
+      pragmas: {},
+      buffer: [],
+      pragmas_implemented: {
+        "IMPLICIT-ITERATOR": true
+      },
+      context: {},
+
+      render: function(template, context, partials, in_recursion) {
+        if(!in_recursion) {
+          this.context = context;
+          this.buffer = []; // TODO: make this non-lazy
+        }
+
+        if(!this.includes("", template)) {
+          if(in_recursion) {
+            return template;
+          } else {
+            this.send(template);
+            return;
+          }
+        }
+
+        template = this.render_pragmas(template);
+        var html = this.render_section(template, context, partials);
+        if(in_recursion) {
+          return this.render_tags(html, context, partials, in_recursion);
+        }
+
+        this.render_tags(html, context, partials, in_recursion);
+      },
+
+      /*
+        Sends parsed lines
+      */
+      send: function(line) {
+        if(line != "") {
+          this.buffer.push(line);
+        }
+      },
+
+      /*
+        Looks for %PRAGMAS
+      */
+      render_pragmas: function(template) {
+        if(!this.includes("%", template)) {
+          return template;
+        }
+
+        var that = this;
+        var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
+              this.ctag);
+        return template.replace(regex, function(match, pragma, options) {
+          if(!that.pragmas_implemented[pragma]) {
+            throw({message:
+              "This implementation of mustache doesn't understand the '" +
+              pragma + "' pragma"});
+          }
+          that.pragmas[pragma] = {};
+          if(options) {
+            var opts = options.split("=");
+            that.pragmas[pragma][opts[0]] = opts[1];
+          }
+          return "";
+        });
+      },
+
+      /*
+        Tries to find a partial in the curent scope and render it
+      */
+      render_partial: function(name, context, partials) {
+        name = this.trim(name);
+        if(!partials || partials[name] === undefined) {
+          throw({message: "unknown_partial '" + name + "'"});
+        }
+        if(typeof(context[name]) != "object") {
+          return this.render(partials[name], context, partials, true);
+        }
+        return this.render(partials[name], context[name], partials, true);
+      },
+
+      /*
+        Renders inverted (^) and normal (#) sections
+      */
+      render_section: function(template, context, partials) {
+        if(!this.includes("#", template) && !this.includes("^", template)) {
+          return template;
+        }
+
+        var that = this;
+        var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+                "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
+                "\\s*", "mg");
+
+        return template.replace(regex, function(match, type, name, content) {
+          var value = that.find(name, context);
+          if(type == "^") { // inverted section
+            if(!value || that.is_array(value) && value.length === 0) {
+              return that.render(content, context, partials, true);
+            } else {
+              return "";
+            }
+          } else if(type == "#") { // normal section
+            if(that.is_array(value)) { // Enumerable, Let's loop!
+              return that.map(value, function(row) {
+                return that.render(content, that.create_context(row),
+                  partials, true);
+              }).join("");
+            } else if(that.is_object(value)) { // Object, Use it as subcontext!
+              return that.render(content, that.create_context(value),
+                partials, true);
+            } else if(typeof value === "function") {
+              return value.call(context, content, function(text) {
+                return that.render(text, context, partials, true);
+              });
+            } else if(value) { // boolean section
+              return that.render(content, context, partials, true);
+            } else {
+              return "";
+            }
+          }
+        });
+      },
+
+      /*
+        Replace {{foo}} and friends with values from our view
+      */
+      render_tags: function(template, context, partials, in_recursion) {
+        var that = this;
+
+        var new_regex = function() {
+          return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
+            that.ctag + "+", "g");
+        };
+
+        var regex = new_regex();
+        var tag_replace_callback = function(match, operator, name) {
+          switch(operator) {
+          case "!": // ignore comments
+            return "";
+          case "=": // set new delimiters, rebuild the replace regexp
+            that.set_delimiters(name);
+            regex = new_regex();
+            return "";
+          case ">": // render partial
+            return that.render_partial(name, context, partials);
+          case "{": // the triple mustache is unescaped
+            return that.find(name, context);
+          default: // escape the value
+            return that.escape(that.find(name, context));
+          }
+        };
+        var lines = template.split("\n");
+        for(var i = 0; i < lines.length; i++) {
+          lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+          if(!in_recursion) {
+            this.send(lines[i]);
+          }
+        }
+
+        if(in_recursion) {
+          return lines.join("\n");
+        }
+      },
+
+      set_delimiters: function(delimiters) {
+        var dels = delimiters.split(" ");
+        this.otag = this.escape_regex(dels[0]);
+        this.ctag = this.escape_regex(dels[1]);
+      },
+
+      escape_regex: function(text) {
+        if(!arguments.callee.sRE) {
+          var specials = [
+            '/', '.', '*', '+', '?', '|',
+            '(', ')', '[', ']', '{', '}', '\\'
+          ];
+          arguments.callee.sRE = new RegExp(
+            '(\\' + specials.join('|\\') + ')', 'g'
+          );
+        }
+        return text.replace(arguments.callee.sRE, '\\$1');
+      },
+
+      /*
+        find `name` in current `context`. That is find me a value
+        from the view object
+      */
+      find: function(name, context) {
+        name = this.trim(name);
+
+        function is_kinda_truthy(bool) {
+          return bool === false || bool === 0 || bool;
+        }
+
+        var value;
+        if(is_kinda_truthy(context[name])) {
+          value = context[name];
+        } else if(is_kinda_truthy(this.context[name])) {
+          value = this.context[name];
+        }
+
+        if(typeof value === "function") {
+          return value.apply(context);
+        }
+        if(value !== undefined) {
+          return value;
+        }
+        return "";
+      },
+
+
+      /* includes tag */
+      includes: function(needle, haystack) {
+        return haystack.indexOf(this.otag + needle) != -1;
+      },
+
+      /*
+        Does away with nasty characters
+      */
+      escape: function(s) {
+        s = String(s === null ? "" : s);
+        return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
+          switch(s) {
+          case "&": return "&amp;";
+          case "\\": return "\\\\";
+          case '"': return '\"';
+          case "<": return "&lt;";
+          case ">": return "&gt;";
+          default: return s;
+          }
+        });
+      },
+
+      create_context: function(_context) {
+        if(this.is_object(_context)) {
+          return _context;
+        } else {
+          var iterator = ".";
+          if(this.pragmas["IMPLICIT-ITERATOR"]) {
+            iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
+          }
+          var ctx = {};
+          ctx[iterator] = _context;
+          return ctx;
+        }
+      },
+
+      is_object: function(a) {
+        return a && typeof a == "object";
+      },
+
+      is_array: function(a) {
+        return Object.prototype.toString.call(a) === '[object Array]';
+      },
+
+      /*
+        Gets rid of leading and trailing whitespace
+      */
+      trim: function(s) {
+        return s.replace(/^\s*|\s*$/g, "");
+      },
+
+      /*
+        Why, why, why? Because IE. Cry, cry cry.
+      */
+      map: function(array, fn) {
+        if (typeof array.map == "function") {
+          return array.map(fn);
+        } else {
+          var r = [];
+          var l = array.length;
+          for(var i = 0; i < l; i++) {
+            r.push(fn(array[i]));
+          }
+          return r;
+        }
+      }
+    };
+
+    return({
+      name: "mustache.js",
+      version: "0.3.1-dev",
+
+      /*
+        Turns a template and view into HTML
+      */
+      to_html: function(template, view, partials, send_fun) {
+        var renderer = new Renderer();
+        if(send_fun) {
+          renderer.send = send_fun;
+        }
+        renderer.render(template, view, partials);
+        if(!send_fun) {
+          return renderer.buffer.join("\n");
+        }
+      }
+    });
+  }();
+
+} // Ensure Mustache
+
+  Sammy = Sammy || {};
+
+  Sammy.Mustache = function(app, method_alias) {
+
+    var mustache = function(template, data, partials) {
+      data     = $.extend({}, this, data);
+      partials = $.extend({}, data.partials, partials);
+      return Mustache.to_html(template, data, partials);
+    };
+
+    if (!method_alias) method_alias = 'mustache';
+    app.helper(method_alias, mustache);
+
+  };
+
+})(jQuery);
 (function($, undefined) {
   $.widget("ui.outline", $.ui.accordion, {
     _create: function() {
       this.options.autoHeight = false;
       $.ui.accordion.prototype._create.apply(this);
       this.element.addClass("ui-outline");
-      var links = this.element.find(".ui-accordion-content a");
-      links.click(function() {
-        links.removeClass("selected");
-        $(this).addClass("selected");
-      });
+      var self = this;
+      $(window).hashchange(function() {
+        self.element.find(".ui-accordion-content a").removeClass("selected");
+        self.element.find(".ui-accordion-content a[href=" + location.hash + "]").addClass("selected");
+      }).hashchange();
     }
   });
 })(jQuery);
@@ -17804,30 +18749,73 @@ $.extend({
     flexspace: function() {
       return $("<div class='flexspace'></div>");
     },
-    outline: function(sections, opts) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, header, item, items, section;
-      sections = (function() {
-        _a = []; _c = sections;
-        for (_b = 0, _d = _c.length; _b < _d; _b++) {
-          section = _c[_b];
-          _a.push((function() {
-            header = ("<h3><a href='#'>" + (section.name) + "</a></h3>");
-            items = (function() {
-              _e = []; _g = section.items;
-              for (_f = 0, _h = _g.length; _f < _h; _f++) {
-                item = _g[_f];
-                _e.push(("<li><a href='" + (item.href) + "'>" + (item.name) + "</a></li>"));
-              }
-              return _e;
-            })();
-            return "" + (header) + "<div><ul>" + (items.toString()) + "</ul></div>";
-          })());
-        }
-        return _a;
-      })();
-      return $("<div class='outline'></div>").append(sections.toString()).outline(opts);
+    outline: function(data, opts) {
+      var html;
+      html = Mustache.to_html(" \
+{{#sections}} \
+<h3><a href='#'>{{name}}</a></h3> \
+<div> \
+<ul> \
+{{#items}} \
+<li><a href='{{href}}'>{{name}}</a></li> \
+{{/items}} \
+</ul> \
+</div> \
+{{/sections}}", data);
+      return $("<div class='outline'></div>").append(html).outline(opts);
     }
   }
 });
 
-function reflow() {}
+jQuery.fn.extend({
+	display: function( url, params, callback ) {
+		if ( typeof url !== "string" ) {
+			return _load.call( this, url );
+
+		} else if ( !this.length ) {
+			return this;
+		}
+
+		var off = url.indexOf(" ");
+		if ( off >= 0 ) {
+			var selector = url.slice(off, url.length);
+			url = url.slice(0, off);
+		}
+
+		var type = "GET";
+
+		if ( params ) {
+			if ( jQuery.isFunction( params ) ) {
+				callback = params;
+				params = null;
+
+			} else if ( typeof params === "object" ) {
+				params = jQuery.param( params, jQuery.ajaxSettings.traditional );
+				type = "POST";
+			}
+		}
+
+		var self = this;
+
+		jQuery.ajax({
+			url: url,
+			type: type,
+			dataType: "html",
+			data: params,
+			complete: function( res, status ) {
+				if ( status === "success" || status === "notmodified" ) {
+					self.html(Mustache.to_html(res.responseText));
+					jQuery("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
+          jQuery(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
+          jQuery(".outline").outline();
+				}
+
+				if ( callback ) {
+					self.each( callback, [res.responseText, status, res] );
+				}
+			}
+		});
+
+		return this;
+	}
+});

@@ -6,13 +6,13 @@ Create great webapps without a hassle.
 
 # What's in there?
 
-* jQuery, jQuery UI, Sammy.js, Mustache.js (coming soon)
+* jQuery, jQuery UI, Sammy.js, Mustache.js
 * Aristo theme done with SASS and Compass
 * And some custom code
 
 # Compatibility
 
-* WebKit (Safari, Chrome) and Firefox. IE compatibility is coming.
+* WebKit (Safari, Chrome) and Firefox. IE compatibility is coming (IE8 may be good).
 
 # Development
 

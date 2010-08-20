@@ -12,12 +12,18 @@ $.extend({
       $("<div class='hbox'></div>")
     flexspace: () ->
       $("<div class='flexspace'></div>")
-    outline: (sections, opts) ->
-      sections = for section in sections
-        header = "<h3><a href='#'>#{section.name}</a></h3>"
-        items  = for item in section.items
-          "<li><a href='#{item.href}'>#{item.name}</a></li>"
-        "#{header}<div><ul>#{items.toString()}</ul></div>"
-      $("<div class='outline'></div>").append(sections.toString()).outline(opts)
+    outline: (data, opts) ->
+      html = Mustache.to_html("
+      {{#sections}}
+        <h3><a href='#'>{{name}}</a></h3>
+        <div>
+          <ul>
+          {{#items}}
+            <li><a href='{{href}}'>{{name}}</a></li>
+          {{/items}}
+          </ul>
+        </div>
+      {{/sections}}", data)
+      $("<div class='outline'></div>").append(html).outline(opts)
   }
 })
