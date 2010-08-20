@@ -144,7 +144,7 @@ input[type=search] {
     @include border-radius(0 $border-radius $border-radius 0);
     @include box-sizing(border-box);
     @include box-shadow(#D9EDF9, 0, 1px, 1px, inset);
-    @include linear-gradient(color-stops(#B2D9F0, #78A1BC), top);
+    @include linear-gradient(color-stops(#B2D9F0, #78A1BC), top, inline-image("aristo/aristo-select-arrow.png"));
     @include text-shadow(#fff, 0, 1px, 1px);
     @include background-clip(padding-box);
     
@@ -153,6 +153,7 @@ input[type=search] {
     right: 0;
     height: $line-height;
     width: $line-height;
+    background-position: 50% 50%;
     color: #1C4257;
     border: {
       width: 1px;
