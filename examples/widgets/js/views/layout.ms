@@ -12,7 +12,7 @@
   </div>
   <div id="container" class="hbox flex">
     <div id="sidebar" style="background: #d4dde6; border-right: 1px solid #a5a5a5; width: 250px;">
-      <div class="navbar"><a class="back button" href="#">Back</a><h2 class="txtC">Demos</h2></div>
+      <div class="navbar"><h2 class="txtC">Demos</h2></div>
       <div class="outline">
         <h3><a href="#/">Buttons</a></h3>
         <div>
@@ -21,6 +21,7 @@
             <li><a href="#/buttons/radios">Radios</a></li>
             <li><a href="#/buttons/checkboxes">Checkboxes</a></li>
             <li><a href="#/buttons/icons">Icons</a></li>
+            <li><a href="#/buttons/back">Back and forward buttons</a></li>
           </ul>
         </div>
         <h3><a href="#/">Other widgets</a></h3>

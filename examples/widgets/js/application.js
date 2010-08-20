@@ -12,6 +12,9 @@ app = $.sammy(function() {
   this.get("#/buttons/icons", function() {
     return $("#content").display("js/views/buttons/icons.ms");
   });
+  this.get("#/buttons/back", function() {
+    return $("#content").display("js/views/buttons/back.ms");
+  });
   this.get("#/widgets/form-controls", function() {
     return $("#content").display("js/views/widgets/form_controls.ms");
   });
