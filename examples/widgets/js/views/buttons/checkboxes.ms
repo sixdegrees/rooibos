@@ -1,3 +1,4 @@
+<div class="navbar"><h1 class="txtC">Checkbox buttons</h1></div>
 <div class="flex"></div>
 <div class="txtC">
   <input type="checkbox" id="check" class="button" /><label for="check">Toggle</label>

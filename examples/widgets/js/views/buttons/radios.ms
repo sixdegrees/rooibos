@@ -1,3 +1,4 @@
+<div class="navbar"><h1 class="txtC">Radio buttons</h1></div>
 <div class="flex"></div>
 <div class="txtC">
   <div class="buttonset">

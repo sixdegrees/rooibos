@@ -1,3 +1,4 @@
+<div class="navbar"><h1 class="txtC">Buttons with icons</h1></div>
 <div class="flex"></div>
 <div class="txtC">
   <div>

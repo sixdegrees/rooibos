@@ -1,3 +1,4 @@
+<div class="navbar"><h1 class="txtC">Default buttons</h1></div>
 <div class="flex"></div>
 <div class="txtC">
   <button>A button element</button>

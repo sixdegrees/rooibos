@@ -23,6 +23,13 @@
             <li><a href="#/buttons/icons">Icons</a></li>
           </ul>
         </div>
+        <h3><a href="#/">Other widgets</a></h3>
+        <div>
+          <ul>
+            <li><a href="#/widgets/form-controls">Form controls</a></li>
+            <li><a href="#/widgets/dialogs">Dialogs</a></li>
+          </ul>
+        </div>
       </div>
     </div>
     <div id="content" class="vbox flex"></div>

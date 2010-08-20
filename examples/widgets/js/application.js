@@ -9,8 +9,14 @@ app = $.sammy(function() {
   this.get("#/buttons/checkboxes", function() {
     return $("#content").display("js/views/buttons/checkboxes.ms");
   });
-  return this.get("#/buttons/icons", function() {
+  this.get("#/buttons/icons", function() {
     return $("#content").display("js/views/buttons/icons.ms");
+  });
+  this.get("#/widgets/form-controls", function() {
+    return $("#content").display("js/views/widgets/form_controls.ms");
+  });
+  return this.get("#/widgets/dialogs", function() {
+    return $("#content").display("js/views/widgets/dialogs.ms");
   });
 });
 $(function() {
