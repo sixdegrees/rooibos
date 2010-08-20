@@ -6,7 +6,7 @@
     </div>
     <div class="flex"></div>
     <div>
-      <select data="{ dropdown: true, width: 100, menuWidth: 124 }"><option>Aristo</option></select><br/>
+      <select data="{ style: 'dropdown', width: 100, menuWidth: 124 }"><option>Aristo</option></select><br/>
       <span>Switch theme</span>
     </div>
   </div>

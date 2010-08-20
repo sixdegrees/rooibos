@@ -94,7 +94,7 @@ img {
 }
 
 /* line 4, ../../themes/aristo/sass/standard/_type.scss */
-.regular-font, .bold-font, .ui-button, .ui-dialog .ui-dialog-titlebar .ui-dialog-title, .navbar, body, input, textarea, .ui-selectmenu .ui-selectmenu-status, .ui-selectmenu .ui-selectmenu-icon {
+.regular-font, .bold-font, .ui-button, .ui-dialog .ui-dialog-titlebar .ui-dialog-title, .navbar, .ui-selectmenu .ui-selectmenu-status, .ui-selectmenu-menu a, body, input, textarea, .ui-selectmenu .ui-selectmenu-icon {
   font-family: Arial, "Liberation Sans", FreeSans, sans-serif;
   font-size: 12px;
   line-height: 24px;
@@ -102,7 +102,7 @@ img {
 }
 
 /* line 11, ../../themes/aristo/sass/standard/_type.scss */
-.bold-font, .ui-button, .ui-dialog .ui-dialog-titlebar .ui-dialog-title, .navbar {
+.bold-font, .ui-button, .ui-dialog .ui-dialog-titlebar .ui-dialog-title, .navbar, .ui-selectmenu .ui-selectmenu-status, .ui-selectmenu-menu a {
   font-weight: bold;
 }
 
@@ -802,24 +802,7 @@ input[type=search] {
 
 /* Selectmenu
 ----------------------------------*/
-/*.ui-selectmenu { display: block; position:relative; height:2em; text-decoration: none; overflow:hidden;}
-.ui-selectmenu-icon { position:absolute; right:6px; margin-top:-8px; top: 50%; }
-.ui-selectmenu-open { visibility: visible; }
-.ui-selectmenu-menu-popup { margin-top: -1px; }
-.ui-selectmenu-menu-dropdown { }
-.ui-selectmenu-menu li { padding:0; margin:0; display: block; border-top: 1px dotted transparent; border-bottom: 1px dotted transparent; border-right-width: 0 !important; border-left-width: 0 !important; font-weight: normal !important; }
-.ui-selectmenu-menu li a,.ui-selectmenu-status {line-height: 1.4em; display:block; padding:.3em 1em; outline:none; text-decoration:none; }
-.ui-selectmenu-menu li.ui-selectmenu-hasIcon a,
-.ui-selectmenu-hasIcon .ui-selectmenu-status { padding-left: 20px; position: relative; margin-left: 5px; }
-.ui-selectmenu-menu li .ui-icon, .ui-selectmenu-status .ui-icon { position: absolute; top: 1em; margin-top: -8px; left: 0; }
-.ui-selectmenu-status { line-height: 1.4em; }
-.ui-selectmenu-open li.ui-selectmenu-item-focus a {  }
-.ui-selectmenu-open li.ui-selectmenu-item-selected { }
-.ui-selectmenu-menu li span,.ui-selectmenu-status span { display:block; margin-bottom: .2em; }
-.ui-selectmenu-menu li .ui-selectmenu-item-header { font-weight: bold; }
-.ui-selectmenu-menu li .ui-selectmenu-item-content {  }
-.ui-selectmenu-menu li .ui-selectmenu-item-footer { opacity: .8; }*/
-/* line 114, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 96, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu {
   display: inline-block;
   *display: inline;
@@ -828,7 +811,7 @@ input[type=search] {
   text-decoration: none;
   padding-right: 24px;
 }
-/* line 120, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 102, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu .ui-selectmenu-status {
   -moz-border-radius: 3px 0 0 3px;
   -webkit-border-radius: 3px 0 0 3px;
@@ -862,7 +845,7 @@ input[type=search] {
   height: 24px;
   padding: 0 12px;
 }
-/* line 142, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 124, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu .ui-selectmenu-icon {
   -moz-border-radius: 0 3px 3px 0;
   -webkit-border-radius: 0 3px 3px 0;
@@ -900,7 +883,7 @@ input[type=search] {
   border-color: #7EA1B7 #5D7C8F #4C6B7E #5D7C8F;
 }
 
-/* line 166, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 148, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu {
   padding: 0;
   margin: 0;
@@ -911,17 +894,17 @@ input[type=search] {
   overflow: auto;
 }
 
-/* line 167, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 149, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-open {
   visibility: visible;
 }
 
-/* line 168, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 150, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu-popup {
   margin-top: -1px;
 }
 
-/* line 171, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 153, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu {
   background: #fafafa;
   -moz-border-radius: 3px;
@@ -930,27 +913,32 @@ input[type=search] {
   -ms-border-radius: 3px;
   -khtml-border-radius: 3px;
   border-radius: 3px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  -moz-box-shadow: #c6c6c6 0 6px 12px 0;
+  -webkit-box-shadow: #c6c6c6 0 6px 12px 0;
+  -o-box-shadow: #c6c6c6 0 6px 12px 0;
+  box-shadow: #c6c6c6 0 6px 12px 0;
   -moz-background-clip: padding;
   -webkit-background-clip: padding;
   -o-background-clip: padding-box;
   -ms-background-clip: padding-box;
   -khtml-background-clip: padding-box;
   background-clip: padding-box;
-  margin-top: 24px;
   padding: 6px 0;
-  /*  border: {
-      width: 1px;
-      style: solid;
-      color: #d9d9d9 #c1c1c1 #a6a6a6 #c1c1c1;
-    }*/
+  border-width: 1px;
+  border-style: solid;
+  border-color: #bcbcbc;
 }
-/* line 185, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 167, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu li {
   padding: 0;
   margin: 0;
   display: block;
 }
-/* line 187, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 169, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu a {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -958,13 +946,13 @@ input[type=search] {
   box-sizing: border-box;
   text-shadow: white 0 1px 1px;
   border-top: 1px solid #fff;
-  color: #000;
+  color: #4f4f4f;
   display: block;
   height: 24px;
   padding: 0 6px;
   text-decoration: none;
 }
-/* line 198, ../../themes/aristo/sass/ui/_forms.scss */
+/* line 181, ../../themes/aristo/sass/ui/_forms.scss */
 .ui-selectmenu-menu a:hover {
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #75a4d9), color-stop(100%, #2a6ab4));
   background-image: -moz-linear-gradient(top, #75a4d9 0%, #2a6ab4 100%);
