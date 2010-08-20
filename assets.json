@@ -5,6 +5,5 @@
   "js/vendor/mustache.js": "http://github.com/janl/mustache.js/raw/0.3.0/mustache.js",
   "js/vendor/jquery-ui.js": "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js",
   "js/vendor/sammy.js": "http://github.com/quirkey/sammy/raw/v0.5.4/lib/sammy.js",
-  "js/vendor/sammy.mustache.js": "http://github.com/quirkey/sammy/raw/master/lib/plugins/sammy.mustache.js",
   "js/vendor/hashchange.js": "http://github.com/cowboy/jquery-hashchange/raw/v1.3/jquery.ba-hashchange.js"
 }

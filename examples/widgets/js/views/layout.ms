@@ -1,5 +1,15 @@
 <div id="application" class="vbox">
-  <div id="header" class="toolbar"></div>
+  <div id="header" class="toolbar hbox">
+    <div>
+      <a href="http://github.com/nmerouze/rooibos" class="default button">Source code</a><br/>
+      <span>Check it out!</span>
+    </div>
+    <div class="flex"></div>
+    <div>
+      <select><option>Aristo</option></select><br/>
+      <span>Switch theme</span>
+    </div>
+  </div>
   <div id="container" class="hbox flex">
     <div id="sidebar">
       <div class="navbar"><h2 class="txtC">Demos</h2></div>
@@ -15,6 +25,6 @@
         </div>
       </div>
     </div>
-    <div id="content" class="flex"></div>
+    <div id="content" class="vbox flex"></div>
   </div>
 </div>

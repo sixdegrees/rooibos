@@ -18432,9 +18432,9 @@ jQuery.fn.extend({
 			complete: function( res, status ) {
 				if ( status === "success" || status === "notmodified" ) {
 					self.html(Mustache.to_html(res.responseText));
-					jQuery("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
-          jQuery(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
-          jQuery(".outline").outline();
+					self.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
+          self.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
+          self.find(".outline").outline();
 				}
 
 				if ( callback ) {

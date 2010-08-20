@@ -1,10 +1,14 @@
-<div>
-  <button data="{ icons: { primary: 'ui-icon-locked' }, text: false }">Button with icon only</button>
-  <button data="{ icons: { primary: 'ui-icon-locked' } }">Button with icon on the left</button>
-  <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' } }">Button with two icons</button>
-  <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</button>
+<div class="flex"></div>
+<div class="txtC">
+  <div>
+    <button data="{ icons: { primary: 'ui-icon-locked' }, text: false }">Button with icon only</button>
+    <button data="{ icons: { primary: 'ui-icon-locked' } }">Button with icon on the left</button>
+    <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' } }">Button with two icons</button>
+    <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</button>
+  </div>
+  <div>
+    <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked' }, text: false }">Button with icon only</a>
+    <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</a>
+  </div>
 </div>
-<div>
-  <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked' }, text: false }">Button with icon only</a>
-  <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</a>
-</div>
+<div class="flex"></div>

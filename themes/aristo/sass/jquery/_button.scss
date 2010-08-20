@@ -11,6 +11,7 @@ $border-radius: 3px;
   @include inline-block;
   @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
   @include text-shadow(#fff, 0, 1px, 1px);
+  @include background-clip(padding-box);
   
   height: $line-height;
   cursor: pointer;
