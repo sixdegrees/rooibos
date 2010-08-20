@@ -104,3 +104,16 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0;  } /* reset extra pa
     &.ui-state-active { @extend .default; }
   }
 }
+
+/* Button Set
+----------------------------------*/
+.back.ui-button {
+  @include border-radius(($line-height / 2) $border-radius $border-radius ($line-height / 2));
+  
+  .ui-button-text {
+    @extend .ui-icon-triangle-1-w;
+    background-position: 0 40%;
+    background-repeat: no-repeat;
+    padding-left: 18px;
+  }
+}

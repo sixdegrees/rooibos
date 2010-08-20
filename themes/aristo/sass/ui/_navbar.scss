@@ -12,26 +12,4 @@ $border-radius: 3px;
   font-size: 14px;
   height: $line-height * 1.5;
   padding: 5px 12px;
-  
-  .back.ui-button {
-    @include border-radius(0 $border-radius $border-radius 0);
-    border-left: 0;
-    .ui-button-text { padding-left: 6px; }
-    margin-left: 12px;
-    
-    &:before {
-      content: "\00a0";
-      display: block;
-      position: absolute;
-      left: -11px;
-      top: -1px;
-      width: 12px;
-      height: $line-height;
-      background: inline-image("aristo/aristo-back-button.png") no-repeat;
-    }
-    
-    &:active:before {
-      background: inline-image("aristo/aristo-back-button-hover.png") no-repeat;
-    }
-  }
 }
