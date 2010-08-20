@@ -18,7 +18,7 @@
   </div>
   
   <div>
-    <select>
+    <select data="{ dropdown: true, width: 100, menuWidth: 124 }">
       <option>Target A</option>
       <option>Target B</option>
       <option>Target C</option>
