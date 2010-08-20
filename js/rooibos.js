@@ -3,6 +3,7 @@
 //= require "vendor/jquery-ui"
 //= require "vendor/metadata"
 //= require "vendor/hashchange"
+//= require "vendor/uniform"
 //= require "vendor/sammy"
 //= require "vendor/mustache"
 //= require "ui/outline"
@@ -53,8 +54,11 @@ jQuery.fn.extend({
 				// If successful, inject the HTML into all the matched elements
 				if ( status === "success" || status === "notmodified" ) {
 					self.html(Mustache.to_html(res.responseText));
+					/* UI buttons */
 					self.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
+          /* UI buttonsets */
           self.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
+          /* UI dialogs */
           self.find(".dialog").hide().each(function() {
             var el = this;
             self.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
@@ -62,7 +66,11 @@ jQuery.fn.extend({
               jQuery(el).dialog(jQuery(this).metadata());
             });
           });
-          self.find(".outline").outline();
+          /* UI outlines */
+          self.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
+          /* Uniform controls */
+          self.find("select").uniform();
+          if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
 				}
 
 				if ( callback ) {

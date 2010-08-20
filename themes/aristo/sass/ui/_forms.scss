@@ -4,26 +4,60 @@ $border-radius: 3px;
 ----------------------------------*/
 input[type="checkbox"] {
   -khtml-appearance: none;
-  background: sprite-image("aristo/aristo-checkbox-o.png") no-repeat;
+  background: inline-image("aristo/aristo-checkbox-o.png") no-repeat;
   width: 15px;
   height: 16px;
   
   &:checked {
-    background: sprite-image("aristo/aristo-checkbox-x.png") no-repeat;
+    background: inline-image("aristo/aristo-checkbox-x.png") no-repeat;
+  }
+}
+
+.checker {
+  @include inline-block;
+  
+  background: inline-image("aristo/aristo-checkbox-o.png") no-repeat;
+  width: 15px;
+  height: 16px;
+  position: relative;
+  
+  span {
+    display: -moz-inline-box;
+    display: inline-block;
+    text-align: center;
+    
+    &.checked { background: inline-image("aristo/aristo-checkbox-x.png") no-repeat; }
   }
 }
 
 /* Radio button
 ----------------------------------*/
-input[type="radio"] {
+input[type="radio"], .radio {
   -khtml-appearance: none;
-  background: sprite-image("aristo/aristo-radio-o.png") no-repeat;
+  background: inline-image("aristo/aristo-radio-o.png") no-repeat;
   width: 17px;
   height: 17px;
   
   &:checked {
     border: none;
-    background: sprite-image("aristo/aristo-radio-x.png") no-repeat;
+    background: inline-image("aristo/aristo-radio-x.png") no-repeat;
+  }
+}
+
+.radio {
+  @include inline-block;
+  
+  background: inline-image("aristo/aristo-radio-o.png") no-repeat;
+  width: 17px;
+  height: 17px;
+  position: relative;
+  
+  span {
+    display: -moz-inline-box;
+    display: inline-block;
+    text-align: center;
+    
+    &.checked { background: inline-image("aristo/aristo-radio-x.png") no-repeat; }
   }
 }
 
@@ -59,17 +93,63 @@ input[type=search] {
 
 /* Select boxes
 ----------------------------------*/
-select {
+select, .selector {
   @extend .regular-font;
-  @include appearance;
-  @include border-radius($border-radius);
+  @include appearance(none);
+  @include border-radius($border-radius 0 0 $border-radius);
   @include box-sizing(border-box);
+  @include box-shadow(#f5f5f5, 0, 1px, 1px, inset);
+  @include inline-block;
+  @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
   @include text-shadow(#fff, 0, 1px, 1px);
+  @include background-clip(padding-box);
   
-  background: inline-image("aristo/aristo-select-arrow-bg.png") 100% 0 no-repeat, inline-image("aristo/aristo-select-bg.png") 0 0 repeat-x;
-  border: 1px solid #bdbdbd;
-  border-width: 0 0 0 1px;
   color: #4f4f4f;
-  padding: 0 40px 0 13px;
+  border: {
+    width: 1px;
+    style: solid;
+    color: #AFAFAF #9A9A9A #828282 #9A9A9A;
+  }
+  
+  position: relative;
+  outline: none;
   height: $line-height;
+  padding: 0 12px;
+  margin-right: 24px;
+  
+  span {
+    @extend .regular-font;
+    cursor: pointer;
+  }
+  
+  &:after {
+    content: " ";
+    top: -1px;
+    right: -24px;
+    position: absolute;
+    display: inline-block;
+    padding: 0 12px;
+    height: $line-height;
+    width: 24px;
+    
+    @include appearance(none);
+    @include border-radius(0 $border-radius $border-radius 0);
+    @include box-sizing(border-box);
+    @include box-shadow(#D9EDF9, 0, 1px, 1px, inset);
+    @include linear-gradient(color-stops(#B2D9F0, #78A1BC), top);
+    @include text-shadow(#fff, 0, 1px, 1px);
+    @include background-clip(padding-box);
+    
+    color: #1C4257;
+    border: {
+      width: 1px;
+      style: solid;
+      color: #7EA1B7 #5D7C8F #4C6B7E #5D7C8F;
+    }
+  }
+  
+  select {
+    top: 0;
+    left: 0;
+  }
 }

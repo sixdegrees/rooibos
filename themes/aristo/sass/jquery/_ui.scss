@@ -10,6 +10,10 @@
 ----------------------------------*/
 .ui-state-disabled { cursor: default !important; }
 
+/* General style
+----------------------------------*/
+.ui-widget { outline: none; }
+
 @import "jquery/icons";
 @import "jquery/accordion";
 @import "jquery/button";

@@ -11,7 +11,7 @@
     </div>
   </div>
   <div id="container" class="hbox flex">
-    <div id="sidebar">
+    <div id="sidebar" style="background: #d4dde6; border-right: 1px solid #a5a5a5; width: 250px;">
       <div class="navbar"><h2 class="txtC">Demos</h2></div>
       <div class="outline">
         <h3><a href="#/">Buttons</a></h3>
