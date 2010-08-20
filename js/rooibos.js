@@ -7,6 +7,7 @@
 //= require "vendor/sammy"
 //= require "vendor/mustache"
 //= require "ui/outline"
+//= require "ui/selectmenu"
 
 jQuery.fn.extend({
 	display: function( url, params, callback ) {
@@ -68,8 +69,9 @@ jQuery.fn.extend({
           });
           /* UI outlines */
           self.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
+          /* UI selectmenus */
+          self.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
           /* Uniform controls */
-          self.find("select").uniform();
           if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
 				}
 

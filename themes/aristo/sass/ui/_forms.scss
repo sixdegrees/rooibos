@@ -91,48 +91,56 @@ input[type=search] {
   padding: 0;
 }
 
-/* Select boxes
+/* Selectmenu
 ----------------------------------*/
-select, .selector {
-  @extend .regular-font;
-  @include appearance(none);
-  @include border-radius($border-radius 0 0 $border-radius);
-  @include box-sizing(border-box);
-  @include box-shadow(#f5f5f5, 0, 1px, 1px, inset);
+/*.ui-selectmenu { display: block; position:relative; height:2em; text-decoration: none; overflow:hidden;}
+.ui-selectmenu-icon { position:absolute; right:6px; margin-top:-8px; top: 50%; }
+.ui-selectmenu-open { visibility: visible; }
+.ui-selectmenu-menu-popup { margin-top: -1px; }
+.ui-selectmenu-menu-dropdown { }
+.ui-selectmenu-menu li { padding:0; margin:0; display: block; border-top: 1px dotted transparent; border-bottom: 1px dotted transparent; border-right-width: 0 !important; border-left-width: 0 !important; font-weight: normal !important; }
+.ui-selectmenu-menu li a,.ui-selectmenu-status {line-height: 1.4em; display:block; padding:.3em 1em; outline:none; text-decoration:none; }
+.ui-selectmenu-menu li.ui-selectmenu-hasIcon a,
+.ui-selectmenu-hasIcon .ui-selectmenu-status { padding-left: 20px; position: relative; margin-left: 5px; }
+.ui-selectmenu-menu li .ui-icon, .ui-selectmenu-status .ui-icon { position: absolute; top: 1em; margin-top: -8px; left: 0; }
+.ui-selectmenu-status { line-height: 1.4em; }
+.ui-selectmenu-open li.ui-selectmenu-item-focus a {  }
+.ui-selectmenu-open li.ui-selectmenu-item-selected { }
+.ui-selectmenu-menu li span,.ui-selectmenu-status span { display:block; margin-bottom: .2em; }
+.ui-selectmenu-menu li .ui-selectmenu-item-header { font-weight: bold; }
+.ui-selectmenu-menu li .ui-selectmenu-item-content {  }
+.ui-selectmenu-menu li .ui-selectmenu-item-footer { opacity: .8; }*/
+
+.ui-selectmenu {
   @include inline-block;
-  @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
-  @include text-shadow(#fff, 0, 1px, 1px);
-  @include background-clip(padding-box);
-  
-  color: #4f4f4f;
-  border: {
-    width: 1px;
-    style: solid;
-    color: #AFAFAF #9A9A9A #828282 #9A9A9A;
-  }
-  
   position: relative;
-  outline: none;
-  height: $line-height;
-  padding: 0 12px;
-  margin-right: 24px;
+  text-decoration: none;
+  padding-right: $line-height;
   
-  span {
+  .ui-selectmenu-status {
     @extend .regular-font;
-    cursor: pointer;
+    @include border-radius($border-radius 0 0 $border-radius);
+    @include box-sizing(border-box);
+    @include box-shadow(#f5f5f5, 0, 1px, 1px, inset);
+    @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
+    @include text-shadow(#fff, 0, 1px, 1px);
+    @include background-clip(padding-box);
+
+    color: #4f4f4f;
+    border: {
+      width: 1px 0 1px 1px;
+      style: solid;
+      color: #AFAFAF #9A9A9A #828282 #9A9A9A;
+    }
+    
+    display: block;
+    height: $line-height;
+    padding: 0 12px;
   }
   
-  &:after {
-    content: " ";
-    top: -1px;
-    right: -24px;
-    position: absolute;
-    display: inline-block;
-    padding: 0 12px;
-    height: $line-height;
-    width: 24px;
-    
-    @include appearance(none);
+  
+  .ui-selectmenu-icon {
+    @extend .regular-font;
     @include border-radius(0 $border-radius $border-radius 0);
     @include box-sizing(border-box);
     @include box-shadow(#D9EDF9, 0, 1px, 1px, inset);
@@ -140,16 +148,58 @@ select, .selector {
     @include text-shadow(#fff, 0, 1px, 1px);
     @include background-clip(padding-box);
     
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: $line-height;
+    width: $line-height;
     color: #1C4257;
     border: {
       width: 1px;
       style: solid;
       color: #7EA1B7 #5D7C8F #4C6B7E #5D7C8F;
     }
-  }
+  } 
+}
+
+.ui-selectmenu-menu { padding:0; margin:0; list-style:none; position:absolute; top: 0; visibility: hidden; overflow: auto; }
+.ui-selectmenu-open { visibility: visible; }
+.ui-selectmenu-menu-popup { margin-top: -1px; }
+.ui-selectmenu-menu-dropdown { }
+
+.ui-selectmenu-menu {
+  background: #fafafa;
+  @include border-radius($border-radius);
+  // @include box-shadow(#666, 0, 0, 10px);
+  @include background-clip(padding-box);
   
-  select {
-    top: 0;
-    left: 0;
+  margin-top: $line-height;
+  padding: 6px 0;
+/*  border: {
+    width: 1px;
+    style: solid;
+    color: #d9d9d9 #c1c1c1 #a6a6a6 #c1c1c1;
+  }*/
+  
+  li { padding:0; margin:0; display: block; }
+
+  a {
+    @include box-sizing(border-box);
+    @include text-shadow(#fff, 0, 1px, 1px);
+    
+    border-top: 1px solid #fff;
+    color: #000;
+    display: block;
+    height: $line-height;
+    padding: 0 6px;
+    text-decoration: none;
+    
+    &:hover {
+      @include linear-gradient(color-stops(#75a4d9, #2a6ab4), top);
+      @include text-shadow(#000, 0, 1px, 1px);
+
+      border-top: 1px solid #5e94ce;
+      color: #fff;
+    }
   }
 }
