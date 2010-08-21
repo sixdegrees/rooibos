@@ -1,32 +1,41 @@
-var app;
-app = $.sammy(function() {
+var app = $.sammy(function() {
   this.get("#/", function() {
-    return $("#content").display("js/views/buttons/default.ms");
+    $("#content").display("js/views/buttons/default.ms");
   });
+  
   this.get("#/buttons/radios", function() {
-    return $("#content").display("js/views/buttons/radios.ms");
+    $("#content").display("js/views/buttons/radios.ms");
   });
+  
   this.get("#/buttons/checkboxes", function() {
-    return $("#content").display("js/views/buttons/checkboxes.ms");
+    $("#content").display("js/views/buttons/checkboxes.ms");
   });
+  
   this.get("#/buttons/icons", function() {
-    return $("#content").display("js/views/buttons/icons.ms");
+    $("#content").display("js/views/buttons/icons.ms");
   });
+  
   this.get("#/buttons/back", function() {
-    return $("#content").display("js/views/buttons/back.ms");
+    $("#content").display("js/views/buttons/back.ms");
   });
+  
   this.get("#/widgets/form-controls", function() {
-    return $("#content").display("js/views/widgets/form_controls.ms");
+    $("#content").display("js/views/widgets/form_controls.ms");
   });
+  
   this.get("#/widgets/dialogs", function() {
-    return $("#content").display("js/views/widgets/dialogs.ms");
+    $("#content").display("js/views/widgets/dialogs.ms");
   });
+  
   this.get("#/widgets/progress", function() {
-    return $("#content").display("js/views/widgets/progress.ms");
+    $("#content").display("js/views/widgets/progress.ms");
+  });
+  
+  this.get("#/widgets/loading", function() {
+    $("#content").display("js/views/widgets/loading.ms");
   });
 });
+
 $(function() {
-  return $("body").display("js/views/layout.ms", function() {
-    return app.run("#/");
-  });
+  $("body").display("js/views/layout.ms", function() { app.run("#/"); });
 });

@@ -1,0 +1,22 @@
+.loading {
+  @include border-radius($border-radius);
+  @include box-shadow(rgba(0, 0, 0, 0.4), 0, 0, 30px);
+  @include box-sizing(border-box);
+  @include linear-gradient(color-stops(#fcfcfc, #f4f4f4), top);
+  @include background-clip(padding-box);
+  
+  $height: $line-height * 6;
+  $width: 300px;
+  
+  position: absolute;
+  height: $height; width: $width;
+  padding: ($line-height * 2) $line-height;
+  text-align: center;
+  top: 50%; left: 50%;
+  margin: (-$height / 2) 0 0 (-$width / 2);
+  border: {
+    width: 1px;
+    style: solid;
+    color: #AFAFAF #9A9A9A #828282 #9A9A9A;
+  }
+}

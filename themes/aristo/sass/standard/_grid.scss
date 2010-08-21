@@ -18,3 +18,4 @@
 }
 
 .flex { @include box-flex(1); }
+.line { height: $line-height; }

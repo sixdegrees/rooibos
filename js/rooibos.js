@@ -9,6 +9,7 @@
 //= require "vendor/flexify"
 //= require "ui/outline"
 //= require "ui/selectmenu"
+//= require "ui/loading"
 
 jQuery.fn.extend({
 	display: function( url, params, callback ) {
