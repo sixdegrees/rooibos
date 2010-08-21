@@ -1,4 +1,4 @@
-<div class="navbar"><h1 class="txtC">Accordions</h1></div>
+<div class="navbar"><h1 class="txtC">Accordion</h1></div>
 <div class="flex"></div>
 <div style="margin: 0 100px;">
   <div class="accordion">

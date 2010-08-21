@@ -22,12 +22,13 @@
             <li><a href="#/buttons/checkboxes">Checkboxes</a></li>
             <li><a href="#/buttons/icons">Icons</a></li>
             <li><a href="#/buttons/back">Back and forward buttons</a></li>
+            <li><a href="#/buttons/buttonbar">Button Bar</a></li>
           </ul>
         </div>
         <h3><a href="#/">Other widgets</a></h3>
         <div>
           <ul>
-            <li><a href="#/widgets/accordions">Accordions</a></li>
+            <li><a href="#/widgets/accordion">Accordion</a></li>
             <li><a href="#/widgets/form-controls">Form controls</a></li>
             <li><a href="#/widgets/dialogs">Dialogs</a></li>
             <li><a href="#/widgets/progress">Progress bars</a></li>

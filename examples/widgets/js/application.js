@@ -19,6 +19,10 @@ var app = $.sammy(function() {
     $("#content").display("js/views/buttons/back.ms");
   });
   
+  this.get("#/buttons/buttonbar", function() {
+    $("#content").display("js/views/buttons/buttonbar.ms");
+  });
+  
   this.get("#/widgets/form-controls", function() {
     $("#content").display("js/views/widgets/form_controls.ms");
   });
@@ -39,8 +43,8 @@ var app = $.sammy(function() {
     $("#content").display("js/views/widgets/scrollbars.ms");
   });
   
-  this.get("#/widgets/accordions", function() {
-    $("#content").display("js/views/widgets/accordions.ms");
+  this.get("#/widgets/accordion", function() {
+    $("#content").display("js/views/widgets/accordion.ms");
   });
 });
 

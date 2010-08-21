@@ -1,0 +1,16 @@
+.buttonbar {
+  @include box-sizing(border-box);
+  @include linear-gradient(color-stops(#fdfdfd, #dfdfdf), top);
+  border-top: 1px solid #bdbdbd;
+  height: $line-height;
+  font-size: 0;
+  
+  .ui-button {
+    @include border-radius(0);
+    @include box-shadow(#f5f5f5, 0, 0, 0, inset);
+    @include linear-gradient(color-stops(#fdfdfd, #dfdfdf), top);
+    border: 0;
+    border-right: 1px solid #bdbdbd;
+    height: $line-height - 1px;
+  }
+}
