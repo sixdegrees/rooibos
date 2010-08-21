@@ -6,5 +6,6 @@ app = $.sammy () ->
   this.get "#/buttons/back", -> $("#content").display("js/views/buttons/back.ms")
   this.get "#/widgets/form-controls", -> $("#content").display("js/views/widgets/form_controls.ms")
   this.get "#/widgets/dialogs", -> $("#content").display("js/views/widgets/dialogs.ms")
+  this.get "#/widgets/progress", -> $("#content").display("js/views/widgets/progress.ms")
 
 $ () -> $("body").display "js/views/layout.ms", -> app.run("#/")

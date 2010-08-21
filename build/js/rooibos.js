@@ -19954,6 +19954,8 @@ jQuery.fn.extend({
           self.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
           /* Uniform controls */
           if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
+          /* UI progress bars */
+          self.find(".progressbar").each(function() { jQuery(this).progressbar(jQuery(this).metadata()); });
           /* Flexible box model compatibility */
           if (!jQuery.browser.webkit && !jQuery.browser.mozilla) {
             self.find(".vbox").flow("vertical");

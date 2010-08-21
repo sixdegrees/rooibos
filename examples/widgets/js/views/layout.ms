@@ -29,6 +29,7 @@
           <ul>
             <li><a href="#/widgets/form-controls">Form controls</a></li>
             <li><a href="#/widgets/dialogs">Dialogs</a></li>
+            <li><a href="#/widgets/progress">Progress bars</a></li>
           </ul>
         </div>
       </div>

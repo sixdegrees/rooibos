@@ -1,3 +1,6 @@
+* Change aristo-arrox-left
+
 Perfect compatibility:
 * Add jQuery Uniform except for WebKit (deal with the sprite)
 * Check with http://github.com/nzakas/cssembed/tree/ and compass if the inline images are compatible
+* http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/

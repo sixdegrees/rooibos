@@ -18,8 +18,11 @@ app = $.sammy(function() {
   this.get("#/widgets/form-controls", function() {
     return $("#content").display("js/views/widgets/form_controls.ms");
   });
-  return this.get("#/widgets/dialogs", function() {
+  this.get("#/widgets/dialogs", function() {
     return $("#content").display("js/views/widgets/dialogs.ms");
+  });
+  this.get("#/widgets/progress", function() {
+    return $("#content").display("js/views/widgets/progress.ms");
   });
 });
 $(function() {

@@ -1,0 +1,30 @@
+.ui-progressbar {
+  @include border-radius($border-radius);
+  @include linear-gradient(color-stops(#fdfdfd, #dfdfdf), top);
+  @include background-clip(padding-box);
+  
+  text-align: left;
+  height: $line-height;
+  border: {
+    width: 1px;
+    style: solid;
+    color: #bdbdbd #b6b6b6 #a7a7a7 #b6b6b6;
+  }
+  
+  .ui-progressbar-value {
+    @include box-shadow(#ddf0fb, 0, 1px, 1px, inset);
+    @include linear-gradient(color-stops(#b9e0f6, #83b0c9), top);
+    @include background-clip(padding-box);
+    
+    margin: -1px;
+    height: 100%;
+    border: {
+      width: 1px;
+      style: solid;
+      color: #89afc4 #79a0b5 #597d92 #79a0b5;
+    }
+    
+    &.ui-corner-left { @include border-left-radius($border-radius); }
+    &.ui-corner-right { @include border-right-radius($border-radius); }
+  }
+}
