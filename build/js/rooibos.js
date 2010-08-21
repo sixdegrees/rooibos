@@ -19930,9 +19930,6 @@ jQuery.fn.extend({
 				callback = params;
 				params = null;
 
-			} else if ( typeof params === "object" ) {
-				params = jQuery.param( params, jQuery.ajaxSettings.traditional );
-				type = "POST";
 			}
 		}
 
@@ -19942,10 +19939,9 @@ jQuery.fn.extend({
 			url: url,
 			type: type,
 			dataType: "html",
-			data: params,
 			complete: function( res, status ) {
 				if ( status === "success" || status === "notmodified" ) {
-					self.html(Mustache.to_html(res.responseText));
+					self.html(Mustache.to_html(res.responseText, params));
 					/* UI buttons */
 					self.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
           /* UI buttonsets */

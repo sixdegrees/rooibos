@@ -2,7 +2,7 @@
   @include experimental(box-flex, $flex, -moz, -webkit, not -o, not -ms, not -khtml, official);
 }
 
-#application {
+body > div {
   width: 100%;
   height: 100%;
 }
