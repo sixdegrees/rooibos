@@ -34,6 +34,10 @@ var app = $.sammy(function() {
   this.get("#/widgets/loading", function() {
     $("#content").display("js/views/widgets/loading.ms");
   });
+  
+  this.get("#/widgets/scrollbars", function() {
+    $("#content").display("js/views/widgets/scrollbars.ms");
+  });
 });
 
 $(function() {

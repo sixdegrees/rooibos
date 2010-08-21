@@ -7,6 +7,7 @@
     <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' } }">Button with two icons</button>
     <button data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</button>
   </div>
+  <div class="line"></div>
   <div>
     <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked' }, text: false }">Button with icon only</a>
     <a class="button" href="#" data="{ icons: { primary: 'ui-icon-locked', secondary: 'ui-icon-locked' }, text: false }">Button with two icons and no text</a>

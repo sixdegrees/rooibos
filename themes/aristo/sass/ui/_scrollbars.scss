@@ -1,0 +1,71 @@
+::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-button:vertical:end {
+  background: inline-image("aristo/scroller-down-arrow.png") no-repeat;
+  width: 15px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-button:vertical:start {
+  background: inline-image("aristo/scroller-up-arrow.png") no-repeat;
+  width: 15px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-button:horizontal:start {
+  background: inline-image("aristo/scroller-left-arrow.png") no-repeat;
+  width: 16px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-button:horizontal:end {
+  background: inline-image("aristo/scroller-right-arrow.png") no-repeat;
+  width: 16px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  -webkit-border-image: inline-image("aristo/scroller-vertical-thumb.png") 8 0 8 0 / 8px 0 8px 0 stretch repeat;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  -webkit-border-image: inline-image("aristo/scroller-horizontal-thumb.png") 7 8 7 8 / 7px 8px 7px 8px stretch repeat;
+}
+
+::-webkit-scrollbar-track-piece:vertical:start {
+  background-image: inline-image("aristo/scroller-up-arrow-track.png"), inline-image("aristo/scroller-vertical-track.png");
+  background-repeat: no-repeat, repeat-y;
+}
+
+::-webkit-scrollbar-track-piece:vertical:end {
+  background-image: inline-image("aristo/scroller-down-arrow-track.png"), inline-image("aristo/scroller-vertical-track.png");
+  background-repeat: no-repeat, repeat-y;
+  background-position: bottom left, 0 0;
+}
+
+::-webkit-scrollbar-track-piece:horizontal:end {
+  background-image: inline-image("aristo/scroller-right-arrow-track.png"), inline-image("aristo/scroller-horizontal-track.png");
+  background-repeat: no-repeat, repeat-x;
+  background-position: top right, 0 0;
+}
+
+::-webkit-scrollbar-track-piece:horizontal:start {
+  background-image: inline-image("aristo/scroller-left-arrow-track.png"), inline-image("aristo/scroller-horizontal-track.png");
+  background-repeat: no-repeat, repeat-x;
+}
+
+
+/* Turn on single button up on top, and down on bottom */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: block;
+}
+ 
+/* Turn off the down area up on top, and up area on bottom */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+    display: none;
+}

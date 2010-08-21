@@ -31,6 +31,7 @@
             <li><a href="#/widgets/dialogs">Dialogs</a></li>
             <li><a href="#/widgets/progress">Progress bars</a></li>
             <li><a href="#/widgets/loading">Loading view</a></li>
+            <li><a href="#/widgets/scrollbars">Scrollbars (webkit only)</a></li>
           </ul>
         </div>
       </div>
