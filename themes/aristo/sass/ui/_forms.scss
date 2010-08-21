@@ -103,9 +103,7 @@ input[type=search] {
     @extend .bold-font;
     @include border-radius($border-radius 0 0 $border-radius);
     @include box-sizing(border-box);
-    @include box-shadow(#f5f5f5, 0, 1px, 1px, inset);
     @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
-    @include text-shadow(#fff, 0, 1px, 1px);
     @include background-clip(padding-box);
 
     color: #4f4f4f;
@@ -154,7 +152,7 @@ input[type=search] {
   background: #fafafa;
   @include border-radius($border-radius);
   @include box-sizing(border-box);
-  @include box-shadow(#c6c6c6, 0, 6px, 12px);
+  @include box-shadow(rgba(0, 0, 0, 0.2), 0, 6px, 12px);
   @include background-clip(padding-box);
   
   padding: 6px 0;
