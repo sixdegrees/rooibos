@@ -1,6 +1,6 @@
 .ui-accordion {
   border: 1px solid #979797;
-  border-width: 0 1px;
+  border-width: 1px 1px 0 1px;
   
   .ui-accordion-header {
     @include box-sizing(border-box);
@@ -8,6 +8,7 @@
     @include linear-gradient(color-stops(#E9E9E9, #B8B8B7), top);
     
     border-bottom: 1px solid #979797;
+    cursor: pointer;
     height: $line-height;
     position: relative;
     

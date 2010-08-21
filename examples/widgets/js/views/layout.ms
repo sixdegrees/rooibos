@@ -27,6 +27,7 @@
         <h3><a href="#/">Other widgets</a></h3>
         <div>
           <ul>
+            <li><a href="#/widgets/accordions">Accordions</a></li>
             <li><a href="#/widgets/form-controls">Form controls</a></li>
             <li><a href="#/widgets/dialogs">Dialogs</a></li>
             <li><a href="#/widgets/progress">Progress bars</a></li>

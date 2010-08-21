@@ -38,6 +38,10 @@ var app = $.sammy(function() {
   this.get("#/widgets/scrollbars", function() {
     $("#content").display("js/views/widgets/scrollbars.ms");
   });
+  
+  this.get("#/widgets/accordions", function() {
+    $("#content").display("js/views/widgets/accordions.ms");
+  });
 });
 
 $(function() {
