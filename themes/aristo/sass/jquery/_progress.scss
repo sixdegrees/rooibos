@@ -1,5 +1,8 @@
+$border-radius: 3px;
+
 .ui-progressbar {
   @include border-radius($border-radius);
+  @include box-sizing(border-box);
   @include linear-gradient(color-stops(#fdfdfd, #dfdfdf), top);
   @include background-clip(padding-box);
   
@@ -26,5 +29,9 @@
     
     &.ui-corner-left { @include border-left-radius($border-radius); }
     &.ui-corner-right { @include border-right-radius($border-radius); }
+  }
+  
+  &.animated .ui-progressbar-value {
+    background-image: inline-image("aristo/aristo-progress-animated.png");
   }
 }

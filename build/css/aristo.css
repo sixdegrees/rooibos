@@ -626,14 +626,18 @@ button.ui-button::-moz-focus-inner {
   margin-left: 6px;
 }
 
-/* line 1, ../../themes/aristo/sass/jquery/_progress.scss */
+/* line 3, ../../themes/aristo/sass/jquery/_progress.scss */
 .ui-progressbar {
-  -moz-border-radius: 6px;
-  -webkit-border-radius: 6px;
-  -o-border-radius: 6px;
-  -ms-border-radius: 6px;
-  -khtml-border-radius: 6px;
-  border-radius: 6px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -o-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  border-radius: 3px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #dfdfdf));
   background-image: -moz-linear-gradient(top, #fdfdfd 0%, #dfdfdf 100%);
   background-image: linear-gradient(top, #fdfdfd 0%, #dfdfdf 100%);
@@ -649,7 +653,7 @@ button.ui-button::-moz-focus-inner {
   border-style: solid;
   border-color: #bdbdbd #b6b6b6 #a7a7a7 #b6b6b6;
 }
-/* line 14, ../../themes/aristo/sass/jquery/_progress.scss */
+/* line 17, ../../themes/aristo/sass/jquery/_progress.scss */
 .ui-progressbar .ui-progressbar-value {
   -moz-box-shadow: #ddf0fb 0 1px 1px inset;
   -webkit-box-shadow: #ddf0fb 0 1px 1px inset;
@@ -670,35 +674,39 @@ button.ui-button::-moz-focus-inner {
   border-style: solid;
   border-color: #89afc4 #79a0b5 #597d92 #79a0b5;
 }
-/* line 27, ../../themes/aristo/sass/jquery/_progress.scss */
+/* line 30, ../../themes/aristo/sass/jquery/_progress.scss */
 .ui-progressbar .ui-progressbar-value.ui-corner-left {
-  -moz-border-radius-topleft: 6px;
-  -webkit-border-top-left-radius: 6px;
-  -o-border-top-left-radius: 6px;
-  -ms-border-top-left-radius: 6px;
-  -khtml-border-top-left-radius: 6px;
-  border-top-left-radius: 6px;
-  -moz-border-radius-bottomleft: 6px;
-  -webkit-border-bottom-left-radius: 6px;
-  -o-border-bottom-left-radius: 6px;
-  -ms-border-bottom-left-radius: 6px;
-  -khtml-border-bottom-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+  -moz-border-radius-topleft: 3px;
+  -webkit-border-top-left-radius: 3px;
+  -o-border-top-left-radius: 3px;
+  -ms-border-top-left-radius: 3px;
+  -khtml-border-top-left-radius: 3px;
+  border-top-left-radius: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  -o-border-bottom-left-radius: 3px;
+  -ms-border-bottom-left-radius: 3px;
+  -khtml-border-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
-/* line 28, ../../themes/aristo/sass/jquery/_progress.scss */
+/* line 31, ../../themes/aristo/sass/jquery/_progress.scss */
 .ui-progressbar .ui-progressbar-value.ui-corner-right {
-  -moz-border-radius-topright: 6px;
-  -webkit-border-top-right-radius: 6px;
-  -o-border-top-right-radius: 6px;
-  -ms-border-top-right-radius: 6px;
-  -khtml-border-top-right-radius: 6px;
-  border-top-right-radius: 6px;
-  -moz-border-radius-bottomright: 6px;
-  -webkit-border-bottom-right-radius: 6px;
-  -o-border-bottom-right-radius: 6px;
-  -ms-border-bottom-right-radius: 6px;
-  -khtml-border-bottom-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+  -moz-border-radius-topright: 3px;
+  -webkit-border-top-right-radius: 3px;
+  -o-border-top-right-radius: 3px;
+  -ms-border-top-right-radius: 3px;
+  -khtml-border-top-right-radius: 3px;
+  border-top-right-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  -o-border-bottom-right-radius: 3px;
+  -ms-border-bottom-right-radius: 3px;
+  -khtml-border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+/* line 34, ../../themes/aristo/sass/jquery/_progress.scss */
+.ui-progressbar.animated .ui-progressbar-value {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAWCAIAAAA97EnnAAABx0lEQVRIiaWV0XKiQBBFe2RADFFhFiqpMmzykP//Il3L1SwGiJhCkBVneh9itkTFQKffp8/M9L232TzdQ/va/t1NlzEgEs72TOPpzuW/24NLqcZ/wr2UBCrXtGd7ON9IrpRqdRIBZq/xriwJVMbYg2trDJRSXLX8rpe3dZoXBCoAjNxhz9A/iFypFuD1JovXGxpV9C3buvmP4wqbfnVelLMwQaAIyuoa96J/zGo6472U02UoWwrio3St43s2IuLRWLmUX/dCwGnwVuwoxmOMPdw5DNgJqJG4FnHyvt0SqADgC8f8FFQF/OWLk00WfUNQQ6t3EcHlVXHlxW4WrpCUUDemcS/6df25qn9xKdWvINo3EMF56VrHdwUqrHMBrxMqIk6WUUFNKN/70WFwxQW14EWcpBkxoXzX6eq1nQ9gdSnrV2keJimNKgaWbZkX21bBZ8I5CIqWUKYxEoMmFj21UynVOIhoK0/nmu8KpRAaXLoyCUSYBBE1oeCnJ64Lqgo+8tkiTt5zYkI9ek7X0K6nQgWMnxdcpdkrVVDuwHJue9hmhRz2cVaU0zChJdStaYyE3WqvH8CllOMgbLKmzkvXOo+eqG68RvUPDyotdfeo/YQAAAAASUVORK5CYII=');
 }
 
 /* line 1, ../../themes/aristo/sass/ui/_outline.scss */
