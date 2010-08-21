@@ -1,5 +1,15 @@
 $border-radius: 3px;
 
+@-webkit-keyframes 'progress' {
+  0% {
+    background-position: 0% 0%;
+  }
+  
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
 .ui-progressbar {
   @include border-radius($border-radius);
   @include box-sizing(border-box);
@@ -32,6 +42,11 @@ $border-radius: 3px;
   }
   
   &.animated .ui-progressbar-value {
+    -webkit-animation-name: progress;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+    
     background-image: inline-image("aristo/aristo-progress-animated.png");
   }
 }
