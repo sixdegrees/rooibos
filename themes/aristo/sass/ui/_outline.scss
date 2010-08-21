@@ -1,5 +1,4 @@
 .ui-outline {
-  background: #d4dde6;
   border: none;
   
   .ui-accordion-header {
@@ -16,7 +15,7 @@
       @include box-sizing(border-box);
       @include text-shadow(#fff, 0, 1px, 1px);
       
-      border-top: 1px solid #d4dde6;
+      border-top: 1px solid rgba(0, 0, 0, 0);
       color: #000;
       display: block;
       height: $line-height;
