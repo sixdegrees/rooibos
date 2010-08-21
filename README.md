@@ -1,40 +1,16 @@
 # Rooibos
 
-Create great webapps without a hassle.
+Create great webapps without a hassle. Don't bother to learn a new tool. With Rooibos you can write webapps with the tools you already know: HTML/CSS/jQuery.
 
-**NOTE: It's very alpha and all**
-
-# What's in there?
-
-* jQuery, jQuery UI, Sammy.js, Mustache.js
-* Aristo theme done with SASS and Compass
-* And some custom code
+In addition Rooibos comes with a great CSS Framework so you don't even have to write CSS. Check out the examples right now!
 
 # Compatibility
 
-* WebKit (Safari, Chrome) and Firefox
-* IE8 is almost good
-* There will be a compatibility layer for IE7 but I don't guarantee anything
-* Opera... Don't have plans for it
+Because Rooibos relies heavily on CSS3, I'm focusing on Webkit and Firefox (which represents almost 50% of the browsers). But it's usable on IE7, IE8 and Opera too.
 
-# Development
+So it's the perfect tool if you want to create an app with Titanium Desktop or Adobe AIR and it's a very good tool too if your audience is limited.
 
-Watch coffee scripts:
-
-    coffee --no-wrap -w -o js -c js/coffee
-
-Watch compass theme:
-
-    compass watch themes/aristo
-
-Build Rooibos:
-
-    rake build
-
-# Inspired by
-
-* Cappuccino
-* Choco
+When I'll get something complete on Webkit and Firefox, I will work more on the other browsers. But feel free to help right now on that if you like the project.
 
 # License
 
