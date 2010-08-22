@@ -10,7 +10,9 @@
         self.element.find(".ui-accordion-content a").removeClass("selected");
         var el = self.element.find(".ui-accordion-content a[href=" + location.hash + "]");
         el.addClass("selected");
+        self.options.animated = false;
         self.activate(self.element.find(".ui-accordion-content").index(el.parent().parent().parent()));
+        self.options.animated = "slide";
       }).hashchange();
     }
   });
