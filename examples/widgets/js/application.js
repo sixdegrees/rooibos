@@ -46,6 +46,10 @@ var app = $.sammy(function() {
   this.get("#/widgets/accordion", function() {
     $("#content").display("js/views/widgets/accordion.ms");
   });
+  
+  this.get("#/widgets/table", function() {
+    $("#content").display("js/views/widgets/table.ms");
+  });
 });
 
 $(function() {
