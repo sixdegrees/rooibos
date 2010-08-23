@@ -5,5 +5,6 @@ css_dir = "../../build/css"
 sass_dir = "sass"
 images_dir = "images"
 javascripts_dir = "../../build/js"
+output_style = :compressed
 # To enable relative paths to assets via compass helper functions. Uncomment:
 relative_assets = true

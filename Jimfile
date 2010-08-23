@@ -4,6 +4,7 @@
 
 modernizr
 mustache
+underscore
 jquery
 jquery.ui
 jquery.metadata
@@ -11,6 +12,7 @@ jquery.hashchange
 jquery.uniform
 jquery.flexify
 sammy
+js-model
 
 js/ui/display
 js/ui/loading

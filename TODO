@@ -1,3 +1,6 @@
+* Add js-model
+* Change outline with jQuery UI 1.9 menu
+* Make $.display() more agnostic
 * Color fallback for CSS gradients (for Opera)
 * IE CSS3: http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/
 * Remove animation for outline
