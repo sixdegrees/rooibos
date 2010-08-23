@@ -1,16 +1,3 @@
-//= require "vendor/modernizr"
-//= require "vendor/jquery"
-//= require "vendor/jquery-ui"
-//= require "vendor/metadata"
-//= require "vendor/hashchange"
-//= require "vendor/uniform"
-//= require "vendor/sammy"
-//= require "vendor/mustache"
-//= require "vendor/flexify"
-//= require "ui/outline"
-//= require "ui/selectmenu"
-//= require "ui/loading"
-
 jQuery.fn.extend({
 	display: function( url, params, callback ) {
 		if ( typeof url !== "string" ) {
@@ -94,3 +81,5 @@ jQuery.fn.extend({
 		return this;
 	}
 });
+
+jQuery.metadata.setType("attr", "data");

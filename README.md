@@ -12,6 +12,10 @@ So it's the perfect tool if you want to create an app with Titanium Desktop or A
 
 When I'll get something complete on Webkit and Firefox, I will work more on the other browsers. But feel free to help right now on that if you like the project.
 
+# Inspired by
+
+* Choco (Javascript Framework that bundles js-model, jim and sammy)
+
 # License
 
 * Aristo theme is Creative Commons

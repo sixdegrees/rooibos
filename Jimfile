@@ -1,0 +1,18 @@
+// bundled_path: build/js/rooibos.js
+// compressed_path: build/js/rooibos.min.js
+// vendor_dir: js/vendor
+
+modernizr
+mustache
+jquery
+jquery.ui
+jquery.metadata
+jquery.hashchange
+jquery.uniform
+jquery.flexify
+sammy
+
+js/ui/display
+js/ui/loading
+js/ui/outline
+js/ui/selectmenu
