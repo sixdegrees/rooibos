@@ -14,7 +14,7 @@ When I'll get something complete on Webkit and Firefox, I will work more on the 
 
 # Inspired by
 
-* Choco (Javascript Framework that bundles js-model, jim and sammy)
+* [Choco](http://github.com/ahe/choco) (Javascript Framework that bundles js-model, jim and sammy)
 
 # License
 

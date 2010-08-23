@@ -1,4 +1,3 @@
-* Add js-model
 * Change outline with jQuery UI 1.9 menu
 * Make $.display() more agnostic
 * Color fallback for CSS gradients (for Opera)
