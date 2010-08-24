@@ -12,6 +12,7 @@ jquery.hashchange
 jquery.uniform
 jquery.flexify
 sammy
+sammy.template
 js-model
 
 js/ui/display

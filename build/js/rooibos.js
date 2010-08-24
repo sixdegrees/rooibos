@@ -22476,6 +22476,123 @@ Enjoy!
 
 })(jQuery);
 
+(function($) {
+  
+  // Simple JavaScript Templating
+  // John Resig - http://ejohn.org/ - MIT Licensed
+  // adapted from: http://ejohn.org/blog/javascript-micro-templating/
+  // originally $.srender by Greg Borenstein http://ideasfordozens.com in Feb 2009
+  // modified for Sammy by Aaron Quint for caching templates by name
+  var srender_cache = {};
+  var srender = function(name, template, data) {
+    // target is an optional element; if provided, the result will be inserted into it
+    // otherwise the result will simply be returned to the caller   
+    if (srender_cache[name]) {
+      fn = srender_cache[name];
+    } else {
+      if (typeof template == 'undefined') {
+        // was a cache check, return false
+        return false;
+      }
+      // Generate a reusable function that will serve as a template
+      // generator (and which will be cached).
+      fn = srender_cache[name] = new Function("obj",
+      "var p=[],print=function(){p.push.apply(p,arguments);};" +
+
+      // Introduce the data as local variables using with(){}
+      "with(obj){p.push(\"" +
+
+      // Convert the template into pure JavaScript
+      template
+        .replace(/[\r\t\n]/g, " ")
+        .replace(/\"/g, '\\"')
+        .split("<%").join("\t")
+        .replace(/((^|%>)[^\t]*)/g, "$1\r")
+        .replace(/\t=(.*?)%>/g, "\",$1,\"")
+        .split("\t").join("\");")
+        .split("%>").join("p.push(\"")
+        .split("\r").join("")
+        + "\");}return p.join('');");
+    }
+
+    if (typeof data != 'undefined') {
+      return fn(data);
+    } else {
+      return fn;
+    }
+  };
+  
+  Sammy = Sammy || {};
+
+  // <tt>Sammy.Template</tt> is a simple plugin that provides a way to create
+  // and render client side templates. The rendering code is based on John Resig's
+  // quick templates and Greg Borenstien's srender plugin. 
+  // This is also a great template/boilerplate for Sammy plugins. 
+  //
+  // Templates use <% %> tags to denote embedded javascript. 
+  //
+  // ### Examples
+  //
+  // Here is an example template (user.template):
+  //
+  //      <div class="user">
+  //        <div class="user-name"><%= user.name %></div>
+  //        <% if (user.photo_url) { %>
+  //          <div class="photo"><img src="<%= user.photo_url %>" /></div>
+  //        <% } %>
+  //      </div>
+  //
+  // Given that is a publicly accesible file, you would render it like:
+  //       
+  //       $.sammy(function() {
+  //         // include the plugin
+  //         this.use(Sammy.Template);
+  //         
+  //         this.get('#/', function() {
+  //           // the template is rendered in the current context.
+  //           this.user = {name: 'Aaron Quint'};
+  //           // partial calls template() because of the file extension
+  //           this.partial('user.template');
+  //         })
+  //       });
+  //
+  // You can also pass a second argument to use() that will alias the template
+  // method and therefore allow you to use a different extension for template files 
+  // in <tt>partial()</tt>
+  //    
+  //      // alias to 'tpl'
+  //      this.use(Sammy.Template, 'tpl');
+  //
+  //      // now .tpl files will be run through srender
+  //      this.get('#/', function() {
+  //        this.partial('myfile.tpl');
+  //      });
+  //
+  Sammy.Template = function(app, method_alias) {
+    
+    // *Helper:* Uses simple templating to parse ERB like templates.
+    //
+    // ### Arguments
+    // 
+    // * `template` A String template. '<% %>' tags are evaluated as Javascript and replaced with the elements in data.
+    // * `data` An Object containing the replacement values for the template. 
+    //   data is extended with the <tt>EventContext</tt> allowing you to call its methods within the template.
+    // * `name` An optional String name to cache the template.
+    //
+    var template = function(template, data, name) {
+      // use name for caching
+      if (typeof name == 'undefined') name = template;
+      return srender(name, template, $.extend({}, this, data));
+    };
+    
+    // set the default method name/extension
+    if (!method_alias) method_alias = 'template'; 
+    // create the helper at the method alias
+    app.helper(method_alias, template);
+    
+  };
+
+})(jQuery);
 /*  js-model JavaScript library, version 0.8.4
  *  (c) 2010 Ben Pickles
  *
@@ -22885,89 +23002,43 @@ Model.RestPersistence = function(resource, methods) {
   return new model_resource();
 };
 
-jQuery.fn.extend({
-	display: function( url, params, callback ) {
-		if ( typeof url !== "string" ) {
-			return _load.call( this, url );
-
-		// Don't do a request if no elements are being requested
-		} else if ( !this.length ) {
-			return this;
-		}
-
-		var off = url.indexOf(" ");
-		if ( off >= 0 ) {
-			var selector = url.slice(off, url.length);
-			url = url.slice(0, off);
-		}
-
-		// Default to a GET request
-		var type = "GET";
-
-		// If the second parameter was provided
-		if ( params ) {
-			// If it's a function
-			if ( jQuery.isFunction( params ) ) {
-				// We assume that it's the callback
-				callback = params;
-				params = null;
-
-			// Otherwise, build a param string
-			}
-		}
-
-		var self = this;
-
-		// Request the remote document
-		jQuery.ajax({
-			url: url,
-			type: type,
-			dataType: "html",
-			complete: function( res, status ) {
-				// If successful, inject the HTML into all the matched elements
-				if ( status === "success" || status === "notmodified" ) {
-					self.html(Mustache.to_html(res.responseText, params));
-					/* UI buttons */
-					self.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
-          /* UI buttonsets */
-          self.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
-          /* UI dialogs */
-          self.find(".dialog").hide().each(function() {
-            var el = this;
-            self.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
-              e.preventDefault();
-              jQuery(el).dialog(jQuery(this).metadata());
-            });
-          });
-          /* UI outlines */
-          self.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
-          /* UI selectmenus */
-          self.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
-          /* Uniform controls */
-          if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
-          /* UI progress bars */
-          self.find(".progressbar").each(function() { jQuery(this).progressbar(jQuery(this).metadata()); });
-          /* UI Accorions */
-          self.find(".accordion").each(function() { jQuery(this).accordion(jQuery(this).metadata()); });
-          /* Flexible box model compatibility */
-          if (!jQuery.browser.webkit && !jQuery.browser.mozilla) {
-            self.find(".vbox").flow("vertical");
-            self.find(".hbox").flow("horizontal");
-            self.find(".vbox > .flex").flex("height", 1).children().flex("height", 1);
-            self.find(".hbox > .flex").flex("width", 1).children().flex("width", 1);
-            jQuery(document).flexify();
-          } 
-				}
-
-				if ( callback ) {
-					self.each( callback, [res.responseText, status, res] );
-				}
-			}
-		});
-
-		return this;
-	}
-});
+Sammy.Rooibos = function(app, prefix, suffix) {
+  
+  this.bind("changed", function(e, data) {
+		selector = $("body");
+		/* UI buttons */
+		selector.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
+    /* UI buttonsets */
+    selector.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
+    /* UI dialogs */
+    selector.find(".dialog").hide().each(function() {
+      var el = this;
+      selector.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
+        e.preventDefault();
+        jQuery(el).dialog(jQuery(this).metadata());
+      });
+    });
+    /* UI outlines */
+    selector.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
+    /* UI selectmenus */
+    selector.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
+    /* Uniform controls */
+    if (!jQuery.browser.webkit) $("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
+    /* UI progress bars */
+    selector.find(".progressbar").each(function() { jQuery(this).progressbar(jQuery(this).metadata()); });
+    /* UI Accorions */
+    selector.find(".accordion").each(function() { jQuery(this).accordion(jQuery(this).metadata()); });
+    /* Flexible box model compatibility */
+    if (!jQuery.browser.webkit && !jQuery.browser.mozilla) {
+      self.find(".vbox").flow("vertical");
+      self.find(".hbox").flow("horizontal");
+      self.find(".vbox > .flex").flex("height", 1).children().flex("height", 1);
+      self.find(".hbox > .flex").flex("width", 1).children().flex("width", 1);
+      jQuery(document).flexify();
+    }
+	});
+  
+};
 
 jQuery.metadata.setType("attr", "data");
 var loadingView;

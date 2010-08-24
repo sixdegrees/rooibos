@@ -7,17 +7,19 @@
   <script src="../../build/js/rooibos.js" type="text/javascript"></script>
   <script>
     var app = $.sammy(function() {
+      this.element_selector = "#application";
+      this.use(Sammy.Template);
+      this.use(Sammy.Rooibos);
+      
       this.get("#/", function() {
-        $("#application").display("views/hello.ms");
+        this.partial("views/hello.html");
       });
     });
     
-    $(function() {
-      $("body").display("views/layout.ms", function() { app.run("#/"); });
-    });
+    $(function() { app.run("#/"); });
   </script>
 </head>
 <body>
-  
+  <div id="application" class="vbox"></div>
 </body>
 </html>

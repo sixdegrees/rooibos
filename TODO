@@ -1,5 +1,7 @@
-* Change outline with jQuery UI 1.9 menu
-* Make $.display() more agnostic
+* See what's the best solution for models (look at githubissues)
+* Change color of Navbar (to be more like in the web inspector)
+* Change outline with jQuery UI 1.9 menu or jstree and change the sidebar color
+* Make $.display() more agnostic (and with a bind event for sammy)
 * Color fallback for CSS gradients (for Opera)
 * IE CSS3: http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/
 * Remove animation for outline
