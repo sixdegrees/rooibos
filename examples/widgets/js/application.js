@@ -1,6 +1,6 @@
 var app = $.sammy(function() {
   this.element_selector = "#content";
-  this.use(Sammy.Template);
+  this.use(Sammy.Template, "ms");
   this.use(Sammy.Rooibos);
   
   this.get("#/", function() {

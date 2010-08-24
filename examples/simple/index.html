@@ -8,7 +8,7 @@
   <script>
     var app = $.sammy(function() {
       this.element_selector = "#application";
-      this.use(Sammy.Template);
+      this.use(Sammy.Template, "html");
       this.use(Sammy.Rooibos);
       
       this.get("#/", function() {
