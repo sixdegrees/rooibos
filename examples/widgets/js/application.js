@@ -1,7 +1,18 @@
-var app = $.sammy(function() {
+$.extend(Sammy.EventContext.prototype, {
+  partial: function(location, data) {
+    var cx = this;
+    
+    return this.render(location, data).then(function(content) {
+      cx.swap(context);
+      cx.trigger("changed");
+    });
+  }
+});
+
+var app = Sammy(function() {
   this.element_selector = "#content";
-  this.use(Sammy.Template, "ms");
-  this.use(Sammy.Rooibos);
+  this.use("Template", "ms");
+  this.use("Rooibos");
   
   this.get("#/", function() {
     this.partial("js/views/buttons/default.ms");

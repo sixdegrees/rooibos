@@ -23297,7 +23297,7 @@ Model.RestPersistence = function(resource, methods) {
   return new model_resource();
 };
 
-Sammy.Rooibos = function(app, prefix, suffix) {
+Sammy.Rooibos = function(app, method_alias) {
   
   this.bind("changed", function(e, data) {
 		selector = $("body");
