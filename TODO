@@ -1,4 +1,4 @@
-* See what's the best solution for models (look at githubissues)
+* Sammy.Template has some problems with quotes. Need to replace it.
 * Change color of Navbar (to be more like in the web inspector)
 * Change outline with jQuery UI 1.9 menu or jstree and change the sidebar color
 * Color fallback for CSS gradients (for Opera)
