@@ -1,0 +1,20 @@
+.ui-menu {
+  .ui-menu-item {
+    a {
+      @include box-sizing(border-box);
+      @include text-shadow(#fff, 0, 1px, 1px);
+      
+      color: #000;
+      display: block;
+      height: $line-height;
+      padding-left: 16px;
+      text-decoration: none;
+      
+      &:hover, &.selected {
+        background-color: #5F83B9;
+        @include text-shadow(#000, 0, 1px, 1px);
+        color: #fff;
+      }
+    }
+  }
+}

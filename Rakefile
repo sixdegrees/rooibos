@@ -11,6 +11,7 @@ namespace :js do
     `jim install http://documentcloud.github.com/underscore/underscore.js underscore 1.1`
     `jim install http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js jquery 1.4.2`
     `jim install http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js jquery.ui 1.8.4`
+    `jim install http://github.com/jquery/jquery-ui/raw/menu/ui/jquery.ui.menu.js jquery.ui.menu 1.9pre`
     `jim install http://plugins.jquery.com/files/flexify-1.1-uncompressed.js.txt jquery.flexify 1.1`
     `jim install http://plugins.jquery.com/files/jquery.metadata.2.1.zip jquery.metadata 2.1`
     `jim install http://github.com/pixelmatrix/uniform/zipball/master jquery.uniform 1.5`

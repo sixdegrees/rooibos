@@ -16,6 +16,8 @@ Sammy.Rooibos = function(app, method_alias) {
     });
     /* UI outlines */
     element.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
+    /* UI Menu */
+    element.find(".menu").each(function() { jQuery(this).menu(jQuery(this).metadata()); });
     /* UI selectmenus */
     element.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
     /* Uniform controls */

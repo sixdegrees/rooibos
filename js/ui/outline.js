@@ -14,6 +14,12 @@
         self.activate(self.element.find(".ui-accordion-content").index(el.parent().parent().parent()));
         self.options.animated = "slide";
       }).hashchange();
+      
+      if (self.options.richHeaders) {
+        self.element.find(".ui-accordion-header a").click(function() {
+          window.location.hash = $(this).attr("href");
+        });
+      }
     }
   });
 })(jQuery);

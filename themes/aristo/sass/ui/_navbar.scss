@@ -3,11 +3,11 @@ $border-radius: 3px;
 .navbar {
   @extend .bold-font;
   @include box-sizing(border-box);
-  @include linear-gradient(color-stops(#c7cfd5, #a8b2ba), top);
+  @include linear-gradient(color-stops(#ececec, #d9d9d9), top);
   @include text-shadow(#fff, 0, 1px, 1px);
   
-  border-bottom: 1px solid #858c92;
-  border-top: 1px solid #d9dee2;
+  border-bottom: 1px solid #a3a3a3;
+  border-top: 1px solid #fff;
   color: #2b3033;
   font-size: 14px;
   height: $line-height * 1.5;
