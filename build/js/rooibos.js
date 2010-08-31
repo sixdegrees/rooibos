@@ -23547,13 +23547,7 @@ Sammy.Rooibos = function(app, method_alias) {
     /* UI buttonsets */
     element.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
     /* UI dialogs */
-    element.find(".dialog").hide().each(function() {
-      var el = this;
-      element.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
-        e.preventDefault();
-        jQuery(el).dialog(jQuery(this).metadata());
-      });
-    });
+    element.find(".dialog").each(function() { jQuery(this).dialog(jQuery(this).metadata()); });
     /* UI outlines */
     element.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
     /* UI Menu */
@@ -23639,6 +23633,7 @@ function loading(text) {
         self.element.find(".ui-accordion-content a").removeClass("selected");
         var el = self.element.find(".ui-accordion-content a[href=" + location.hash + "]");
         el.addClass("selected");
+        // FIXME: Doesn't work with collapsible
         // self.options.animated = false;
         // self.activate(self.element.find(".ui-accordion-content").index(el.parent().parent().parent()));
         // self.options.animated = "slide";

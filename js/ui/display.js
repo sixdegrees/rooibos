@@ -7,13 +7,7 @@ Sammy.Rooibos = function(app, method_alias) {
     /* UI buttonsets */
     element.find(".buttonset").each(function() { jQuery(this).buttonset(jQuery(this).metadata()); });
     /* UI dialogs */
-    element.find(".dialog").hide().each(function() {
-      var el = this;
-      element.find("*[data-for=" + jQuery(this).attr("id") + "]").click(function(e) {
-        e.preventDefault();
-        jQuery(el).dialog(jQuery(this).metadata());
-      });
-    });
+    element.find(".dialog").each(function() { jQuery(this).dialog(jQuery(this).metadata()); });
     /* UI outlines */
     element.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
     /* UI Menu */
