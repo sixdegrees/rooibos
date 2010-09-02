@@ -31,6 +31,7 @@ $border-radius: 6px;
     height: $line-height;
     position: relative;
     text-align: center;
+    cursor: pointer;
     
     .ui-dialog-title {
       @extend .bold-font;
