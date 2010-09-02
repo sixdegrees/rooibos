@@ -3,20 +3,20 @@
     _create: function() {
       this.options.autoHeight = false;
       this.options.collapsible = true;
+      this.options.active = false;
       this.eventOption = this.options.event;
       this.options.event = false;
       $.ui.accordion.prototype._create.apply(this);
       this.element.addClass("ui-outline");
       // Highlight selected element on hash change
       var self = this;
+      
       $(window).hashchange(function() {
-        self.element.find(".ui-accordion-content a").removeClass("selected");
-        var el = self.element.find(".ui-accordion-content a[href=" + location.hash + "]");
-        el.addClass("selected");
-        // FIXME: Doesn't work with collapsible
-        // self.options.animated = false;
-        // self.activate(self.element.find(".ui-accordion-content").index(el.parent().parent().parent()));
-        // self.options.animated = "slide";
+        self.element.find("a").removeClass("selected");
+        self.element.find(".ui-accordion-header").removeClass("selected");
+        var el = self.element.find("a[href=" + location.hash + "]")
+        if (el.parent().hasClass("ui-accordion-header")) el.parent().addClass("selected");
+        else el.addClass("selected");
       }).hashchange();
     },
     

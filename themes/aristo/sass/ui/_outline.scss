@@ -5,6 +5,16 @@
     @include box-shadow(none);
     background-image: none;
     border: none;
+    
+    &.selected {
+      @include linear-gradient(color-stops(#75a4d9, #2a6ab4), top);
+      border-top: 1px solid #5e94ce;
+      
+      a {
+        @include text-shadow(#000, 0, 1px, 1px);
+        color: #fff;
+      }
+    }
   }
   
   .ui-accordion-content {
