@@ -1,7 +1,5 @@
-Sammy.Rooibos = function(app, method_alias) {
-  
-  this.bind("changed", function(e, data) {
-		element = data ? data["element"] : $("body");
+var Rooibos = {
+  init: function(element) {
 		/* UI buttons */
 		element.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
     /* UI buttonsets */
@@ -28,6 +26,13 @@ Sammy.Rooibos = function(app, method_alias) {
       element.find(".hbox > .flex").flex("width", 1).children().flex("width", 1);
       element.flexify();
     }
+  }
+};
+
+Sammy.Rooibos = function(app, method_alias) {
+  
+  this.bind("changed", function(e, data) {
+		Rooibos.init(data ? data["element"] : $("body"));
 	});
   
 };
