@@ -23,6 +23,14 @@
     _createIcons: function() {
       $.ui.accordion.prototype._createIcons.apply(this);
       
+      // TODO : find a way to avoid making and then removing the arrows
+      $('.ui-accordion-header', this.context).each(function() {
+        if ($(this).next().html() == "") {
+          $('.ui-icon', this).remove()
+          $('a', this).addClass('ui-noicon')
+        }
+      });
+      
       var self = this;
       if (this.eventOption) {
         self.headers.find("span.ui-icon").bind( this.eventOption.split(" ").join(".accordion ") + ".accordion", function(event) {

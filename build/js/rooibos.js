@@ -1,42 +1,44 @@
 /*!
- * Modernizr JavaScript library 1.5
- * http://www.modernizr.com/
+ * Modernizr v1.6
+ * http://www.modernizr.com
  *
- * Copyright (c) 2009-2010 Faruk Ates - http://farukat.es/
- * Dual-licensed under the BSD and MIT licenses.
+ * Developed by: 
+ * - Faruk Ates  http://farukat.es/
+ * - Paul Irish  http://paulirish.com/
+ *
+ * Copyright (c) 2009-2010
+ * Dual-licensed under the BSD or MIT licenses.
  * http://www.modernizr.com/license/
- *
- * Featuring major contributions by
- * Paul Irish  - http://paulirish.com
  */
+
  
 /*
- * Modernizr is a script that will detect native CSS3 and HTML5 features
- * available in the current UA and provide an object containing all
+ * Modernizr is a script that detects native CSS3 and HTML5 features
+ * available in the current UA and provides an object containing all
  * features with a true/false value, depending on whether the UA has
  * native support for it or not.
  * 
- * In addition to that, Modernizr will add classes to the <html>
- * element of the page, one for each cutting-edge feature. If the UA
- * supports it, a class like "cssgradients" will be added. If not,
- * the class name will be "no-cssgradients". This allows for simple
- * if-conditionals in CSS styling, making it easily to have fine
- * control over the look and feel of your website.
+ * Modernizr will also add classes to the <html> element of the page,
+ * one for each feature it detects. If the UA supports it, a class
+ * like "cssgradients" will be added. If not, the class name will be
+ * "no-cssgradients". This allows for simple if-conditionals in your
+ * CSS, giving you fine control over the look & feel of your website.
  * 
  * @author        Faruk Ates
+ * @author        Paul Irish
  * @copyright     (c) 2009-2010 Faruk Ates.
- *
- * @contributor   Paul Irish
  * @contributor   Ben Alman
  */
 
 window.Modernizr = (function(window,doc,undefined){
     
-    var version = '1.5',
+    var version = '1.6',
     
     ret = {},
 
     /**
+     * !! DEPRECATED !!
+     * 
      * enableHTML5 is a private property for advanced use only. If enabled,
      * it will make Modernizr.init() run through a brief while() loop in
      * which it will create all HTML5 elements in the DOM to allow for
@@ -44,22 +46,11 @@ window.Modernizr = (function(window,doc,undefined){
      * non-HTML4 elements unless created in the DOM this way.
      * 
      * enableHTML5 is ON by default.
+     * 
+     * The enableHTML5 toggle option is DEPRECATED as per 1.6, and will be
+     * replaced in 2.0 in lieu of the modular, configurable nature of 2.0.
      */
     enableHTML5 = true,
-    
-    
-    /**
-     * fontfaceCheckDelay is the ms delay before the @font-face test is
-     * checked a second time. This is neccessary because both Gecko and
-     * WebKit do not load data: URI font data synchronously.
-     *   https://bugzilla.mozilla.org/show_bug.cgi?id=512566
-     * The check will be done again at fontfaceCheckDelay*2 and then 
-     * a fourth time at window's load event. 
-     * If you need to query for @font-face support, send a callback to: 
-     *  Modernizr._fontfaceready(fn);
-     * The callback is passed the boolean value of Modernizr.fontface
-     */
-    fontfaceCheckDelay = 75,
     
     
     docElement = doc.documentElement,
@@ -76,62 +67,26 @@ window.Modernizr = (function(window,doc,undefined){
      */
     f = doc.createElement( 'input' ),
     
-    // Reused strings, stored here to allow better minification
-    
-    canvas = 'canvas',
-    canvastext = 'canvastext',
-    rgba = 'rgba',
-    hsla = 'hsla',
-    multiplebgs = 'multiplebgs',
-    backgroundsize = 'backgroundsize',
-    borderimage = 'borderimage',
-    borderradius = 'borderradius',
-    boxshadow = 'boxshadow',
-    opacity = 'opacity',
-    cssanimations = 'cssanimations',
-    csscolumns = 'csscolumns',
-    cssgradients = 'cssgradients',
-    cssreflections = 'cssreflections',
-    csstransforms = 'csstransforms',
-    csstransforms3d = 'csstransforms3d',
-    csstransitions = 'csstransitions',
-    fontface = 'fontface',
-    geolocation = 'geolocation',
-    video = 'video',
-    audio = 'audio',
-    input = 'input',
-    inputtypes = input + 'types',
-    // inputtypes is an object of its own containing individual tests for
-    // various new input types, such as search, range, datetime, etc.
-    
-    svg = 'svg',
-    smil = 'smil',
-    svgclippaths = svg+'clippaths',
-    
-    background = 'background',
-    backgroundColor = background + 'Color',
-    canPlayType = 'canPlayType',
-    
-    // FF gets really angry if you name local variables as these, but camelCased.
-    localstorage = 'localStorage',
-    sessionstorage = 'sessionStorage',
-    applicationcache = 'applicationCache',
-    
-    webWorkers = 'webworkers',
-    hashchange = 'hashchange',
-    crosswindowmessaging = 'crosswindowmessaging',
-    historymanagement = 'historymanagement',
-    draganddrop = 'draganddrop',
-    websqldatabase = 'websqldatabase',
-    indexedDB = 'indexedDB',
-    websockets = 'websockets',
     smile = ':)',
     
-    // IE7 gets mad if you name a local variable `toString`
     tostring = Object.prototype.toString,
     
-    // list of property values to set for css tests. see ticket #21
-    prefixes = ' -o- -moz- -ms- -webkit- -khtml- '.split(' '),
+    // List of property values to set for css tests. See ticket #21
+    prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' '),
+
+    // Following spec is to expose vendor-specific style properties as:
+    //   elem.style.WebkitBorderRadius
+    // and the following would be incorrect:
+    //   elem.style.webkitBorderRadius
+    
+    // Webkit ghosts their properties in lowercase but Opera & Moz do not.
+    // Microsoft foregoes prefixes entirely <= IE8, but appears to 
+    //   use a lowercase `ms` instead of the correct `Ms` in IE9
+    
+    // More here: http://github.com/Modernizr/Modernizr/issues/issue/21
+    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+
+    ns = {'svg': 'http://www.w3.org/2000/svg'},
 
     tests = {},
     inputs = {},
@@ -139,47 +94,77 @@ window.Modernizr = (function(window,doc,undefined){
     
     classes = [],
     
+    featurename, // used in testing loop
+    
+    
+    
+    // todo: consider using http://javascript.nwbox.com/CSSSupport/css-support.js instead
+    testMediaQuery = function(mq){
+
+      var st = document.createElement('style'),
+          div = doc.createElement('div'),
+          ret;
+
+      st.textContent = mq + '{#modernizr{height:3px}}';
+      (doc.head || doc.getElementsByTagName('head')[0]).appendChild(st);
+      div.id = 'modernizr';
+      docElement.appendChild(div);
+
+      ret = div.offsetHeight === 3;
+
+      st.parentNode.removeChild(st);
+      div.parentNode.removeChild(div);
+
+      return !!ret;
+
+    },
+    
+    
     /**
       * isEventSupported determines if a given element supports the given event
       * function from http://yura.thinkweb2.com/isEventSupported/
       */
     isEventSupported = (function(){
-  
-        var TAGNAMES = {
-          'select':'input','change':'input',
-          'submit':'form','reset':'form',
-          'error':'img','load':'img','abort':'img'
-        }, 
-        cache = { };
-        
-        function isEventSupported(eventName, element) {
-            var canCache = (arguments.length == 1);
-            
-            // only return cached result when no element is given
-            if (canCache && cache[eventName]) {
-                return cache[eventName];
+
+      var TAGNAMES = {
+        'select':'input','change':'input',
+        'submit':'form','reset':'form',
+        'error':'img','load':'img','abort':'img'
+      };
+
+      function isEventSupported(eventName, element) {
+
+        element = element || document.createElement(TAGNAMES[eventName] || 'div');
+        eventName = 'on' + eventName;
+
+        // When using `setAttribute`, IE skips "unload", WebKit skips "unload" and "resize", whereas `in` "catches" those
+        var isSupported = (eventName in element);
+
+        if (!isSupported) {
+          // If it has no `setAttribute` (i.e. doesn't implement Node interface), try generic element
+          if (!element.setAttribute) {
+            element = document.createElement('div');
+          }
+          if (element.setAttribute && element.removeAttribute) {
+            element.setAttribute(eventName, '');
+            isSupported = typeof element[eventName] == 'function';
+
+            // If property was created, "remove it" (by setting value to `undefined`)
+            if (typeof element[eventName] != 'undefined') {
+              element[eventName] = undefined;
             }
-            
-            element = element || document.createElement(TAGNAMES[eventName] || 'div');
-            eventName = 'on' + eventName;
-            
-            // When using `setAttribute`, IE skips "unload", WebKit skips "unload" and "resize"
-            // `in` "catches" those
-            var isSupported = (eventName in element);
-            
-            if (!isSupported && element.setAttribute) {
-                element.setAttribute(eventName, 'return;');
-                isSupported = typeof element[eventName] == 'function';
-            }
-            
-            element = null;
-            return canCache ? (cache[eventName] = isSupported) : isSupported;
+            element.removeAttribute(eventName);
+          }
         }
-        
-        return isEventSupported;
-    })();    
+
+        element = null;
+        return isSupported;
+      }
+      return isEventSupported;
+    })();
     
     
+    // hasOwnProperty shim by kangax needed for Safari 2.0 support
     var _hasOwnProperty = ({}).hasOwnProperty, hasOwnProperty;
     if (typeof _hasOwnProperty !== 'undefined' && typeof _hasOwnProperty.call !== 'undefined') {
       hasOwnProperty = function (object, property) {
@@ -233,24 +218,9 @@ window.Modernizr = (function(window,doc,undefined){
      *   compatibility.
      */
     function test_props_all( prop, callback ) {
+      
         var uc_prop = prop.charAt(0).toUpperCase() + prop.substr(1),
-        
-        // following spec is to expose vendor-specific style properties as:
-        //   elem.style.WebkitBorderRadius
-        // and the following would be incorrect:
-        //   elem.style.webkitBorderRadius
-        // Webkit and Mozilla are nice enough to ghost their properties in the lowercase
-        //   version but Opera does not.
-        
-        // see more here: http://github.com/Modernizr/Modernizr/issues/issue/21
-        props = [
-            prop,
-            'Webkit' + uc_prop,
-            'Moz' + uc_prop,
-            'O' + uc_prop,
-            'ms' + uc_prop,
-            'Khtml' + uc_prop
-        ];
+            props   = (prop + ' ' + domPrefixes.join(uc_prop + ' ') + uc_prop).split(' ');
 
         return !!test_props( props, callback );
     }
@@ -259,33 +229,100 @@ window.Modernizr = (function(window,doc,undefined){
     /**
      * Tests
      */
-     
-    tests[canvas] = function() {
-        return !!doc.createElement( canvas ).getContext;
+
+    tests['flexbox'] = function() {
+        /**
+         * set_prefixed_value_css sets the property of a specified element
+         * adding vendor prefixes to the VALUE of the property.
+         * @param {Element} element
+         * @param {string} property The property name. This will not be prefixed.
+         * @param {string} value The value of the property. This WILL be prefixed.
+         * @param {string=} extra Additional CSS to append unmodified to the end of
+         * the CSS string.
+         */
+        function set_prefixed_value_css(element, property, value, extra) {
+            property += ':';
+            element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
+        }
+
+        /**
+         * set_prefixed_property_css sets the property of a specified element
+         * adding vendor prefixes to the NAME of the property.
+         * @param {Element} element
+         * @param {string} property The property name. This WILL be prefixed.
+         * @param {string} value The value of the property. This will not be prefixed.
+         * @param {string=} extra Additional CSS to append unmodified to the end of
+         * the CSS string.
+         */
+        function set_prefixed_property_css(element, property, value, extra) {
+            element.style.cssText = prefixes.join(property + ':' + value + ';') + (extra || '');
+        }
+
+        var c = doc.createElement('div'),
+            elem = doc.createElement('div');
+
+        set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
+        set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
+
+        c.appendChild(elem);
+        docElement.appendChild(c);
+
+        var ret = elem.offsetWidth === 42;
+
+        c.removeChild(elem);
+        docElement.removeChild(c);
+
+        return ret;
     };
     
-    tests[canvastext] = function() {
-        return !!(tests[canvas]() && typeof doc.createElement( canvas ).getContext('2d').fillText == 'function');
+    // On the S60 and BB Storm, getContext exists, but always returns undefined
+    // http://github.com/Modernizr/Modernizr/issues/issue/97/ 
+    
+    tests['canvas'] = function() {
+        var elem = doc.createElement( 'canvas' );
+        return !!(elem.getContext && elem.getContext('2d'));
     };
     
-    /**
+    tests['canvastext'] = function() {
+        return !!(ret['canvas'] && typeof doc.createElement( 'canvas' ).getContext('2d').fillText == 'function');
+    };
+    
+    
+    tests['webgl'] = function(){
+
+        var elem = doc.createElement( 'canvas' ); 
+        
+        try {
+            if (elem.getContext('webgl')){ return true; }
+        } catch(e){	}
+        
+        try {
+            if (elem.getContext('experimental-webgl')){ return true; }
+        } catch(e){	}
+
+        return false;
+    };
+    
+    /*
      * The Modernizr.touch test only indicates if the browser supports
      *    touch events, which does not necessarily reflect a touchscreen
      *    device, as evidenced by tablets running Windows 7 or, alas,
      *    the Palm Pre / WebOS (touch) phones.
-     * Additionally, chrome used to lie about its support on this, but that 
-     *    has since been recitifed: http://crbug.com/36415
-     * Because there is no way to reliably detect Chrome's false positive 
-     *    without UA sniffing we have removed this test from Modernizr. We 
-     *    hope to add it in after Chrome 5 has been sunsetted. 
-     * See also http://github.com/Modernizr/Modernizr/issues#issue/84
+     *    
+     * Additionally, Chrome (desktop) used to lie about its support on this,
+     *    but that has since been rectified: http://crbug.com/36415
+     *    
+     * We also test for Firefox 4 Multitouch Support.
+     *
+     * For more info, see: http://modernizr.github.com/Modernizr/touch.html
+     */
      
-    tests[touch] = function() {
+    tests['touch'] = function() {
 
-        return !!('ontouchstart' in window);
-        
+        return ('ontouchstart' in window) || testMediaQuery('@media ('+prefixes.join('touch-enabled),(')+'modernizr)');
+
     };
-    */
+
 
     /**
      * geolocation tests for the new Geolocation API specification.
@@ -295,84 +332,118 @@ window.Modernizr = (function(window,doc,undefined){
      * or view a fallback solution using google's geo API:
      *   http://gist.github.com/366184
      */
-    tests[geolocation] = function() {
+    tests['geolocation'] = function() {
         return !!navigator.geolocation;
     };
 
-    tests[crosswindowmessaging] = function() {
+    // Per 1.6: 
+    // This used to be Modernizr.crosswindowmessaging but the longer
+    // name has been deprecated in favor of a shorter and property-matching one.
+    // The old API is still available in 1.6, but as of 2.0 will throw a warning,
+    // and in the first release thereafter disappear entirely.
+    tests['postmessage'] = function() {
       return !!window.postMessage;
     };
 
-    tests[websqldatabase] = function() {
+    // Web SQL database detection is tricky:
+
+    // In chrome incognito mode, openDatabase is truthy, but using it will 
+    //   throw an exception: http://crbug.com/42380
+    // We can create a dummy database, but there is no way to delete it afterwards. 
+    
+    // Meanwhile, Safari users can get prompted on any database creation.
+    //   If they do, any page with Modernizr will give them a prompt:
+    //   http://github.com/Modernizr/Modernizr/issues/closed#issue/113
+    
+    // We have chosen to allow the Chrome incognito false positive, so that Modernizr
+    //   doesn't litter the web with these test databases. As a developer, you'll have
+    //   to account for this gotcha yourself.
+    tests['websqldatabase'] = function() {
       var result = !!window.openDatabase;
+      /*
       if (result){
         try {
-          result = !!openDatabase("testdb", "1.0", "html5 test db", 200000);
-        } catch(err) {
-          result = false;
+          result = !!openDatabase( mod + "testdb", "1.0", mod + "testdb", 2e4);
+        } catch(e) {
         }
       }
+      */
       return result;
     };
     
-    tests[indexedDB] = function(){
-      return !!window[indexedDB];
+    // Vendors have inconsistent prefixing with the experimental Indexed DB:
+    // - Firefox is shipping indexedDB in FF4 as moz_indexedDB
+    // - Webkit's implementation is accessible through webkitIndexedDB
+    // We test both styles.
+    tests['indexedDB'] = function(){
+      for (var i = -1, len = domPrefixes.length; ++i < len; ){ 
+        var prefix = domPrefixes[i].toLowerCase();
+        if (window[prefix + '_indexedDB'] || window[prefix + 'IndexedDB']){
+          return true;
+        } 
+      }
+      return false;
     };
 
     // documentMode logic from YUI to filter out IE8 Compat Mode
     //   which false positives.
-    tests[hashchange] = function() {
-      return isEventSupported(hashchange, window) && ( document.documentMode === undefined || document.documentMode > 7 );
+    tests['hashchange'] = function() {
+      return isEventSupported('hashchange', window) && ( document.documentMode === undefined || document.documentMode > 7 );
     };
 
-    tests[historymanagement] = function() {
+    // Per 1.6: 
+    // This used to be Modernizr.historymanagement but the longer
+    // name has been deprecated in favor of a shorter and property-matching one.
+    // The old API is still available in 1.6, but as of 2.0 will throw a warning,
+    // and in the first release thereafter disappear entirely.
+    tests['history'] = function() {
       return !!(window.history && history.pushState);
     };
 
-    tests[draganddrop] = function() {
-        return isEventSupported('drag')
-            && isEventSupported('dragstart')
-            && isEventSupported('dragenter')
-            && isEventSupported('dragover')
-            && isEventSupported('dragleave')
-            && isEventSupported('dragend')
-            && isEventSupported('drop');
+    tests['draganddrop'] = function() {
+        return  isEventSupported('drag') && 
+                isEventSupported('dragstart') && 
+                isEventSupported('dragenter') &&
+                isEventSupported('dragover') &&
+                isEventSupported('dragleave') &&
+                isEventSupported('dragend') &&
+                isEventSupported('drop');
     };
-
     
-    tests[websockets] = function(){
+    tests['websockets'] = function(){
         return ('WebSocket' in window);
     };
     
     
     // http://css-tricks.com/rgba-browser-support/
-    tests[rgba] = function() {
+    tests['rgba'] = function() {
         // Set an rgba() color and check the returned value
         
-        set_css( background + '-color:rgba(150,255,150,.5)' );
+        set_css(  'background-color:rgba(150,255,150,.5)' );
         
-        return contains( m_style[backgroundColor], rgba );
+        return contains( m_style.backgroundColor, 'rgba' );
     };
     
-    tests[hsla] = function() {
-        // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally
+    tests['hsla'] = function() {
+        // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally,
+        //   except IE9 who retains it as hsla
         
-        set_css( background + '-color:hsla(120,40%,100%,.5)' );
+        set_css('background-color:hsla(120,40%,100%,.5)' );
         
-        return contains( m_style[backgroundColor], rgba );
+        return contains( m_style.backgroundColor, 'rgba' ) || contains( m_style.backgroundColor, 'hsla' );
     };
     
-    tests[multiplebgs] = function() {
+    tests['multiplebgs'] = function() {
         // Setting multiple images AND a color on the background shorthand property
         //  and then querying the style.background property value for the number of
         //  occurrences of "url(" is a reliable method for detecting ACTUAL support for this!
         
-        set_css( background + ':url(//:),url(//:),red url(//:)' );
+        set_css( 'background:url(//:),url(//:),red url(//:)' );
         
         // If the UA supports multiple backgrounds, there should be three occurrences
-        //  of the string "url(" in the return value for elem_style.background
+        //   of the string "url(" in the return value for elem_style.background
 
-        return new RegExp("(url\\s*\\(.*?){3}").test(m_style[background]);
+        return new RegExp("(url\\s*\\(.*?){3}").test(m_style.background);
     };
     
     
@@ -384,24 +455,24 @@ window.Modernizr = (function(window,doc,undefined){
     // on our modernizr element, but instead just testing undefined vs
     // empty string.
     // The legacy set_css_all calls will remain in the source 
-    // (however, commented) in for clarity, yet functionally they are 
+    // (however, commented) for clarity, yet functionally they are 
     // no longer needed.
     
 
-    tests[backgroundsize] = function() {
-        return test_props_all( background + 'Size' );
+    tests['backgroundsize'] = function() {
+        return test_props_all( 'backgroundSize' );
     };
     
-    tests[borderimage] = function() {
+    tests['borderimage'] = function() {
         //  set_css_all( 'border-image:url(m.png) 1 1 stretch' );
         return test_props_all( 'borderImage' );
     };
     
     
-    // super comprehensive table about all the unique implementations of 
+    // Super comprehensive table about all the unique implementations of 
     // border-radius: http://muddledramblings.com/table-of-css3-border-radius-compliance
     
-    tests[borderradius] = function() {
+    tests['borderradius'] = function() {
         //  set_css_all( 'border-radius:10px' );
         return test_props_all( 'borderRadius', '', function( prop ) {
             return contains( prop, 'orderRadius' );
@@ -409,36 +480,41 @@ window.Modernizr = (function(window,doc,undefined){
     };
     
     
-    tests[boxshadow] = function() {
+    tests['boxshadow'] = function() {
         //  set_css_all( 'box-shadow:#000 1px 1px 3px' );
         return test_props_all( 'boxShadow' );
     };
     
+    // Note: FF3.0 will false positive on this test 
+    tests['textshadow'] = function(){
+        return doc.createElement('div').style.textShadow === '';
+    };
     
-    tests[opacity] = function() {
+    
+    tests['opacity'] = function() {
         // Browsers that actually have CSS Opacity implemented have done so
         //  according to spec, which means their return values are within the
         //  range of [0.0,1.0] - including the leading zero.
         
         set_css_all( 'opacity:.5' );
         
-        return contains( m_style[opacity], '0.5' );
+        return contains( m_style.opacity, '0.5' );
     };
     
     
-    tests[cssanimations] = function() {
+    tests['cssanimations'] = function() {
         //  set_css_all( 'animation:"animate" 2s ease 2', 'position:relative' );
         return test_props_all( 'animationName' );
     };
     
     
-    tests[csscolumns] = function() {
+    tests['csscolumns'] = function() {
         //  set_css_all( 'column-count:3' );
         return test_props_all( 'columnCount' );
     };
     
     
-    tests[cssgradients] = function() {
+    tests['cssgradients'] = function() {
         /**
          * For CSS Gradients syntax, please see:
          * http://webkit.org/blog/175/introducing-css-gradients/
@@ -447,7 +523,7 @@ window.Modernizr = (function(window,doc,undefined){
          * http://dev.w3.org/csswg/css3-images/#gradients-
          */
         
-        var str1 = background + '-image:',
+        var str1 = 'background-image:',
             str2 = 'gradient(linear,left top,right bottom,from(#9f9),to(white));',
             str3 = 'linear-gradient(left top,#9f9, white);';
         
@@ -459,169 +535,149 @@ window.Modernizr = (function(window,doc,undefined){
     };
     
     
-    tests[cssreflections] = function() {
+    tests['cssreflections'] = function() {
         //  set_css_all( 'box-reflect:right 1px' );
         return test_props_all( 'boxReflect' );
     };
     
     
-    tests[csstransforms] = function() {
+    tests['csstransforms'] = function() {
         //  set_css_all( 'transform:rotate(3deg)' );
         return !!test_props([ 'transformProperty', 'WebkitTransform', 'MozTransform', 'OTransform', 'msTransform' ]);
     };
     
     
-    tests[csstransforms3d] = function() {
+    tests['csstransforms3d'] = function() {
         //  set_css_all( 'perspective:500' );
         
         var ret = !!test_props([ 'perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective' ]);
         
-        // webkit has 3d transforms disabled for chrome, though
-        //   it works fine in safari on leopard and snow leopard
-        // as a result, it 'recognizes' the syntax and throws a false positive
-        // thus we must do a more thorough check:
+        // Webkit’s 3D transforms are passed off to the browser's own graphics renderer.
+        //   It works fine in Safari on Leopard and Snow Leopard, but not in Chrome (yet?).
+        //   As a result, Webkit typically recognizes the syntax but will sometimes throw a false
+        //   positive, thus we must do a more thorough check:
         if (ret){
-            var st = document.createElement('style'),
-                div = doc.createElement('div');
-                
-            // webkit allows this media query to succeed only if the feature is enabled.    
-            // "@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),(-ms-transform-3d),(-webkit-transform-3d),(modernizr){#modernizr{height:3px}}"
-            st.textContent = '@media ('+prefixes.join('transform-3d),(')+'modernizr){#modernizr{height:3px}}';
-            doc.getElementsByTagName('head')[0].appendChild(st);
-            div.id = 'modernizr';
-            docElement.appendChild(div);
-            
-            ret = div.offsetHeight === 3;
-            
-            st.parentNode.removeChild(st);
-            div.parentNode.removeChild(div);
+          
+          // Webkit allows this media query to succeed only if the feature is enabled.    
+          // "@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),(-ms-transform-3d),(-webkit-transform-3d),(modernizr){ ... }"      
+          ret = testMediaQuery('@media ('+prefixes.join('transform-3d),(')+'modernizr)');
         }
         return ret;
     };
     
     
-    tests[csstransitions] = function() {
+    tests['csstransitions'] = function() {
         //  set_css_all( 'transition:all .5s linear' );
         return test_props_all( 'transitionProperty' );
     };
 
 
-    // @font-face detection routine created by Paul Irish - paulirish.com
-    // Merged into Modernizr with approval. Read more about Paul's work here:
-    // http://paulirish.com/2009/font-face-feature-detection/  
-    tests[fontface] = function(){
+    // @font-face detection routine by Diego Perini
+    // http://javascript.nwbox.com/CSSSupport/
+    tests['fontface'] = function(){
 
-        var fontret;
-        if (/*@cc_on@if(@_jscript_version>=5)!@end@*/0) fontret = true;
-  
-        else {
-      
-          // Create variables for dedicated @font-face test
-          var st  = doc.createElement('style'),
-            spn = doc.createElement('span'),
-            size, isFakeBody = false, body = doc.body,
-            callback, isCallbackCalled;
-  
-          // The following is a font-face + glyph definition for the . character:
-          st.textContent = "@font-face{font-family:testfont;src:url('data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMliohmwAAADMAAAAVmNtYXCp5qrBAAABJAAAANhjdnQgACICiAAAAfwAAAAEZ2FzcP//AAMAAAIAAAAACGdseWYv5OZoAAACCAAAANxoZWFk69bnvwAAAuQAAAA2aGhlYQUJAt8AAAMcAAAAJGhtdHgGDgC4AAADQAAAABRsb2NhAIQAwgAAA1QAAAAMbWF4cABVANgAAANgAAAAIG5hbWUgXduAAAADgAAABPVwb3N03NkzmgAACHgAAAA4AAECBAEsAAUAAAKZAswAAACPApkCzAAAAesAMwEJAAACAAMDAAAAAAAAgAACbwAAAAoAAAAAAAAAAFBmRWQAAAAgqS8DM/8zAFwDMwDNAAAABQAAAAAAAAAAAAMAAAADAAAAHAABAAAAAABGAAMAAQAAAK4ABAAqAAAABgAEAAEAAgAuqQD//wAAAC6pAP///9ZXAwAAAAAAAAACAAAABgBoAAAAAAAvAAEAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEACoAAAAGAAQAAQACAC6pAP//AAAALqkA////1lcDAAAAAAAAAAIAAAAiAogAAAAB//8AAgACACIAAAEyAqoAAwAHAC6xAQAvPLIHBADtMrEGBdw8sgMCAO0yALEDAC88sgUEAO0ysgcGAfw8sgECAO0yMxEhESczESMiARDuzMwCqv1WIgJmAAACAFUAAAIRAc0ADwAfAAATFRQWOwEyNj0BNCYrASIGARQGKwEiJj0BNDY7ATIWFX8aIvAiGhoi8CIaAZIoN/43KCg3/jcoAWD0JB4eJPQkHh7++EY2NkbVRjY2RgAAAAABAEH/+QCdAEEACQAANjQ2MzIWFAYjIkEeEA8fHw8QDxwWFhwWAAAAAQAAAAIAAIuYbWpfDzz1AAsEAAAAAADFn9IuAAAAAMWf0i797/8zA4gDMwAAAAgAAgAAAAAAAAABAAADM/8zAFwDx/3v/98DiAABAAAAAAAAAAAAAAAAAAAABQF2ACIAAAAAAVUAAAJmAFUA3QBBAAAAKgAqACoAWgBuAAEAAAAFAFAABwBUAAQAAgAAAAEAAQAAAEAALgADAAMAAAAQAMYAAQAAAAAAAACLAAAAAQAAAAAAAQAhAIsAAQAAAAAAAgAFAKwAAQAAAAAAAwBDALEAAQAAAAAABAAnAPQAAQAAAAAABQAKARsAAQAAAAAABgAmASUAAQAAAAAADgAaAUsAAwABBAkAAAEWAWUAAwABBAkAAQBCAnsAAwABBAkAAgAKAr0AAwABBAkAAwCGAscAAwABBAkABABOA00AAwABBAkABQAUA5sAAwABBAkABgBMA68AAwABBAkADgA0A/tDb3B5cmlnaHQgMjAwOSBieSBEYW5pZWwgSm9obnNvbi4gIFJlbGVhc2VkIHVuZGVyIHRoZSB0ZXJtcyBvZiB0aGUgT3BlbiBGb250IExpY2Vuc2UuIEtheWFoIExpIGdseXBocyBhcmUgcmVsZWFzZWQgdW5kZXIgdGhlIEdQTCB2ZXJzaW9uIDMuYmFlYzJhOTJiZmZlNTAzMiAtIHN1YnNldCBvZiBKdXJhTGlnaHRiYWVjMmE5MmJmZmU1MDMyIC0gc3Vic2V0IG9mIEZvbnRGb3JnZSAyLjAgOiBKdXJhIExpZ2h0IDogMjMtMS0yMDA5YmFlYzJhOTJiZmZlNTAzMiAtIHN1YnNldCBvZiBKdXJhIExpZ2h0VmVyc2lvbiAyIGJhZWMyYTkyYmZmZTUwMzIgLSBzdWJzZXQgb2YgSnVyYUxpZ2h0aHR0cDovL3NjcmlwdHMuc2lsLm9yZy9PRkwAQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMAA5ACAAYgB5ACAARABhAG4AaQBlAGwAIABKAG8AaABuAHMAbwBuAC4AIAAgAFIAZQBsAGUAYQBzAGUAZAAgAHUAbgBkAGUAcgAgAHQAaABlACAAdABlAHIAbQBzACAAbwBmACAAdABoAGUAIABPAHAAZQBuACAARgBvAG4AdAAgAEwAaQBjAGUAbgBzAGUALgAgAEsAYQB5AGEAaAAgAEwAaQAgAGcAbAB5AHAAaABzACAAYQByAGUAIAByAGUAbABlAGEAcwBlAGQAIAB1AG4AZABlAHIAIAB0AGgAZQAgAEcAUABMACAAdgBlAHIAcwBpAG8AbgAgADMALgBiAGEAZQBjADIAYQA5ADIAYgBmAGYAZQA1ADAAMwAyACAALQAgAHMAdQBiAHMAZQB0ACAAbwBmACAASgB1AHIAYQBMAGkAZwBoAHQAYgBhAGUAYwAyAGEAOQAyAGIAZgBmAGUANQAwADMAMgAgAC0AIABzAHUAYgBzAGUAdAAgAG8AZgAgAEYAbwBuAHQARgBvAHIAZwBlACAAMgAuADAAIAA6ACAASgB1AHIAYQAgAEwAaQBnAGgAdAAgADoAIAAyADMALQAxAC0AMgAwADAAOQBiAGEAZQBjADIAYQA5ADIAYgBmAGYAZQA1ADAAMwAyACAALQAgAHMAdQBiAHMAZQB0ACAAbwBmACAASgB1AHIAYQAgAEwAaQBnAGgAdABWAGUAcgBzAGkAbwBuACAAMgAgAGIAYQBlAGMAMgBhADkAMgBiAGYAZgBlADUAMAAzADIAIAAtACAAcwB1AGIAcwBlAHQAIABvAGYAIABKAHUAcgBhAEwAaQBnAGgAdABoAHQAdABwADoALwAvAHMAYwByAGkAcAB0AHMALgBzAGkAbAAuAG8AcgBnAC8ATwBGAEwAAAAAAgAAAAAAAP+BADMAAAAAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAQACAQIAEQt6ZXJva2F5YWhsaQ==')}";
-          doc.getElementsByTagName('head')[0].appendChild(st);
-      
-          // we don't use `serif` and we don't use `monospace`
-          // http://github.com/Modernizr/Modernizr/issues/closed#issue/39
-          // http://neugierig.org/software/chromium/notes/2009/09/monospace-fonts-workaround.html
-          spn.setAttribute('style','font:99px _,arial,helvetica;position:absolute;visibility:hidden'); 
-      
-          if  (!body){
-            body = docElement.appendChild(doc.createElement(fontface));
-            isFakeBody = true;
-          } 
-      
-          // the data-uri'd font only has the . glyph; which is 3 pixels wide.
-          spn.innerHTML = '........';
-          spn.id        = 'fonttest';
-      
-          body.appendChild(spn);
-          size = spn.offsetWidth*spn.offsetHeight;
-          spn.style.font = '99px testfont,_,arial,helvetica';
-      
-          // needed for the CSSFontFaceRule false positives (ff3, chrome, op9)
-          fontret = size !== spn.offsetWidth*spn.offsetHeight;
-      
-          function delayedCheck(){
-            if (!body.parentNode) return;
-            fontret = ret[fontface] = size !== spn.offsetWidth*spn.offsetHeight;
-            docElement.className = docElement.className.replace(/(no-)?fontface\b/,'') + (fontret ? ' ' : ' no-') + fontface;
-          }
+        var 
+        sheet,
+        head = doc.head || doc.getElementsByTagName('head')[0] || docElement,
+        style = doc.createElement("style"),
+        impl = doc.implementation || { hasFeature: function() { return false; } };
+        
+        style.type = 'text/css';
+        head.insertBefore(style, head.firstChild);
+        sheet = style.sheet || style.styleSheet;
 
-          setTimeout(delayedCheck,fontfaceCheckDelay);
-          setTimeout(delayedCheck,fontfaceCheckDelay*2);
-          addEventListener('load',function(){
-              delayedCheck();
-              (isCallbackCalled = true) && callback && callback(fontret);
-              setTimeout(function(){
-                  if (!isFakeBody) body = spn;
-                  body.parentNode.removeChild(body);
-                  st.parentNode.removeChild(st);
-              }, 50);
-          },false);
-        }
+        // removing it crashes IE browsers
+        //head.removeChild(style);
 
-        // allow for a callback
+        var supportAtRule = impl.hasFeature('CSS2', '') ?
+                function(rule) {
+                    if (!(sheet && rule)) return false;
+                    var result = false;
+                    try {
+                        sheet.insertRule(rule, 0);
+                        result = !(/unknown/i).test(sheet.cssRules[0].cssText);
+                        sheet.deleteRule(sheet.cssRules.length - 1);
+                    } catch(e) { }
+                    return result;
+                } :
+                function(rule) {
+                    if (!(sheet && rule)) return false;
+                    sheet.cssText = rule;
+                    
+                    return sheet.cssText.length !== 0 && !(/unknown/i).test(sheet.cssText) &&
+                      sheet.cssText
+                            .replace(/\r+|\n+/g, '')
+                            .indexOf(rule.split(' ')[0]) === 0;
+                };
+
+
+        // DEPRECATED - allow for a callback
         ret._fontfaceready = function(fn){
-          (isCallbackCalled || fontret) ? fn(fontret) : (callback = fn);
-        }
-      
-        return fontret || size !== spn.offsetWidth;
-    
+          fn(ret.fontface);
+        };
+        
+        return supportAtRule('@font-face { font-family: "font"; src: "font.ttf"; }');
+        
     };
     
 
     // These tests evaluate support of the video/audio elements, as well as
     // testing what types of content they support.
     //
-    // we're using the Boolean constructor here, so that we can extend the value
+    // We're using the Boolean constructor here, so that we can extend the value
     // e.g.  Modernizr.video     // true
     //       Modernizr.video.ogg // 'probably'
     //
-    // codec values from : http://github.com/NielsLeenheer/html5test/blob/9106a8/index.html#L845
+    // Codec values from : http://github.com/NielsLeenheer/html5test/blob/9106a8/index.html#L845
     //                     thx to NielsLeenheer and zcorpan
     
-    tests[video] = function() {
-        var elem = doc.createElement(video),
-            bool = !!elem[canPlayType];
+    // Note: in FF 3.5.1 and 3.5.0, "no" was a return value instead of empty string.
+    //   Modernizr does not normalize for that.
+    
+    tests['video'] = function() {
+        var elem = doc.createElement('video'),
+            bool = !!elem.canPlayType;
         
         if (bool){  
             bool      = new Boolean(bool);  
-            bool.ogg  = elem[canPlayType]('video/ogg; codecs="theora"');
-            bool.h264 = elem[canPlayType]('video/mp4; codecs="avc1.42E01E"');
-            bool.webm = elem[canPlayType]('video/webm; codecs="vp8, vorbis"');
+            bool.ogg  = elem.canPlayType('video/ogg; codecs="theora"');
+            
+            // Workaround required for IE9, which doesn't report video support without audio codec specified.
+            //   bug 599718 @ msft connect
+            var h264 = 'video/mp4; codecs="avc1.42E01E';
+            bool.h264 = elem.canPlayType(h264 + '"') || elem.canPlayType(h264 + ', mp4a.40.2"');
+            
+            bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"');
         }
         return bool;
     };
     
-    tests[audio] = function() {
-        var elem = doc.createElement(audio),
-            bool = !!elem[canPlayType];
+    tests['audio'] = function() {
+        var elem = doc.createElement('audio'),
+            bool = !!elem.canPlayType;
         
         if (bool){  
             bool      = new Boolean(bool);  
-            bool.ogg  = elem[canPlayType]('audio/ogg; codecs="vorbis"');
-            bool.mp3  = elem[canPlayType]('audio/mpeg;');
+            bool.ogg  = elem.canPlayType('audio/ogg; codecs="vorbis"');
+            bool.mp3  = elem.canPlayType('audio/mpeg;');
             
-            // mimetypes accepted: 
+            // Mimetypes accepted: 
             //   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
             //   http://bit.ly/iphoneoscodecs
-            bool.wav  = elem[canPlayType]('audio/wav; codecs="1"');
-            bool.m4a  = elem[canPlayType]('audio/x-m4a;') || elem[canPlayType]('audio/aac;');
+            bool.wav  = elem.canPlayType('audio/wav; codecs="1"');
+            bool.m4a  = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;');
         }
         return bool;
     };
 
 
-    // both localStorage and sessionStorage are
-    // tested in this method because otherwise Firefox will
+    // Both localStorage and sessionStorage are
+    //   tested via the `in` operator because otherwise Firefox will
     //   throw an error: https://bugzilla.mozilla.org/show_bug.cgi?id=365772
-    // if cookies are disabled
+    //   if cookies are disabled
+    
+    // They require try/catch because of possible firefox configuration:
+    //   http://github.com/Modernizr/Modernizr/issues#issue/92
     
     // FWIW miller device resolves to [object Storage] in all supporting browsers
     //   except for IE who does [object Object]
@@ -629,50 +685,58 @@ window.Modernizr = (function(window,doc,undefined){
     // IE8 Compat mode supports these features completely:
     //   http://www.quirksmode.org/dom/html5.html
     
-    tests[localstorage] = function() {
-        return ('localStorage' in window) && window[localstorage] !== null;
+    tests['localstorage'] = function() {
+        try {
+          return ('localStorage' in window) && window.localStorage !== null;
+        } catch(e) {
+          return false;
+        }
     };
 
-    tests[sessionstorage] = function() {
-        // try/catch required for pissy FF behavior
+    tests['sessionstorage'] = function() {
         try {
-            return ('sessionStorage' in window) && window[sessionstorage] !== null;
+            return ('sessionStorage' in window) && window.sessionStorage !== null;
         } catch(e){
             return false;
         }
     };
 
 
-    tests[webWorkers] = function () {
+    tests['webWorkers'] = function () {
         return !!window.Worker;
     };
 
 
-    tests[applicationcache] =  function() {
-        var cache = window[applicationcache];
-        return !!(cache && (typeof cache.status != 'undefined') && (typeof cache.update == 'function') && (typeof cache.swapCache == 'function'));
+    tests['applicationcache'] =  function() {
+        return !!window.applicationCache;
     };
 
  
-    // thanks to Erik Dahlstrom
-    tests[svg] = function(){
-        return !!doc.createElementNS && !!doc.createElementNS( "http://www.w3.org/2000/svg", "svg").createSVGRect;
-    };
-    
-    // thanks to F1lt3r and lucideer
-    // http://github.com/Modernizr/Modernizr/issues#issue/35
-    tests[smil] = function(){
-        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS('http://www.w3.org/2000/svg','animate')));
+    // Thanks to Erik Dahlstrom
+    tests['svg'] = function(){
+        return !!doc.createElementNS && !!doc.createElementNS(ns.svg, "svg").createSVGRect;
     };
 
-    tests[svgclippaths] = function(){
-        // returns a false positive in saf 3.2?
-        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS('http://www.w3.org/2000/svg','clipPath')));
+    tests['inlinesvg'] = function() {
+      var div = document.createElement('div');
+      div.innerHTML = '<svg/>';
+      return (div.firstChild && div.firstChild.namespaceURI) == ns.svg;
+    };
+
+    // Thanks to F1lt3r and lucideer
+    // http://github.com/Modernizr/Modernizr/issues#issue/35
+    tests['smil'] = function(){
+        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS(ns.svg,'animate')));
+    };
+
+    tests['svgclippaths'] = function(){
+        // Possibly returns a false positive in Safari 3.2?
+        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS(ns.svg,'clipPath')));
     };
 
 
     // input features and input types go directly onto the ret object, bypassing the tests loop.
-    // hold this guy to execute in a moment.
+    // Hold this guy to execute in a moment.
     function webforms(){
     
         // Run through HTML5's new input attributes to see if the UA understands any.
@@ -681,7 +745,7 @@ window.Modernizr = (function(window,doc,undefined){
         //   when applied to all input types: 
         //   http://miketaylr.com/code/input-type-attr.html
         // spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-input-element.html#input-type-attr-summary
-        ret[input] = (function(props) {
+        ret['input'] = (function(props) {
             for (var i = 0,len=props.length;i<len;i++) {
                 attrs[ props[i] ] = !!(props[i] in f);
             }
@@ -693,34 +757,48 @@ window.Modernizr = (function(window,doc,undefined){
         //   true/false like all the other tests; instead, it returns an object
         //   containing each input type with its corresponding true/false value 
         
-        // Big thx to @miketaylr for the html5 forms expertise. http://miketaylr.com/
-        ret[inputtypes] = (function(props) {
-            for (var i = 0,bool,len=props.length;i<len;i++) {
+        // Big thanks to @miketaylr for the html5 forms expertise. http://miketaylr.com/
+        ret['inputtypes'] = (function(props) {
+            for (var i = 0, bool, len=props.length ; i < len ; i++) {
+              
                 f.setAttribute('type', props[i]);
                 bool = f.type !== 'text';
                 
-                // chrome likes to falsely purport support, so we feed it a textual value
+                // Chrome likes to falsely purport support, so we feed it a textual value;
                 // if that doesnt succeed then we know there's a custom UI
                 if (bool){  
 
                     f.value = smile;
-                    
-                    /* Safari 4 is allowing the smiley as a value, and incorrecty failing..
-                       the test fixes for webkit only, but breaks Opera.. 
-                    if (/range/.test(f.type)){
-                      bool =  test_props_all('appearance',function(prop,m){ return m_style[prop] !== 'textfield' })  
-                    } 
-                    */
-                            
-                    if (/tel|search/.test(f.type)){
-                      // spec doesnt define any special parsing or detectable UI 
+     
+                    if (/^range$/.test(f.type) && f.style.WebkitAppearance !== undefined){
+                      
+                      docElement.appendChild(f);
+                      var defaultView = doc.defaultView;
+                      
+                      // Safari 2-4 allows the smiley as a value, despite making a slider
+                      bool =  defaultView.getComputedStyle && 
+                              defaultView.getComputedStyle(f, null).WebkitAppearance !== 'textfield' && 
+                      
+                              // Mobile android web browser has false positive, so must
+                              // check the height to see if the widget is actually there.
+                              (f.offsetHeight !== 0);
+                              
+                      docElement.removeChild(f);
+                              
+                    } else if (/^(search|tel)$/.test(f.type)){
+                      // Spec doesnt define any special parsing or detectable UI 
                       //   behaviors so we pass these through as true
                       
-                    } else if (/url|email/.test(f.type)) {
-                      // real url and email support comes with prebaked validation.
+                      // Interestingly, opera fails the earlier test, so it doesn't
+                      //  even make it here.
+                      
+                    } else if (/^(url|email)$/.test(f.type)) {
+
+                      // Real url and email support comes with prebaked validation.
                       bool = f.checkValidity && f.checkValidity() === false;
                       
                     } else {
+                      // If the upgraded input compontent rejects the :) text, we got a winner
                       bool = f.value != smile;
                     }
                 }
@@ -734,7 +812,8 @@ window.Modernizr = (function(window,doc,undefined){
 
 
 
-    // end of test definitions
+    // End of test definitions
+
 
 
     // Run through all tests and detect their support in the current UA.
@@ -744,15 +823,21 @@ window.Modernizr = (function(window,doc,undefined){
             // run the test, throw the return value into the Modernizr,
             //   then based on that boolean, define an appropriate className
             //   and push it into an array of classes we'll join later.
-            classes.push( ( ( ret[ feature.toLowerCase() ] = tests[ feature ]() ) ?  '' : 'no-' ) + feature.toLowerCase() );
+            featurename  = feature.toLowerCase();
+            ret[ featurename ] = tests[ feature ]();
+
+            classes.push( ( ret[ featurename ] ? '' : 'no-' ) + featurename );
         }
     }
     
     // input tests need to run.
-    if (!ret[input]) webforms();
+    if (!ret.input) webforms();
     
 
    
+    // Per 1.6: deprecated API is still accesible for now:
+    ret.crosswindowmessaging = ret.postmessage;
+    ret.historymanagement = ret.history;
 
 
 
@@ -785,11 +870,11 @@ window.Modernizr = (function(window,doc,undefined){
     // Enable HTML 5 elements for styling in IE. 
     // fyi: jscript version does not reflect trident version
     //      therefore ie9 in ie7 mode will still have a jScript v.9
-    if ( enableHTML5 && (function(){ var elem = doc.createElement("div");
+    if ( enableHTML5 && window.attachEvent && (function(){ var elem = doc.createElement("div");
                                       elem.innerHTML = "<elem></elem>";
                                       return elem.childNodes.length !== 1; })()) {
-        // iepp v1.5.1 MIT @jon_neal  http://code.google.com/p/ie-print-protector/
-        (function(p,e){function q(a,b){if(g[a])g[a].styleSheet.cssText+=b;else{var c=r[l],d=e[j]("style");d.media=a;c.insertBefore(d,c[l]);g[a]=d;q(a,b)}}function s(a,b){for(var c=new RegExp("\\b("+m+")\\b(?!.*[;}])","gi"),d=function(k){return".iepp_"+k},h=-1;++h<a.length;){b=a[h].media||b;s(a[h].imports,b);q(b,a[h].cssText.replace(c,d))}}function t(){for(var a,b=e.getElementsByTagName("*"),c,d,h=new RegExp("^"+m+"$","i"),k=-1;++k<b.length;)if((a=b[k])&&(d=a.nodeName.match(h))){c=new RegExp("^\\s*<"+d+"(.*)\\/"+d+">\\s*$","i");i.innerHTML=a.outerHTML.replace(/\r|\n/g," ").replace(c,a.currentStyle.display=="block"?"<div$1/div>":"<span$1/span>");c=i.childNodes[0];c.className+=" iepp_"+d;c=f[f.length]=[a,c];a.parentNode.replaceChild(c[1],c[0])}s(e.styleSheets,"all")}function u(){for(var a=-1,b;++a<f.length;)f[a][1].parentNode.replaceChild(f[a][0],f[a][1]);for(b in g)r[l].removeChild(g[b]);g={};f=[]}for(var r=e.documentElement,i=e.createDocumentFragment(),g={},m="abbr|article|aside|audio|canvas|command|datalist|details|figure|figcaption|footer|header|hgroup|keygen|mark|meter|nav|output|progress|section|source|summary|time|video",n=m.split("|"),f=[],o=-1,l="firstChild",j="createElement";++o<n.length;){e[j](n[o]);i[j](n[o])}i=i.appendChild(e[j]("div"));p.attachEvent("onbeforeprint",t);p.attachEvent("onafterprint",u)})(this,doc);
+        // iepp v1.6 by @jon_neal : code.google.com/p/ie-print-protector
+        (function(f,l){var j="abbr|article|aside|audio|canvas|details|figcaption|figure|footer|header|hgroup|mark|meter|nav|output|progress|section|summary|time|video",n=j.split("|"),k=n.length,g=new RegExp("<(/*)("+j+")","gi"),h=new RegExp("\\b("+j+")\\b(?!.*[;}])","gi"),m=l.createDocumentFragment(),d=l.documentElement,i=d.firstChild,b=l.createElement("style"),e=l.createElement("body");b.media="all";function c(p){var o=-1;while(++o<k){p.createElement(n[o])}}c(l);c(m);function a(t,s){var r=t.length,q=-1,o,p=[];while(++q<r){o=t[q];s=o.media||s;p.push(a(o.imports,s));p.push(o.cssText)}return p.join("")}f.attachEvent("onbeforeprint",function(){var r=-1;while(++r<k){var o=l.getElementsByTagName(n[r]),q=o.length,p=-1;while(++p<q){if(o[p].className.indexOf("iepp_")<0){o[p].className+=" iepp_"+n[r]}}}i.insertBefore(b,i.firstChild);b.styleSheet.cssText=a(l.styleSheets,"all").replace(h,".iepp_$1");m.appendChild(l.body);d.appendChild(e);e.innerHTML=m.firstChild.innerHTML.replace(g,"<$1bdo")});f.attachEvent("onafterprint",function(){e.innerHTML="";d.removeChild(e);i.removeChild(b);d.appendChild(m.firstChild)})})(this,document);
     }
 
     // Assign private properties to the return object with prefix
@@ -1131,40 +1216,39 @@ var Mustache = function() {
   });
 }();
 
-// Underscore.js
-// (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
-// Underscore is freely distributable under the terms of the MIT license.
-// Portions of Underscore are inspired by or borrowed from Prototype.js,
-// Oliver Steele's Functional, and John Resig's Micro-Templating.
-// For all details and documentation:
-// http://documentcloud.github.com/underscore
+//     Underscore.js 1.1.3
+//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
+//     Underscore is freely distributable under the MIT license.
+//     Portions of Underscore are inspired or borrowed from Prototype,
+//     Oliver Steele's Functional, and John Resig's Micro-Templating.
+//     For all details and documentation:
+//     http://documentcloud.github.com/underscore
 
 (function() {
-  // ------------------------- Baseline setup ---------------------------------
 
-  // Establish the root object, "window" in the browser, or "global" on the server.
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `global` on the server.
   var root = this;
 
-  // Save the previous value of the "_" variable.
+  // Save the previous value of the `_` variable.
   var previousUnderscore = root._;
 
-  // Establish the object that gets thrown to break out of a loop iteration.
-  var breaker = typeof StopIteration !== 'undefined' ? StopIteration : '__break__';
-
-  // Quick regexp-escaping function, because JS doesn't have RegExp.escape().
-  var escapeRegExp = function(s) { return s.replace(/([.*+?^${}()|[\]\/\\])/g, '\\$1'); };
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
 
   // Save bytes in the minified (but not gzipped) version:
   var ArrayProto = Array.prototype, ObjProto = Object.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
-  var slice                 = ArrayProto.slice,
-      unshift               = ArrayProto.unshift,
-      toString              = ObjProto.toString,
-      hasOwnProperty        = ObjProto.hasOwnProperty,
-      propertyIsEnumerable  = ObjProto.propertyIsEnumerable;
+  var slice            = ArrayProto.slice,
+      unshift          = ArrayProto.unshift,
+      toString         = ObjProto.toString,
+      hasOwnProperty   = ObjProto.hasOwnProperty;
 
-  // All ECMA5 native implementations we hope to use are declared here.
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
   var
     nativeForEach      = ArrayProto.forEach,
     nativeMap          = ArrayProto.map,
@@ -1181,91 +1265,102 @@ var Mustache = function() {
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) { return new wrapper(obj); };
 
-  // Export the Underscore object for CommonJS.
-  if (typeof exports !== 'undefined') exports._ = _;
-
-  // Export underscore to global scope.
-  root._ = _;
+  // Export the Underscore object for **CommonJS**, with backwards-compatibility
+  // for the old `require()` API. If we're not in CommonJS, add `_` to the
+  // global object.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = _;
+    _._ = _;
+  } else {
+    root._ = _;
+  }
 
   // Current version.
-  _.VERSION = '1.1.0';
+  _.VERSION = '1.1.3';
 
-  // ------------------------ Collection Functions: ---------------------------
+  // Collection Functions
+  // --------------------
 
-  // The cornerstone, an each implementation.
-  // Handles objects implementing forEach, arrays, and raw objects.
-  // Delegates to JavaScript 1.6's native forEach if available.
-  var each = _.forEach = function(obj, iterator, context) {
-    try {
-      if (nativeForEach && obj.forEach === nativeForEach) {
-        obj.forEach(iterator, context);
-      } else if (_.isNumber(obj.length)) {
-        for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
-      } else {
-        for (var key in obj) {
-          if (hasOwnProperty.call(obj, key)) iterator.call(context, obj[key], key, obj);
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects implementing `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    var value;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (_.isNumber(obj.length)) {
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) {
+          if (iterator.call(context, obj[key], key, obj) === breaker) return;
         }
       }
-    } catch(e) {
-      if (e != breaker) throw e;
     }
-    return obj;
   };
 
   // Return the results of applying the iterator to each element.
-  // Delegates to JavaScript 1.6's native map if available.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
   _.map = function(obj, iterator, context) {
     if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
     var results = [];
     each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
+      results[results.length] = iterator.call(context, value, index, list);
     });
     return results;
   };
 
-  // Reduce builds up a single result from a list of values, aka inject, or foldl.
-  // Delegates to JavaScript 1.8's native reduce if available.
-  _.reduce = function(obj, iterator, memo, context) {
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = memo !== void 0;
     if (nativeReduce && obj.reduce === nativeReduce) {
       if (context) iterator = _.bind(iterator, context);
-      return obj.reduce(iterator, memo);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
     }
     each(obj, function(value, index, list) {
-      memo = iterator.call(context, memo, value, index, list);
+      if (!initial && index === 0) {
+        memo = value;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
     });
     return memo;
   };
 
-  // The right-associative version of reduce, also known as foldr. Uses
-  // Delegates to JavaScript 1.8's native reduceRight if available.
-  _.reduceRight = function(obj, iterator, memo, context) {
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
     if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
       if (context) iterator = _.bind(iterator, context);
-      return obj.reduceRight(iterator, memo);
+      return memo !== void 0 ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
     }
-    var reversed = _.clone(_.toArray(obj)).reverse();
+    var reversed = (_.isArray(obj) ? obj.slice() : _.toArray(obj)).reverse();
     return _.reduce(reversed, iterator, memo, context);
   };
 
-  // Return the first value which passes a truth test.
-  _.detect = function(obj, iterator, context) {
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
     var result;
-    each(obj, function(value, index, list) {
+    any(obj, function(value, index, list) {
       if (iterator.call(context, value, index, list)) {
         result = value;
-        _.breakLoop();
+        return true;
       }
     });
     return result;
   };
 
   // Return all the elements that pass a truth test.
-  // Delegates to JavaScript 1.6's native filter if available.
-  _.filter = function(obj, iterator, context) {
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
     if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
     var results = [];
     each(obj, function(value, index, list) {
-      iterator.call(context, value, index, list) && results.push(value);
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
     });
     return results;
   };
@@ -1274,59 +1369,62 @@ var Mustache = function() {
   _.reject = function(obj, iterator, context) {
     var results = [];
     each(obj, function(value, index, list) {
-      !iterator.call(context, value, index, list) && results.push(value);
+      if (!iterator.call(context, value, index, list)) results[results.length] = value;
     });
     return results;
   };
 
   // Determine whether all of the elements match a truth test.
-  // Delegates to JavaScript 1.6's native every if available.
-  _.every = function(obj, iterator, context) {
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
     var result = true;
     each(obj, function(value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list))) _.breakLoop();
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
     });
     return result;
   };
 
   // Determine if at least one element in the object matches a truth test.
-  // Delegates to JavaScript 1.6's native some if available.
-  _.some = function(obj, iterator, context) {
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
     var result = false;
     each(obj, function(value, index, list) {
-      if (result = iterator.call(context, value, index, list)) _.breakLoop();
+      if (result = iterator.call(context, value, index, list)) return breaker;
     });
     return result;
   };
 
-  // Determine if a given value is included in the array or object using '==='.
-  _.include = function(obj, target) {
+  // Determine if a given value is included in the array or object using `===`.
+  // Aliased as `contains`.
+  _.include = _.contains = function(obj, target) {
     if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
     var found = false;
-    each(obj, function(value) {
-      if (found = value === target) _.breakLoop();
+    any(obj, function(value) {
+      if (found = value === target) return true;
     });
     return found;
   };
 
-  // Invoke a method with arguments on every item in a collection.
+  // Invoke a method (with arguments) on every item in a collection.
   _.invoke = function(obj, method) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return _.map(obj, function(value) {
       return (method ? value[method] : value).apply(value, args);
     });
   };
 
-  // Convenience version of a common use case of map: fetching a property.
+  // Convenience version of a common use case of `map`: fetching a property.
   _.pluck = function(obj, key) {
     return _.map(obj, function(value){ return value[key]; });
   };
 
-  // Return the maximum item or (item-based computation).
+  // Return the maximum element or (element-based computation).
   _.max = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
     var result = {computed : -Infinity};
@@ -1373,7 +1471,7 @@ var Mustache = function() {
     return low;
   };
 
-  // Convert anything iterable into a real, live array.
+  // Safely convert anything iterable into a real, live array.
   _.toArray = function(iterable) {
     if (!iterable)                return [];
     if (iterable.toArray)         return iterable.toArray();
@@ -1387,20 +1485,21 @@ var Mustache = function() {
     return _.toArray(obj).length;
   };
 
-  // -------------------------- Array Functions: ------------------------------
+  // Array Functions
+  // ---------------
 
-  // Get the first element of an array. Passing "n" will return the first N
-  // values in the array. Aliased as "head". The "guard" check allows it to work
-  // with _.map.
-  _.first = function(array, n, guard) {
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head`. The **guard** check allows it to work
+  // with `_.map`.
+  _.first = _.head = function(array, n, guard) {
     return n && !guard ? slice.call(array, 0, n) : array[0];
   };
 
-  // Returns everything but the first entry of the array. Aliased as "tail".
-  // Especially useful on the arguments object. Passing an "index" will return
-  // the rest of the values in the array from that index onward. The "guard"
-   //check allows it to work with _.map.
-  _.rest = function(array, index, guard) {
+  // Returns everything but the first entry of the array. Aliased as `tail`.
+  // Especially useful on the arguments object. Passing an **index** will return
+  // the rest of the values in the array from that index onward. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = function(array, index, guard) {
     return slice.call(array, _.isUndefined(index) || guard ? 1 : index);
   };
 
@@ -1418,22 +1517,23 @@ var Mustache = function() {
   _.flatten = function(array) {
     return _.reduce(array, function(memo, value) {
       if (_.isArray(value)) return memo.concat(_.flatten(value));
-      memo.push(value);
+      memo[memo.length] = value;
       return memo;
     }, []);
   };
 
   // Return a version of the array that does not contain the specified value(s).
   _.without = function(array) {
-    var values = _.rest(arguments);
+    var values = slice.call(arguments, 1);
     return _.filter(array, function(value){ return !_.include(values, value); });
   };
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
-  _.uniq = function(array, isSorted) {
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted) {
     return _.reduce(array, function(memo, el, i) {
-      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo.push(el);
+      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo[memo.length] = el;
       return memo;
     }, []);
   };
@@ -1441,7 +1541,7 @@ var Mustache = function() {
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
   _.intersect = function(array) {
-    var rest = _.rest(arguments);
+    var rest = slice.call(arguments, 1);
     return _.filter(_.uniq(array), function(item) {
       return _.every(rest, function(other) {
         return _.indexOf(other, item) >= 0;
@@ -1452,17 +1552,17 @@ var Mustache = function() {
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
   _.zip = function() {
-    var args = _.toArray(arguments);
+    var args = slice.call(arguments);
     var length = _.max(_.pluck(args, 'length'));
     var results = new Array(length);
-    for (var i = 0; i < length; i++) results[i] = _.pluck(args, String(i));
+    for (var i = 0; i < length; i++) results[i] = _.pluck(args, "" + i);
     return results;
   };
 
-  // If the browser doesn't supply us with indexOf (I'm looking at you, MSIE),
-  // we need this function. Return the position of the first occurence of an
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
   // item in an array, or -1 if the item is not included in the array.
-  // Delegates to JavaScript 1.8's native indexOf if available.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
   _.indexOf = function(array, item) {
     if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
     for (var i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
@@ -1470,7 +1570,7 @@ var Mustache = function() {
   };
 
 
-  // Delegates to JavaScript 1.6's native lastIndexOf if available.
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
   _.lastIndexOf = function(array, item) {
     if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
     var i = array.length;
@@ -1479,36 +1579,40 @@ var Mustache = function() {
   };
 
   // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python range() function. See:
-  // http://docs.python.org/library/functions.html#range
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
   _.range = function(start, stop, step) {
-    var a     = _.toArray(arguments);
-    var solo  = a.length <= 1;
-    var start = solo ? 0 : a[0], stop = solo ? a[0] : a[1], step = a[2] || 1;
-    var len   = Math.ceil((stop - start) / step);
-    if (len <= 0) return [];
-    var range = new Array(len);
-    for (var i = start, idx = 0; true; i += step) {
-      if ((step > 0 ? i - stop : stop - i) >= 0) return range;
-      range[idx++] = i;
+    var args  = slice.call(arguments),
+        solo  = args.length <= 1,
+        start = solo ? 0 : args[0],
+        stop  = solo ? args[0] : args[1],
+        step  = args[2] || 1,
+        len   = Math.max(Math.ceil((stop - start) / step), 0),
+        idx   = 0,
+        range = new Array(len);
+    while (idx < len) {
+      range[idx++] = start;
+      start += step;
     }
+    return range;
   };
 
-  // ----------------------- Function Functions: ------------------------------
+  // Function (ahem) Functions
+  // ------------------
 
-  // Create a function bound to a given object (assigning 'this', and arguments,
-  // optionally). Binding with arguments is also known as 'curry'.
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Binding with arguments is also known as `curry`.
   _.bind = function(func, obj) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return function() {
-      return func.apply(obj || {}, args.concat(_.toArray(arguments)));
+      return func.apply(obj || {}, args.concat(slice.call(arguments)));
     };
   };
 
   // Bind all of an object's methods to that object. Useful for ensuring that
   // all callbacks defined on an object belong to it.
   _.bindAll = function(obj) {
-    var funcs = _.rest(arguments);
+    var funcs = slice.call(arguments, 1);
     if (funcs.length == 0) funcs = _.functions(obj);
     each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
     return obj;
@@ -1527,14 +1631,41 @@ var Mustache = function() {
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
   _.delay = function(func, wait) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return setTimeout(function(){ return func.apply(func, args); }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
   _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(_.rest(arguments)));
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Internal function used to implement `_.throttle` and `_.debounce`.
+  var limit = function(func, wait, debounce) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var throttler = function() {
+        timeout = null;
+        func.apply(context, args);
+      };
+      if (debounce) clearTimeout(timeout);
+      if (debounce || !timeout) timeout = setTimeout(throttler, wait);
+    };
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time.
+  _.throttle = function(func, wait) {
+    return limit(func, wait, false);
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds.
+  _.debounce = function(func, wait) {
+    return limit(func, wait, true);
   };
 
   // Returns the first function passed as an argument to the second,
@@ -1542,7 +1673,7 @@ var Mustache = function() {
   // conditionally execute the original function.
   _.wrap = function(func, wrapper) {
     return function() {
-      var args = [func].concat(_.toArray(arguments));
+      var args = [func].concat(slice.call(arguments));
       return wrapper.apply(wrapper, args);
     };
   };
@@ -1550,9 +1681,9 @@ var Mustache = function() {
   // Returns a function that is the composition of a list of functions, each
   // consuming the return value of the function that follows.
   _.compose = function() {
-    var funcs = _.toArray(arguments);
+    var funcs = slice.call(arguments);
     return function() {
-      var args = _.toArray(arguments);
+      var args = slice.call(arguments);
       for (var i=funcs.length-1; i >= 0; i--) {
         args = [funcs[i].apply(this, args)];
       }
@@ -1560,14 +1691,15 @@ var Mustache = function() {
     };
   };
 
-  // ------------------------- Object Functions: ------------------------------
+  // Object Functions
+  // ----------------
 
   // Retrieve the names of an object's properties.
-  // Delegates to ECMA5's native Object.keys
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
   _.keys = nativeKeys || function(obj) {
     if (_.isArray(obj)) return _.range(0, obj.length);
     var keys = [];
-    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys.push(key);
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
     return keys;
   };
 
@@ -1577,13 +1709,14 @@ var Mustache = function() {
   };
 
   // Return a sorted list of the function names available on the object.
-  _.functions = function(obj) {
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
     return _.filter(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
   };
 
   // Extend a given object with all the properties in passed-in object(s).
   _.extend = function(obj) {
-    each(_.rest(arguments), function(source) {
+    each(slice.call(arguments, 1), function(source) {
       for (var prop in source) obj[prop] = source[prop];
     });
     return obj;
@@ -1591,12 +1724,12 @@ var Mustache = function() {
 
   // Create a (shallow-cloned) duplicate of an object.
   _.clone = function(obj) {
-    if (_.isArray(obj)) return obj.slice(0);
-    return _.extend({}, obj);
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
   };
 
   // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in order to perform operations on intermediate results within the chain.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
   _.tap = function(obj, interceptor) {
     interceptor(obj);
     return obj;
@@ -1658,7 +1791,7 @@ var Mustache = function() {
 
   // Is a given variable an arguments object?
   _.isArguments = function(obj) {
-    return obj && obj.callee;
+    return !!(obj && obj.callee);
   };
 
   // Is a given value a function?
@@ -1673,7 +1806,13 @@ var Mustache = function() {
 
   // Is a given value a number?
   _.isNumber = function(obj) {
-    return (obj === +obj) || (toString.call(obj) === '[object Number]');
+    return !!(obj === 0 || (obj && obj.toExponential && obj.toFixed));
+  };
+
+  // Is the given value NaN -- this one is interesting. NaN != NaN, and
+  // isNaN(undefined) == true, so we make sure it's a number first.
+  _.isNaN = function(obj) {
+    return toString.call(obj) === '[object Number]' && isNaN(obj);
   };
 
   // Is a given value a boolean?
@@ -1691,12 +1830,6 @@ var Mustache = function() {
     return !!(obj && obj.test && obj.exec && (obj.ignoreCase || obj.ignoreCase === false));
   };
 
-  // Is the given value NaN -- this one is interesting. NaN != NaN, and
-  // isNaN(undefined) == true, so we make sure it's a number first.
-  _.isNaN = function(obj) {
-    return _.isNumber(obj) && isNaN(obj);
-  };
-
   // Is a given value equal to null?
   _.isNull = function(obj) {
     return obj === null;
@@ -1704,12 +1837,13 @@ var Mustache = function() {
 
   // Is a given variable undefined?
   _.isUndefined = function(obj) {
-    return typeof obj == 'undefined';
+    return obj === void 0;
   };
 
-  // -------------------------- Utility Functions: ----------------------------
+  // Utility Functions
+  // -----------------
 
-  // Run Underscore.js in noConflict mode, returning the '_' variable to its
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
   // previous owner. Returns a reference to the Underscore object.
   _.noConflict = function() {
     root._ = previousUnderscore;
@@ -1721,14 +1855,9 @@ var Mustache = function() {
     return value;
   };
 
-  // Run a function n times.
+  // Run a function **n** times.
   _.times = function (n, iterator, context) {
     for (var i = 0; i < n; i++) iterator.call(context, i);
-  };
-
-  // Break out of the middle of an iteration.
-  _.breakLoop = function() {
-    throw breaker;
   };
 
   // Add your own custom functions to the Underscore object, ensuring that
@@ -1750,53 +1879,44 @@ var Mustache = function() {
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    start       : '<%',
-    end         : '%>',
-    interpolate : /<%=(.+?)%>/g
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g
   };
 
-  // JavaScript templating a-la ERB, pilfered from John Resig's
-  // "Secrets of the JavaScript Ninja", page 83.
-  // Single-quote fix from Rick Strahl's version.
-  // With alterations for arbitrary delimiters, and to preserve whitespace.
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
   _.template = function(str, data) {
     var c  = _.templateSettings;
-    var endMatch = new RegExp("'(?=[^"+c.end.substr(0, 1)+"]*"+escapeRegExp(c.end)+")","g");
-    var fn = new Function('obj',
-      'var p=[],print=function(){p.push.apply(p,arguments);};' +
-      'with(obj||{}){p.push(\'' +
-      str.replace(/\r/g, '\\r')
+    var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
+      'with(obj||{}){__p.push(\'' +
+      str.replace(/\\/g, '\\\\')
+         .replace(/'/g, "\\'")
+         .replace(c.interpolate, function(match, code) {
+           return "'," + code.replace(/\\'/g, "'") + ",'";
+         })
+         .replace(c.evaluate || null, function(match, code) {
+           return "');" + code.replace(/\\'/g, "'")
+                              .replace(/[\r\n\t]/g, ' ') + "__p.push('";
+         })
+         .replace(/\r/g, '\\r')
          .replace(/\n/g, '\\n')
          .replace(/\t/g, '\\t')
-         .replace(endMatch,"✄")
-         .split("'").join("\\'")
-         .split("✄").join("'")
-         .replace(c.interpolate, "',$1,'")
-         .split(c.start).join("');")
-         .split(c.end).join("p.push('")
-         + "');}return p.join('');");
-    return data ? fn(data) : fn;
+         + "');}return __p.join('');";
+    var func = new Function('obj', tmpl);
+    return data ? func(data) : func;
   };
 
-  // ------------------------------- Aliases ----------------------------------
-
-  _.each     = _.forEach;
-  _.foldl    = _.inject       = _.reduce;
-  _.foldr    = _.reduceRight;
-  _.select   = _.filter;
-  _.all      = _.every;
-  _.any      = _.some;
-  _.contains = _.include;
-  _.head     = _.first;
-  _.tail     = _.rest;
-  _.methods  = _.functions;
-
-  // ------------------------ Setup the OOP Wrapper: --------------------------
+  // The OOP Wrapper
+  // ---------------
 
   // If Underscore is called as a function, it returns a wrapped object that
   // can be used OO-style. This wrapper holds altered versions of all the
   // underscore functions. Wrapped objects may be chained.
   var wrapper = function(obj) { this._wrapped = obj; };
+
+  // Expose `wrapper.prototype` as `_.prototype`
+  _.prototype = wrapper.prototype;
 
   // Helper function to continue chaining intermediate results.
   var result = function(obj, chain) {
@@ -1806,7 +1926,7 @@ var Mustache = function() {
   // A method to easily add functions to the OOP wrapper.
   var addToWrapper = function(name, func) {
     wrapper.prototype[name] = function() {
-      var args = _.toArray(arguments);
+      var args = slice.call(arguments);
       unshift.call(args, this._wrapped);
       return result(func.apply(_, args), this._chain);
     };
@@ -19363,7 +19483,7 @@ $.extend( $.ui.tabs.prototype, {
 /*
  * jQuery UI Menu @VERSION
  * 
- * Copyright 2010, AUTHORS.txt
+ * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
@@ -19374,18 +19494,21 @@ $.extend( $.ui.tabs.prototype, {
  *	jquery.ui.widget.js
  */
 (function($) {
+	
+var idIncrement = 0;
 
 $.widget("ui.menu", {
 	_create: function() {
 		var self = this;
+		this.menuId = this.element.attr( "id" ) || "ui-menu-" + idIncrement++;
 		this.element
-			.addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
+			.addClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
 			.attr({
-				role: "listbox",
-				"aria-activedescendant": "ui-active-menuitem"
+				id: this.menuId,
+				role: "listbox"
 			})
-			.bind("click.menu", function( event ) {
-				if (self.options.disabled) {
+			.bind( "click.menu", function( event ) {
+				if ( self.options.disabled ) {
 					return false;
 				}
 				if ( !$( event.target ).closest( ".ui-menu-item a" ).length ) {
@@ -19394,17 +19517,35 @@ $.widget("ui.menu", {
 				// temporary
 				event.preventDefault();
 				self.select( event );
+			})
+			.bind( "mouseover.menu", function( event ) {
+				if ( self.options.disabled ) {
+					return;
+				}
+				var target = $( event.target ).closest( ".ui-menu-item" );
+				if ( target.length && target.parent()[0] === self.element[0] ) {
+					self.activate( event, target );
+				}
+			})
+			.bind("mouseout.menu", function( event ) {
+				if ( self.options.disabled ) {
+					return;
+				}
+				var target = $( event.target ).closest( ".ui-menu-item" );
+				if ( target.length && target.parent()[0] === self.element[0] ) {
+					self.deactivate( event );
+				}
 			});
 		this.refresh();
 		
-		if (!this.options.input) {
-			this.options.input = this.element.attr("tabIndex", 0);
+		if ( !this.options.input ) {
+			this.options.input = this.element.attr( "tabIndex", 0 );
 		}
-		this.options.input.bind("keydown.menu", function(event) {
-			if (self.options.disabled) {
+		this.options.input.bind( "keydown.menu", function( event ) {
+			if ( self.options.disabled ) {
 				return;
 			}
-			switch (event.keyCode) {
+			switch ( event.keyCode ) {
 			case $.ui.keyCode.PAGE_UP:
 				self.previousPage();
 				event.preventDefault();
@@ -19435,171 +19576,159 @@ $.widget("ui.menu", {
 	},
 	
 	destroy: function() {
-		$.Widget.prototype.destroy.apply(this, arguments);
+		$.Widget.prototype.destroy.apply( this, arguments );
 		
 		this.element
-			.removeClass("ui-menu ui-widget ui-widget-content ui-corner-all")
-			.removeAttr("tabIndex")
-			.removeAttr("role")
-			.removeAttr("aria-activedescendant");
+			.removeClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
+			.removeAttr( "tabIndex" )
+			.removeAttr( "role" )
+			.removeAttr( "aria-activedescendant" );
 		
-		this.element.children(".ui-menu-item")
-			.removeClass("ui-menu-item")
-			.removeAttr("role")
-			.children("a")
-			.removeClass("ui-corner-all")
-			.removeAttr("tabIndex")
-			.unbind(".menu");
+		this.element.children( ".ui-menu-item" )
+			.removeClass( "ui-menu-item" )
+			.removeAttr( "role" )
+			.children( "a" )
+			.removeClass( "ui-corner-all" )
+			.removeAttr( "tabIndex" )
+			.unbind( ".menu" );
 	},
 	
 	refresh: function() {
-		var self = this;
-
 		// don't refresh list items that are already adapted
-		var items = this.element.children("li:not(.ui-menu-item):has(a)")
-			.addClass("ui-menu-item")
-			.attr("role", "menuitem");
+		var items = this.element.children( "li:not(.ui-menu-item):has(a)" )
+			.addClass( "ui-menu-item" )
+			.attr( "role", "menuitem" );
 		
-		items.children("a")
-			.addClass("ui-corner-all")
-			.attr("tabIndex", -1)
-			// mouseenter doesn't work with event delegation
-			.bind("mouseenter.menu", function( event ) {
-				if (self.options.disabled) {
-					return;
-				}
-				self.activate( event, $(this).parent() );
-			})
-			.bind("mouseleave.menu", function() {
-				if (self.options.disabled) {
-					return;
-				}
-				self.deactivate();
-			});
+		items.children( "a" )
+			.addClass( "ui-corner-all" )
+			.attr( "tabIndex", -1 );
 	},
 
 	activate: function( event, item ) {
+		var self = this;
 		this.deactivate();
-		if (this._hasScroll()) {
-			var offset = item.offset().top - this.element.offset().top,
-				scroll = this.element.attr("scrollTop"),
-				elementHeight = this.element.height();
-			if (offset < 0) {
-				this.element.attr("scrollTop", scroll + offset);
-			} else if (offset > elementHeight) {
-				this.element.attr("scrollTop", scroll + offset - elementHeight + item.height());
+		if ( this._hasScroll() ) {
+			var borderTop = parseFloat( $.curCSS( this.element[0], "borderTopWidth", true) ) || 0,
+				paddingtop = parseFloat( $.curCSS( this.element[0], "paddingTop", true) ) || 0,
+				offset = item.offset().top - this.element.offset().top - borderTop - paddingtop,
+				scroll = this.element.attr( "scrollTop" ),
+				elementHeight = this.element.height(),
+				itemHeight = item.height();
+			if ( offset < 0 ) {
+				this.element.attr( "scrollTop", scroll + offset );
+			} else if ( offset + itemHeight > elementHeight ) {
+				this.element.attr( "scrollTop", scroll + offset - elementHeight + itemHeight );
 			}
 		}
-		this.active = item.eq(0)
-			.children("a")
-				.addClass("ui-state-hover")
-				.attr("id", "ui-active-menuitem")
+		this.active = item.first()
+			.children( "a" )
+				.addClass( "ui-state-hover" )
+				.attr( "id", function(index, id) {
+					return (self.itemId = id || self.menuId + "-activedescendant");
+				})
 			.end();
-		this._trigger("focus", event, { item: item });
+		// need to remove the attribute before adding it for the screenreader to pick up the change
+		// see http://groups.google.com/group/jquery-a11y/msg/929e0c1e8c5efc8f
+		this.element.removeAttr("aria-activedescenant").attr("aria-activedescenant", self.itemId);
+		this._trigger( "focus", event, { item: item } );
 	},
 
-	deactivate: function() {
-		if (!this.active) { return; }
+	deactivate: function(event) {
+		if (!this.active) {
+			return;
+		}
 
-		this.active.children("a")
-			.removeClass("ui-state-hover")
-			.removeAttr("id");
-		this._trigger("blur");
+		var self = this;
+		this.active.children( "a" ).removeClass( "ui-state-hover" );
+		// remove only generated id
+		$( "#" + self.menuId + "-activedescendant" ).removeAttr( "id" );
+		this.element.removeAttr( "aria-activedescenant" );
+		this._trigger( "blur", event );
 		this.active = null;
 	},
 
 	next: function(event) {
-		this._move("next", ".ui-menu-item:first", event);
+		this._move( "next", ".ui-menu-item", "first", event );
 	},
 
 	previous: function(event) {
-		this._move("prev", ".ui-menu-item:last", event);
+		this._move( "prev", ".ui-menu-item", "last", event );
 	},
 
 	first: function() {
-		return this.active && !this.active.prevAll(".ui-menu-item").length;
+		return this.active && !this.active.prevAll( ".ui-menu-item" ).length;
 	},
 
 	last: function() {
-		return this.active && !this.active.nextAll(".ui-menu-item").length;
+		return this.active && !this.active.nextAll( ".ui-menu-item" ).length;
 	},
 
-	_move: function(direction, edge, event) {
-		if (!this.active) {
-			this.activate(event, this.element.children(edge));
+	_move: function(direction, edge, filter, event) {
+		if ( !this.active ) {
+			this.activate( event, this.element.children(edge)[filter]() );
 			return;
 		}
-		var next = this.active[direction + "All"](".ui-menu-item").eq(0);
-		if (next.length) {
-			this.activate(event, next);
+		var next = this.active[ direction + "All" ]( ".ui-menu-item" ).eq( 0 );
+		if ( next.length ) {
+			this.activate( event, next );
 		} else {
-			this.activate(event, this.element.children(edge));
+			this.activate( event, this.element.children(edge)[filter]() );
 		}
 	},
-
-	// TODO merge with previousPage
-	nextPage: function(event) {
-		if (this._hasScroll()) {
-			// TODO merge with no-scroll-else
-			if (!this.active || this.last()) {
-				this.activate(event, this.element.children(":first"));
+	
+	nextPage: function( event ) {
+		if ( this._hasScroll() ) {
+			if ( !this.active || this.last() ) {
+				this.activate( event, this.element.children( ".ui-menu-item" ).first() );
 				return;
 			}
 			var base = this.active.offset().top,
 				height = this.element.height(),
-				result = this.element.children("li").filter(function() {
-					var close = $(this).offset().top - base - height + $(this).height();
-					// TODO improve approximation
-					return close < 10 && close > -10;
-				});
+				result;
+			this.active.nextAll( ".ui-menu-item" ).each( function() {
+				result = $( this );
+				return $( this ).offset().top - base - height < 0;
+			});
 
-			// TODO try to catch this earlier when scrollTop indicates the last page anyway
-			if (!result.length) {
-				result = this.element.children(":last");
-			}
-			this.activate(event, result);
+			this.activate( event, result );
 		} else {
-			this.activate(event, this.element.children(!this.active || this.last() ? ":first" : ":last"));
+			this.activate( event, this.element.children( ".ui-menu-item" )
+				[ !this.active || this.last() ? "first" : "last" ]() );
 		}
 	},
 
-	// TODO merge with nextPage
-	previousPage: function(event) {
-		if (this._hasScroll()) {
-			// TODO merge with no-scroll-else
-			if (!this.active || this.first()) {
-				this.activate(event, this.element.children(":last"));
+	previousPage: function( event ) {
+		if ( this._hasScroll() ) {
+			if ( !this.active || this.first() ) {
+				this.activate( event, this.element.children( ".ui-menu-item" ).last() );
 				return;
 			}
 
 			var base = this.active.offset().top,
-				height = this.element.height();
-				result = this.element.children("li").filter(function() {
-					var close = $(this).offset().top - base + height - $(this).height();
-					// TODO improve approximation
-					return close < 10 && close > -10;
-				});
+				height = this.element.height(),
+				result;
+			this.active.prevAll( ".ui-menu-item" ).each( function() {
+				result = $( this );
+				return $(this).offset().top - base + height > 0;
+			});
 
-			// TODO try to catch this earlier when scrollTop indicates the last page anyway
-			if (!result.length) {
-				result = this.element.children(":first");
-			}
-			this.activate(event, result);
+			this.activate( event, result );
 		} else {
-			this.activate(event, this.element.children(!this.active || this.first() ? ":last" : ":first"));
+			this.activate( event, this.element.children( ".ui-menu-item" )
+				[ !this.active || this.first() ? ":last" : ":first" ]() );
 		}
 	},
 
 	_hasScroll: function() {
-		return this.element.height() < this.element.attr("scrollHeight");
+		return this.element.height() < this.element.attr( "scrollHeight" );
 	},
 
 	select: function( event ) {
-		this._trigger("select", event, { item: this.active });
+		this._trigger( "select", event, { item: this.active } );
 	}
 });
 
-}(jQuery));
+}( jQuery ));
 
 /*
  * Metadata - jQuery plugin for parsing metadata from elements
@@ -20142,7 +20271,7 @@ $.fn.metadata = function( opts ){
 
 /*
 
-Uniform v1.7.3
+Uniform v1.7.5
 Copyright © 2009 Josh Pyles / Pixelmatrix Design LLC
 http://pixelmatrixdesign.com
 
@@ -20181,7 +20310,8 @@ Enjoy!
       hoverClass: 'hover',
       useID: true,
       idPrefix: 'uniform',
-      resetSelector: false
+      resetSelector: false,
+      autoHide: true
     },
     elements: []
   };
@@ -20219,7 +20349,7 @@ Enjoy!
     }
     
     function doButton(elem){
-      $el = elem;
+      var $el = $(elem);
       
       var divTag = $("<div>"),
           spanTag = $("<span>");
@@ -20230,19 +20360,17 @@ Enjoy!
       
       var btnText;
       
-      if($el.is("a")){
+      if($el.is("a") || $el.is("button")){
         btnText = $el.text();
-      }else if($el.is("button")){
-        btnText = $el.text();
-      }else if($el.is(":submit") || $el.is("input[type=button]")){
+      }else if($el.is(":submit") || $el.is(":reset") || $el.is("input[type=button]")){
         btnText = $el.attr("value");
       }
       
-      if(btnText == "") btnText = "Submit";
+      btnText = btnText == "" ? $el.is(":reset") ? "Reset" : "Submit" : btnText;
       
       spanTag.html(btnText);
       
-      $el.hide();
+      $el.css("opacity", 0);
       $el.wrap(divTag);
       $el.wrap(spanTag);
       
@@ -20258,6 +20386,7 @@ Enjoy!
         },
         "mouseleave.uniform": function(){
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         },
         "mousedown.uniform touchbegin.uniform": function(){
           divTag.addClass(options.activeClass);
@@ -20289,12 +20418,18 @@ Enjoy!
       
       $.uniform.noSelect(divTag);
       storeElement(elem);
+      
     }
 
     function doSelect(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.selectClass);
 
@@ -20306,7 +20441,7 @@ Enjoy!
       if(selected.length == 0){
         selected = elem.find("option:first");
       }
-      spanTag.html(selected.text());
+      spanTag.html(selected.html());
       
       elem.css('opacity', 0);
       elem.wrap(divTag);
@@ -20318,7 +20453,7 @@ Enjoy!
 
       elem.bind({
         "change.uniform": function() {
-          spanTag.text(elem.find(":selected").text());
+          spanTag.text(elem.find(":selected").html());
           divTag.removeClass(options.activeClass);
         },
         "focus.uniform": function() {
@@ -20342,9 +20477,10 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         },
         "keyup.uniform": function(){
-          spanTag.text(elem.find(":selected").text());
+          spanTag.text(elem.find(":selected").html());
         }
       });
       
@@ -20360,10 +20496,15 @@ Enjoy!
     }
 
     function doCheckbox(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
-
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
+      
       divTag.addClass(options.checkboxClass);
 
       //assign the id of the element
@@ -20409,6 +20550,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
       
@@ -20425,13 +20567,17 @@ Enjoy!
       }
 
       storeElement(elem);
-
     }
 
     function doRadio(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
+          
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.radioClass);
 
@@ -20463,7 +20609,8 @@ Enjoy!
             spanTag.removeClass(options.checkedClass);
           }else{
             //box was just checked, check span
-            $("."+options.radioClass + " span."+options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
+            var classes = options.radioClass.split(" ")[0];
+            $("." + classes + " span." + options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
             spanTag.addClass(options.checkedClass);
           }
         },
@@ -20480,6 +20627,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -20505,6 +20653,10 @@ Enjoy!
       var divTag = $('<div />'),
           filenameTag = $('<span>'+options.fileDefaultText+'</span>'),
           btnTag = $('<span>'+options.fileBtnText+'</span>');
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.fileClass);
       filenameTag.addClass(options.filenameClass);
@@ -20572,6 +20724,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -20595,6 +20748,7 @@ Enjoy!
       
       $.uniform.noSelect(filenameTag);
       $.uniform.noSelect(btnTag);
+      
       storeElement(elem);
 
     }
@@ -20621,7 +20775,7 @@ Enjoy!
           $(this).siblings("span").remove();
           //unwrap parent div
           $(this).unwrap();
-        }else if($(this).is("button, :submit, a, input[type='button']")){
+        }else if($(this).is("button, :submit, :reset, a, input[type='button']")){
           //unwrap from span and div
           $(this).unwrap().unwrap();
         }
@@ -20683,7 +20837,7 @@ Enjoy!
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
 
           //reset current selected text
-          spanTag.html($e.find(":selected").text());
+          spanTag.html($e.find(":selected").html());
 
           if($e.is(":disabled")){
             divTag.addClass(options.disabledClass);
@@ -20739,7 +20893,7 @@ Enjoy!
           }else{
             divTag.removeClass(options.disabledClass);
           }
-        }else if($e.is(":submit") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
+        }else if($e.is(":submit") || $e.is(":reset") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
           var divTag = $e.closest("div");
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
           
@@ -20750,6 +20904,7 @@ Enjoy!
           }
           
         }
+        
       });
     };
 
@@ -20778,7 +20933,7 @@ Enjoy!
           doInput(elem);
         }else if(elem.is("textarea")){
           doTextarea(elem);
-        }else if(elem.is("a") || elem.is(":submit") || elem.is("button") || elem.is("input[type=button]")){
+        }else if(elem.is("a") || elem.is(":submit") || elem.is(":reset") || elem.is("button") || elem.is("input[type=button]")){
           doButton(elem);
         }
           
@@ -21325,9 +21480,9 @@ Enjoy!
 })(jQuery);
 
 // name: sammy
-// version: 0.6.0pre
+// version: 0.6.2
 
-(function($) {
+(function($, window) {
 
   var Sammy,
       PATH_REPLACER = "([^\/]+)",
@@ -21339,8 +21494,9 @@ Enjoy!
       _isFunction = function( obj ) { return Object.prototype.toString.call(obj) === "[object Function]"; },
       _isArray = function( obj ) { return Object.prototype.toString.call(obj) === "[object Array]"; },
       _decode = decodeURIComponent,
+      _encode = encodeURIComponent,
       _escapeHTML = function(s) {
-        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return String(s).replace(/&(?!\w+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       },
       _routeWrapper = function(verb) {
         return function(path, callback) { return this.route.apply(this, [verb, path, callback]); };
@@ -21396,7 +21552,7 @@ Enjoy!
     }
   };
 
-  Sammy.VERSION = '0.6.0pre';
+  Sammy.VERSION = '0.6.2';
 
   // Add to the global logger pool. Takes a function that accepts an
   // unknown number of arguments and should print them or send them somewhere
@@ -21417,9 +21573,9 @@ Enjoy!
   };
 
   if (typeof window.console != 'undefined') {
-    if (_isFunction(console.log.apply)) {
+    if (_isFunction(window.console.log.apply)) {
       Sammy.addLogger(function() {
-        window.console.log.apply(console, arguments);
+        window.console.log.apply(window.console, arguments);
       });
     } else {
       Sammy.addLogger(function() {
@@ -21553,7 +21709,7 @@ Enjoy!
         if (proxy.is_native === false && !non_native) {
           Sammy.log('native hash change exists, using');
           proxy.is_native = true;
-          clearInterval(Sammy.HashLocationProxy._interval);
+          window.clearInterval(Sammy.HashLocationProxy._interval);
         }
         app.trigger('location-changed');
       });
@@ -21568,7 +21724,7 @@ Enjoy!
       $(window).unbind('hashchange.' + this.app.eventNamespace());
       Sammy.HashLocationProxy._bindings--;
       if (Sammy.HashLocationProxy._bindings <= 0) {
-        clearInterval(Sammy.HashLocationProxy._interval);
+        window.clearInterval(Sammy.HashLocationProxy._interval);
       }
     },
 
@@ -21592,17 +21748,17 @@ Enjoy!
       if (!Sammy.HashLocationProxy._interval) {
         if (!every) { every = 10; }
         var hashCheck = function() {
-          current_location = proxy.getLocation();
+          var current_location = proxy.getLocation();
           if (!Sammy.HashLocationProxy._last_location ||
             current_location != Sammy.HashLocationProxy._last_location) {
-            setTimeout(function() {
+            window.setTimeout(function() {
               $(window).trigger('hashchange', [true]);
             }, 13);
           }
           Sammy.HashLocationProxy._last_location = current_location;
         };
         hashCheck();
-        Sammy.HashLocationProxy._interval = setInterval(hashCheck, every);
+        Sammy.HashLocationProxy._interval = window.setInterval(hashCheck, every);
       }
     }
   };
@@ -21644,7 +21800,18 @@ Enjoy!
 
     // An array of the default events triggered by the
     // application during its lifecycle
-    APP_EVENTS: ['run','unload','lookup-route','run-route','route-found','event-context-before','event-context-after','changed','error','check-form-submission','redirect'],
+    APP_EVENTS: ['run',
+                 'unload',
+                 'lookup-route',
+                 'run-route',
+                 'route-found',
+                 'event-context-before',
+                 'event-context-after',
+                 'changed',
+                 'error',
+                 'check-form-submission',
+                 'redirect',
+                 'location-changed'],
 
     _last_route: null,
     _location_proxy: null,
@@ -21679,8 +21846,8 @@ Enjoy!
     },
 
     // returns a jQuery object of the Applications bound element.
-    $element: function() {
-      return $(this.element_selector);
+    $element: function(selector) {
+      return selector ? $(this.element_selector).find(selector) : $(this.element_selector);
     },
 
     // `use()` is the entry point for including Sammy plugins.
@@ -21795,7 +21962,7 @@ Enjoy!
     //    of a method on the application.
     //
     route: function(verb, path, callback) {
-      var app = this, param_names = [], add_route;
+      var app = this, param_names = [], add_route, path_match;
 
       // if the method signature is just (path, callback)
       // assume the verb is 'any'
@@ -22261,6 +22428,7 @@ Enjoy!
           befores,
           before,
           callback_args,
+          path_params,
           final_returned;
 
       this.log('runRoute', [verb, path].join(' '));
@@ -22443,6 +22611,11 @@ Enjoy!
       }
     },
 
+    // clear the templateCache
+    clearTemplateCache: function() {
+      return _template_cache = {};
+    },
+
     // This thows a '404 Not Found' error by invoking `error()`.
     // Override this method or `error()` to provide custom
     // 404 behavior (i.e redirecting to / or showing a warning)
@@ -22473,9 +22646,9 @@ Enjoy!
       // get current location
       location = this.getLocation();
       // compare to see if hash has changed
-      if (location != this.last_location) {
+      if (!this.last_location || this.last_location[0] != 'get' || this.last_location[1] != location) {
         // reset last location
-        this.last_location = location;
+        this.last_location = ['get', location];
         // lookup route for current hash
         returned = this.runRoute('get', location);
       }
@@ -22483,7 +22656,7 @@ Enjoy!
     },
 
     _getFormVerb: function(form) {
-      var $form = $(form), verb;
+      var $form = $(form), verb, $_method;
       $_method = $form.find('input[name="_method"]');
       if ($_method.length > 0) { verb = $_method.val(); }
       if (!verb) { verb = $form[0].getAttribute('method'); }
@@ -22499,13 +22672,30 @@ Enjoy!
       if (!verb || verb == '') { verb = 'get'; }
       this.log('_checkFormSubmission', $form, path, verb);
       if (verb === 'get') {
-        this.setLocation(path + '?' + $form.serialize());
+        this.setLocation(path + '?' + this._serializeFormParams($form));
         returned = false;
       } else {
         params = $.extend({}, this._parseFormParams($form));
         returned = this.runRoute(verb, path, params, form.get(0));
       };
       return (typeof returned == 'undefined') ? false : returned;
+    },
+
+    _serializeFormParams: function($form) {
+       var queryString = "",
+         fields = $form.serializeArray(),
+         i;
+       if (fields.length > 0) {
+         queryString = this._encodeFormPair(fields[0].name, fields[0].value);
+         for (i = 1; i < fields.length; i++) {
+           queryString = queryString + "&" + this._encodeFormPair(fields[i].name, fields[i].value);
+         }
+       }
+       return queryString;
+    },
+
+    _encodeFormPair: function(name, value){
+      return _encode(name) + "=" + _encode(value);
     },
 
     _parseFormParams: function($form) {
@@ -22581,7 +22771,7 @@ Enjoy!
     this.waiting          = false;
   };
 
-  $.extend(Sammy.RenderContext.prototype, {
+  Sammy.RenderContext.prototype = $.extend({}, Sammy.Object.prototype, {
 
     // The "core" of the `RenderContext` object, adds the `callback` to the
     // queue. If the context is `waiting` (meaning an async operation is happening)
@@ -22594,6 +22784,9 @@ Enjoy!
     // the next callback in the queue will not be executed until `next()` is
     // called. This allows for the guarunteed order of execution while working
     // with async operations.
+    //
+    // If then() is passed a string instead of a function, the string is looked
+    // up as a helper method on the event context.
     //
     // ### Example
     //
@@ -22610,19 +22803,29 @@ Enjoy!
     //      });
     //
     then: function(callback) {
-      if (_isFunction(callback)) {
-        var context = this;
-        if (this.waiting) {
-          this.callbacks.push(callback);
+      if (!_isFunction(callback)) {
+        // if a string is passed to then, assume we want to call
+        // a helper on the event context in its context
+        if (typeof callback === 'string' && callback in this.event_context) {
+          var helper = this.event_context[callback];
+          callback = function(content) {
+            return helper.apply(this.event_context, [content]);
+          };
         } else {
-          this.wait();
-          setTimeout(function() {
-            var returned = callback.apply(context, [context.content, context.previous_content]);
-            if (returned !== false) {
-              context.next(returned);
-            }
-          }, 13);
+          return this;
         }
+      }
+      var context = this;
+      if (this.waiting) {
+        this.callbacks.push(callback);
+      } else {
+        this.wait();
+        window.setTimeout(function() {
+          var returned = callback.apply(context, [context.content, context.previous_content]);
+          if (returned !== false) {
+            context.next(returned);
+          }
+        }, 13);
       }
       return this;
     },
@@ -22690,7 +22893,7 @@ Enjoy!
     load: function(location, options, callback) {
       var context = this;
       return this.then(function() {
-        var should_cache, cached;
+        var should_cache, cached, is_json, location_array;
         if (_isFunction(options)) {
           callback = options;
           options = {};
@@ -22700,8 +22903,11 @@ Enjoy!
         if (callback) { this.then(callback); }
         if (typeof location === 'string') {
           // its a path
-          should_cache = !(options.cache === false);
+          is_json      = (location.match(/\.json$/) || options.json);
+          should_cache = ((is_json && options.cache === true) || options.cache !== false);
+          context.next_engine = context.event_context.engineFor(location);
           delete options.cache;
+          delete options.json;
           if (options.engine) {
             context.next_engine = options.engine;
             delete options.engine;
@@ -22713,6 +22919,7 @@ Enjoy!
           $.ajax($.extend({
             url: location,
             data: {},
+            dataType: is_json ? 'json' : null,
             type: 'get',
             success: function(data) {
               if (should_cache) {
@@ -22752,42 +22959,101 @@ Enjoy!
       if (_isFunction(location) && !data) {
         return this.then(location);
       } else {
-        return this.load(location).interpolate(data, location).then(callback);
+        if (!data && this.content) { data = this.content; }
+        return this.load(location)
+                   .interpolate(data, location)
+                   .then(callback);
       }
+    },
+
+    // `render()` the the `location` with `data` and then `swap()` the
+    // app's `$element` with the rendered content.
+    partial: function(location, data) {
+      return this.render(location, data).swap();
+    },
+
+    // defers the call of function to occur in order of the render queue.
+    // The function can accept any number of arguments as long as the last
+    // argument is a callback function. This is useful for putting arbitrary
+    // asynchronous functions into the queue. The content passed to the
+    // callback is passed as `content` to the next item in the queue.
+    //
+    // === Example
+    //
+    //        this.send($.getJSON, '/app.json')
+    //            .then(function(json) {
+    //              $('#message).text(json['message']);
+    //            });
+    //
+    //
+    send: function() {
+      var context = this,
+          args = _makeArray(arguments),
+          fun  = args.shift();
+
+      if (_isArray(args[0])) { args = args[0]; }
+
+      return this.then(function(content) {
+        args.push(function(response) { context.next(response); });
+        context.wait();
+        fun.apply(fun, args);
+        return false;
+      });
     },
 
     // itterates over an array, applying the callback for each item item. the
     // callback takes the same style of arguments as `jQuery.each()` (index, item).
     // The return value of each callback is collected as a single string and stored
     // as `content` to be used in the next iteration of the `RenderContext`.
-    collect: function(array, callback) {
+    collect: function(array, callback, now) {
       var context = this;
-      return this.then(function() {
-        var contents = "";
+      var coll = function() {
+        if (_isFunction(array)) {
+          callback = array;
+          array = this.content;
+        }
+        var contents = [], doms = false;
         $.each(array, function(i, item) {
           var returned = callback.apply(context, [i, item]);
-          contents += returned;
+          if (returned.jquery && returned.length == 1) {
+            returned = returned[0];
+            doms = true;
+          }
+          contents.push(returned);
           return returned;
         });
-        return contents;
-      });
+        return doms ? contents : contents.join('');
+      };
+      return now ? coll() : this.then(coll);
     },
 
     // loads a template, and then interpolates it for each item in the `data`
-    // array.
+    // array. If a callback is passed, it will call the callback with each
+    // item in the array _after_ interpolation
     renderEach: function(location, name, data, callback) {
       if (_isArray(name)) {
         callback = data;
         data = name;
         name = null;
       }
-      if (!data && _isArray(this.content)) {
-        data = this.content;
-      }
-      return this.load(location).collect(data, function(i, value) {
-        var idata = {};
-        name ? (idata[name] = value) : (idata = value);
-        return this.event_context.interpolate(this.content, idata, location);
+      return this.load(location).then(function(content) {
+          var rctx = this;
+          if (!data) {
+            data = _isArray(this.previous_content) ? this.previous_content : [];
+          }
+          if (callback) {
+            $.each(data, function(i, value) {
+              var idata = {}, engine = this.next_engine || location;
+              name ? (idata[name] = value) : (idata = value);
+              callback(value, rctx.event_context.interpolate(content, idata, engine));
+            });
+          } else {
+            return this.collect(data, function(i, value) {
+              var idata = {}, engine = this.next_engine || location;
+              name ? (idata[name] = value) : (idata = value);
+              return this.event_context.interpolate(content, idata, engine);
+            }, true);
+          }
       });
     },
 
@@ -22799,6 +23065,7 @@ Enjoy!
     interpolate: function(data, engine, retain) {
       var context = this;
       return this.then(function(content, prev) {
+        if (!data && prev) { data = prev; }
         if (this.next_engine) {
           engine = this.next_engine;
           this.next_engine = false;
@@ -22812,21 +23079,21 @@ Enjoy!
     swap: function() {
       return this.then(function(content) {
         this.event_context.swap(content);
-      });
+      }).trigger('changed', {});
     },
 
     // Same usage as `jQuery.fn.appendTo()` but uses `then()` to ensure order
     appendTo: function(selector) {
       return this.then(function(content) {
         $(selector).append(content);
-      });
+      }).trigger('changed', {});
     },
 
     // Same usage as `jQuery.fn.prependTo()` but uses `then()` to ensure order
     prependTo: function(selector) {
       return this.then(function(content) {
         $(selector).prepend(content);
-      });
+      }).trigger('changed', {});
     },
 
     // Replaces the `$(selector)` using `html()` with the previously loaded
@@ -22834,6 +23101,16 @@ Enjoy!
     replace: function(selector) {
       return this.then(function(content) {
         $(selector).html(content);
+      }).trigger('changed', {});
+    },
+
+    // trigger the event in the order of the event context. Same semantics
+    // as `Sammy.EventContext#trigger()`. If data is ommitted, `content`
+    // is sent as `{content: content}`
+    trigger: function(name, data) {
+      return this.then(function(content) {
+        if (typeof data == 'undefined') { data = {content: content}; }
+        this.event_context.trigger(name, data);
       });
     }
 
@@ -22882,7 +23159,7 @@ Enjoy!
 
     // A shortcut to the app's `$element()`
     $element: function() {
-      return this.app.$element();
+      return this.app.$element(_makeArray(arguments).shift());
     },
 
     // Look up a templating engine within the current app and context.
@@ -22900,7 +23177,7 @@ Enjoy!
       // if path is actually an engine function just return it
       if (_isFunction(engine)) { return engine; }
       // lookup engine name by path extension
-      engine = engine.toString();
+      engine = (engine || context.app.template_engine).toString();
       if ((engine_match = engine.match(/\.([^\.]+)$/))) {
         engine = engine_match[1];
       }
@@ -22908,6 +23185,7 @@ Enjoy!
       if (engine && _isFunction(context[engine])) {
         return context[engine];
       }
+
       if (context.app.template_engine) {
         return this.engineFor(context.app.template_engine);
       }
@@ -22937,6 +23215,22 @@ Enjoy!
       return new Sammy.RenderContext(this).render(location, data, callback);
     },
 
+    // Create and return a `Sammy.RenderContext` calling `renderEach()` on it.
+    // Loads the template and interpolates the data for each item,
+    // however does not actual place it in the DOM.
+    //
+    // ### Example
+    //
+    //      // mytemplate.mustache <div class="name">{{name}}</div>
+    //      renderEach('mytemplate.mustache', [{name: 'quirkey'}, {name: 'endor'}])
+    //      // sets the `content` to <div class="name">quirkey</div><div class="name">endor</div>
+    //      renderEach('mytemplate.mustache', [{name: 'quirkey'}, {name: 'endor'}]).appendTo('ul');
+    //      // appends the rendered content to $('ul')
+    //
+    renderEach: function(location, name, data, callback) {
+      return new Sammy.RenderContext(this).renderEach(location, name, data, callback);
+    },
+
     // create a new `Sammy.RenderContext` calling `load()` with `location` and
     // `options`. Called without interpolation or placement, this allows for
     // preloading/caching the templates.
@@ -22947,7 +23241,14 @@ Enjoy!
     // `render()` the the `location` with `data` and then `swap()` the
     // app's `$element` with the rendered content.
     partial: function(location, data) {
-      return this.render(location, data).swap();
+      return new Sammy.RenderContext(this).partial(location, data);
+    },
+
+    // create a new `Sammy.RenderContext` calling `send()` with an arbitrary
+    // function
+    send: function() {
+      var rctx = new Sammy.RenderContext(this);
+      return rctx.send.apply(rctx, arguments);
     },
 
     // Changes the location of the current window. If `to` begins with
@@ -22970,7 +23271,7 @@ Enjoy!
         to = args[0];
       }
       this.trigger('redirect', {to: to});
-      this.app.last_location = this.path;
+      this.app.last_location = [this.verb, this.path];
       this.app.setLocation(to);
       if (current_location == to) {
         this.app.trigger('location-changed');
@@ -22999,6 +23300,12 @@ Enjoy!
       return this.app.notFound(this.verb, this.path);
     },
 
+    // Default JSON parsing uses jQuery's `parseJSON()`. Include `Sammy.JSON`
+    // plugin for the more conformant "crockford special".
+    json: function(string) {
+      return $.parseJSON(string);
+    },
+
     // //=> Sammy.EventContext: get #/ {}
     toString: function() {
       return "Sammy.EventContext: " + [this.verb, this.path, this.params].join(' ');
@@ -23009,7 +23316,7 @@ Enjoy!
   // An alias to Sammy
   $.sammy = window.Sammy = Sammy;
 
-})(jQuery);
+})(jQuery, window);
 
 (function($) {
 
@@ -23032,22 +23339,23 @@ Enjoy!
       // Generate a reusable function that will serve as a template
       // generator (and which will be cached).
       fn = srender_cache[name] = new Function("obj",
-      "var p=[],print=function(){p.push.apply(p,arguments);};" +
+      "var ___$$$___=[],print=function(){___$$$___.push.apply(___$$$___,arguments);};" +
 
       // Introduce the data as local variables using with(){}
-      "with(obj){p.push(\"" +
+      "with(obj){___$$$___.push(\"" +
 
       // Convert the template into pure JavaScript
-      template
+      String(template)
         .replace(/[\r\t\n]/g, " ")
         .replace(/\"/g, '\\"')
         .split("<%").join("\t")
         .replace(/((^|%>)[^\t]*)/g, "$1\r")
-        .replace(/\t=(.*?)%>/g, "\",$1,\"")
+        .replace(/\t=(.*?)%>/g, "\",h($1),\"")
+        .replace(/\t!(.*?)%>/g, "\",$1,\"")
         .split("\t").join("\");")
-        .split("%>").join("p.push(\"")
+        .split("%>").join("___$$$___.push(\"")
         .split("\r").join("")
-        + "\");}return p.join('');");
+        + "\");}return ___$$$___.join('');");
     }
 
     if (typeof data != 'undefined') {
@@ -23647,6 +23955,14 @@ function loading(text) {
     
     _createIcons: function() {
       $.ui.accordion.prototype._createIcons.apply(this);
+      
+      // TODO : find a way to avoid making and then removing the arrows
+      $('.ui-accordion-header', this.context).each(function() {
+        if ($(this).next().html() == "") {
+          $('.ui-icon', this).remove()
+          $('a', this).addClass('ui-noicon')
+        }
+      });
       
       var self = this;
       if (this.eventOption) {
