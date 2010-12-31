@@ -7,14 +7,37 @@
   <link rel="stylesheet" href="../../build/css/rooibos.css">
 </head>
 <body>
-  <div id="application" class="vbox">
-    <div class="flex"></div>
-    <div class="txtC">
-      <a href="/" class="button">Hello World!</a>
-    </div>
-    <div class="flex"></div>
-  </div>
+  <div id="application" class="vbox"></div>
   <script src="../../build/js/rooibos.js" type="text/javascript"></script>
-  <script>Rooibos.update("#application")</script>
+  <script>
+    $(function() {
+      var Button = Backbone.View.extend({
+        el: "#application",
+        
+        events: {
+          "click #mybutton": "alert"
+        },
+        
+        initialize: function() {
+          _.bindAll(this, "render");
+        },
+        
+        render: function() {
+          $(this.el).load("templates/button.html", function() {
+            Rooibos.update("#application");
+          });
+          
+          return this;
+        },
+        
+        alert: function(e) {
+          e.preventDefault();
+          alert("I should have this behaviour");
+        }
+      });
+      
+      new Button().render();
+    });
+  </script>
 </body>
 </html>
