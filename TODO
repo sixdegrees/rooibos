@@ -1,7 +1,11 @@
-* Change outline with jQuery UI 1.9 menu or jstree and change the sidebar color
-* Color fallback for CSS gradients (for Opera)
-* IE CSS3: http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/
-* Add tabs
-* Add datepicker
-* Add slider
-* Fix resize control on dialogs
+0.1.0:
+  * Update all the libraries
+  * Change outline with jQuery UI 1.9 menu or jstree and change the sidebar color
+
+Aristo:
+  * Color fallback for CSS gradients (for Opera)
+  * IE CSS3: http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/
+  * Add tabs
+  * Add datepicker
+  * Add slider
+  * Fix resize control on dialogs
