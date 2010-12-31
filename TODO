@@ -1,9 +1,6 @@
-* Sammy.Template has some problems with quotes. Need to replace it.
-* Change color of Navbar (to be more like in the web inspector)
 * Change outline with jQuery UI 1.9 menu or jstree and change the sidebar color
 * Color fallback for CSS gradients (for Opera)
 * IE CSS3: http://www.smashingmagazine.com/2010/04/28/css3-solutions-for-internet-explorer/
-* Remove animation for outline
 * Add tabs
 * Add datepicker
 * Add slider

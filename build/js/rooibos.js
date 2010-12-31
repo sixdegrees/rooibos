@@ -1,44 +1,42 @@
 /*!
- * Modernizr v1.6
- * http://www.modernizr.com
+ * Modernizr JavaScript library 1.5
+ * http://www.modernizr.com/
  *
- * Developed by: 
- * - Faruk Ates  http://farukat.es/
- * - Paul Irish  http://paulirish.com/
- *
- * Copyright (c) 2009-2010
- * Dual-licensed under the BSD or MIT licenses.
+ * Copyright (c) 2009-2010 Faruk Ates - http://farukat.es/
+ * Dual-licensed under the BSD and MIT licenses.
  * http://www.modernizr.com/license/
+ *
+ * Featuring major contributions by
+ * Paul Irish  - http://paulirish.com
  */
-
  
 /*
- * Modernizr is a script that detects native CSS3 and HTML5 features
- * available in the current UA and provides an object containing all
+ * Modernizr is a script that will detect native CSS3 and HTML5 features
+ * available in the current UA and provide an object containing all
  * features with a true/false value, depending on whether the UA has
  * native support for it or not.
  * 
- * Modernizr will also add classes to the <html> element of the page,
- * one for each feature it detects. If the UA supports it, a class
- * like "cssgradients" will be added. If not, the class name will be
- * "no-cssgradients". This allows for simple if-conditionals in your
- * CSS, giving you fine control over the look & feel of your website.
+ * In addition to that, Modernizr will add classes to the <html>
+ * element of the page, one for each cutting-edge feature. If the UA
+ * supports it, a class like "cssgradients" will be added. If not,
+ * the class name will be "no-cssgradients". This allows for simple
+ * if-conditionals in CSS styling, making it easily to have fine
+ * control over the look and feel of your website.
  * 
  * @author        Faruk Ates
- * @author        Paul Irish
  * @copyright     (c) 2009-2010 Faruk Ates.
+ *
+ * @contributor   Paul Irish
  * @contributor   Ben Alman
  */
 
 window.Modernizr = (function(window,doc,undefined){
     
-    var version = '1.6',
+    var version = '1.5',
     
     ret = {},
 
     /**
-     * !! DEPRECATED !!
-     * 
      * enableHTML5 is a private property for advanced use only. If enabled,
      * it will make Modernizr.init() run through a brief while() loop in
      * which it will create all HTML5 elements in the DOM to allow for
@@ -46,11 +44,22 @@ window.Modernizr = (function(window,doc,undefined){
      * non-HTML4 elements unless created in the DOM this way.
      * 
      * enableHTML5 is ON by default.
-     * 
-     * The enableHTML5 toggle option is DEPRECATED as per 1.6, and will be
-     * replaced in 2.0 in lieu of the modular, configurable nature of 2.0.
      */
     enableHTML5 = true,
+    
+    
+    /**
+     * fontfaceCheckDelay is the ms delay before the @font-face test is
+     * checked a second time. This is neccessary because both Gecko and
+     * WebKit do not load data: URI font data synchronously.
+     *   https://bugzilla.mozilla.org/show_bug.cgi?id=512566
+     * The check will be done again at fontfaceCheckDelay*2 and then 
+     * a fourth time at window's load event. 
+     * If you need to query for @font-face support, send a callback to: 
+     *  Modernizr._fontfaceready(fn);
+     * The callback is passed the boolean value of Modernizr.fontface
+     */
+    fontfaceCheckDelay = 75,
     
     
     docElement = doc.documentElement,
@@ -67,26 +76,62 @@ window.Modernizr = (function(window,doc,undefined){
      */
     f = doc.createElement( 'input' ),
     
+    // Reused strings, stored here to allow better minification
+    
+    canvas = 'canvas',
+    canvastext = 'canvastext',
+    rgba = 'rgba',
+    hsla = 'hsla',
+    multiplebgs = 'multiplebgs',
+    backgroundsize = 'backgroundsize',
+    borderimage = 'borderimage',
+    borderradius = 'borderradius',
+    boxshadow = 'boxshadow',
+    opacity = 'opacity',
+    cssanimations = 'cssanimations',
+    csscolumns = 'csscolumns',
+    cssgradients = 'cssgradients',
+    cssreflections = 'cssreflections',
+    csstransforms = 'csstransforms',
+    csstransforms3d = 'csstransforms3d',
+    csstransitions = 'csstransitions',
+    fontface = 'fontface',
+    geolocation = 'geolocation',
+    video = 'video',
+    audio = 'audio',
+    input = 'input',
+    inputtypes = input + 'types',
+    // inputtypes is an object of its own containing individual tests for
+    // various new input types, such as search, range, datetime, etc.
+    
+    svg = 'svg',
+    smil = 'smil',
+    svgclippaths = svg+'clippaths',
+    
+    background = 'background',
+    backgroundColor = background + 'Color',
+    canPlayType = 'canPlayType',
+    
+    // FF gets really angry if you name local variables as these, but camelCased.
+    localstorage = 'localStorage',
+    sessionstorage = 'sessionStorage',
+    applicationcache = 'applicationCache',
+    
+    webWorkers = 'webworkers',
+    hashchange = 'hashchange',
+    crosswindowmessaging = 'crosswindowmessaging',
+    historymanagement = 'historymanagement',
+    draganddrop = 'draganddrop',
+    websqldatabase = 'websqldatabase',
+    indexedDB = 'indexedDB',
+    websockets = 'websockets',
     smile = ':)',
     
+    // IE7 gets mad if you name a local variable `toString`
     tostring = Object.prototype.toString,
     
-    // List of property values to set for css tests. See ticket #21
-    prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' '),
-
-    // Following spec is to expose vendor-specific style properties as:
-    //   elem.style.WebkitBorderRadius
-    // and the following would be incorrect:
-    //   elem.style.webkitBorderRadius
-    
-    // Webkit ghosts their properties in lowercase but Opera & Moz do not.
-    // Microsoft foregoes prefixes entirely <= IE8, but appears to 
-    //   use a lowercase `ms` instead of the correct `Ms` in IE9
-    
-    // More here: http://github.com/Modernizr/Modernizr/issues/issue/21
-    domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-
-    ns = {'svg': 'http://www.w3.org/2000/svg'},
+    // list of property values to set for css tests. see ticket #21
+    prefixes = ' -o- -moz- -ms- -webkit- -khtml- '.split(' '),
 
     tests = {},
     inputs = {},
@@ -94,77 +139,47 @@ window.Modernizr = (function(window,doc,undefined){
     
     classes = [],
     
-    featurename, // used in testing loop
-    
-    
-    
-    // todo: consider using http://javascript.nwbox.com/CSSSupport/css-support.js instead
-    testMediaQuery = function(mq){
-
-      var st = document.createElement('style'),
-          div = doc.createElement('div'),
-          ret;
-
-      st.textContent = mq + '{#modernizr{height:3px}}';
-      (doc.head || doc.getElementsByTagName('head')[0]).appendChild(st);
-      div.id = 'modernizr';
-      docElement.appendChild(div);
-
-      ret = div.offsetHeight === 3;
-
-      st.parentNode.removeChild(st);
-      div.parentNode.removeChild(div);
-
-      return !!ret;
-
-    },
-    
-    
     /**
       * isEventSupported determines if a given element supports the given event
       * function from http://yura.thinkweb2.com/isEventSupported/
       */
     isEventSupported = (function(){
-
-      var TAGNAMES = {
-        'select':'input','change':'input',
-        'submit':'form','reset':'form',
-        'error':'img','load':'img','abort':'img'
-      };
-
-      function isEventSupported(eventName, element) {
-
-        element = element || document.createElement(TAGNAMES[eventName] || 'div');
-        eventName = 'on' + eventName;
-
-        // When using `setAttribute`, IE skips "unload", WebKit skips "unload" and "resize", whereas `in` "catches" those
-        var isSupported = (eventName in element);
-
-        if (!isSupported) {
-          // If it has no `setAttribute` (i.e. doesn't implement Node interface), try generic element
-          if (!element.setAttribute) {
-            element = document.createElement('div');
-          }
-          if (element.setAttribute && element.removeAttribute) {
-            element.setAttribute(eventName, '');
-            isSupported = typeof element[eventName] == 'function';
-
-            // If property was created, "remove it" (by setting value to `undefined`)
-            if (typeof element[eventName] != 'undefined') {
-              element[eventName] = undefined;
+  
+        var TAGNAMES = {
+          'select':'input','change':'input',
+          'submit':'form','reset':'form',
+          'error':'img','load':'img','abort':'img'
+        }, 
+        cache = { };
+        
+        function isEventSupported(eventName, element) {
+            var canCache = (arguments.length == 1);
+            
+            // only return cached result when no element is given
+            if (canCache && cache[eventName]) {
+                return cache[eventName];
             }
-            element.removeAttribute(eventName);
-          }
+            
+            element = element || document.createElement(TAGNAMES[eventName] || 'div');
+            eventName = 'on' + eventName;
+            
+            // When using `setAttribute`, IE skips "unload", WebKit skips "unload" and "resize"
+            // `in` "catches" those
+            var isSupported = (eventName in element);
+            
+            if (!isSupported && element.setAttribute) {
+                element.setAttribute(eventName, 'return;');
+                isSupported = typeof element[eventName] == 'function';
+            }
+            
+            element = null;
+            return canCache ? (cache[eventName] = isSupported) : isSupported;
         }
-
-        element = null;
-        return isSupported;
-      }
-      return isEventSupported;
-    })();
+        
+        return isEventSupported;
+    })();    
     
     
-    // hasOwnProperty shim by kangax needed for Safari 2.0 support
     var _hasOwnProperty = ({}).hasOwnProperty, hasOwnProperty;
     if (typeof _hasOwnProperty !== 'undefined' && typeof _hasOwnProperty.call !== 'undefined') {
       hasOwnProperty = function (object, property) {
@@ -218,9 +233,24 @@ window.Modernizr = (function(window,doc,undefined){
      *   compatibility.
      */
     function test_props_all( prop, callback ) {
-      
         var uc_prop = prop.charAt(0).toUpperCase() + prop.substr(1),
-            props   = (prop + ' ' + domPrefixes.join(uc_prop + ' ') + uc_prop).split(' ');
+        
+        // following spec is to expose vendor-specific style properties as:
+        //   elem.style.WebkitBorderRadius
+        // and the following would be incorrect:
+        //   elem.style.webkitBorderRadius
+        // Webkit and Mozilla are nice enough to ghost their properties in the lowercase
+        //   version but Opera does not.
+        
+        // see more here: http://github.com/Modernizr/Modernizr/issues/issue/21
+        props = [
+            prop,
+            'Webkit' + uc_prop,
+            'Moz' + uc_prop,
+            'O' + uc_prop,
+            'ms' + uc_prop,
+            'Khtml' + uc_prop
+        ];
 
         return !!test_props( props, callback );
     }
@@ -229,100 +259,33 @@ window.Modernizr = (function(window,doc,undefined){
     /**
      * Tests
      */
-
-    tests['flexbox'] = function() {
-        /**
-         * set_prefixed_value_css sets the property of a specified element
-         * adding vendor prefixes to the VALUE of the property.
-         * @param {Element} element
-         * @param {string} property The property name. This will not be prefixed.
-         * @param {string} value The value of the property. This WILL be prefixed.
-         * @param {string=} extra Additional CSS to append unmodified to the end of
-         * the CSS string.
-         */
-        function set_prefixed_value_css(element, property, value, extra) {
-            property += ':';
-            element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
-        }
-
-        /**
-         * set_prefixed_property_css sets the property of a specified element
-         * adding vendor prefixes to the NAME of the property.
-         * @param {Element} element
-         * @param {string} property The property name. This WILL be prefixed.
-         * @param {string} value The value of the property. This will not be prefixed.
-         * @param {string=} extra Additional CSS to append unmodified to the end of
-         * the CSS string.
-         */
-        function set_prefixed_property_css(element, property, value, extra) {
-            element.style.cssText = prefixes.join(property + ':' + value + ';') + (extra || '');
-        }
-
-        var c = doc.createElement('div'),
-            elem = doc.createElement('div');
-
-        set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
-        set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
-
-        c.appendChild(elem);
-        docElement.appendChild(c);
-
-        var ret = elem.offsetWidth === 42;
-
-        c.removeChild(elem);
-        docElement.removeChild(c);
-
-        return ret;
+     
+    tests[canvas] = function() {
+        return !!doc.createElement( canvas ).getContext;
     };
     
-    // On the S60 and BB Storm, getContext exists, but always returns undefined
-    // http://github.com/Modernizr/Modernizr/issues/issue/97/ 
-    
-    tests['canvas'] = function() {
-        var elem = doc.createElement( 'canvas' );
-        return !!(elem.getContext && elem.getContext('2d'));
+    tests[canvastext] = function() {
+        return !!(tests[canvas]() && typeof doc.createElement( canvas ).getContext('2d').fillText == 'function');
     };
     
-    tests['canvastext'] = function() {
-        return !!(ret['canvas'] && typeof doc.createElement( 'canvas' ).getContext('2d').fillText == 'function');
-    };
-    
-    
-    tests['webgl'] = function(){
-
-        var elem = doc.createElement( 'canvas' ); 
-        
-        try {
-            if (elem.getContext('webgl')){ return true; }
-        } catch(e){	}
-        
-        try {
-            if (elem.getContext('experimental-webgl')){ return true; }
-        } catch(e){	}
-
-        return false;
-    };
-    
-    /*
+    /**
      * The Modernizr.touch test only indicates if the browser supports
      *    touch events, which does not necessarily reflect a touchscreen
      *    device, as evidenced by tablets running Windows 7 or, alas,
      *    the Palm Pre / WebOS (touch) phones.
-     *    
-     * Additionally, Chrome (desktop) used to lie about its support on this,
-     *    but that has since been rectified: http://crbug.com/36415
-     *    
-     * We also test for Firefox 4 Multitouch Support.
-     *
-     * For more info, see: http://modernizr.github.com/Modernizr/touch.html
-     */
+     * Additionally, chrome used to lie about its support on this, but that 
+     *    has since been recitifed: http://crbug.com/36415
+     * Because there is no way to reliably detect Chrome's false positive 
+     *    without UA sniffing we have removed this test from Modernizr. We 
+     *    hope to add it in after Chrome 5 has been sunsetted. 
+     * See also http://github.com/Modernizr/Modernizr/issues#issue/84
      
-    tests['touch'] = function() {
+    tests[touch] = function() {
 
-        return ('ontouchstart' in window) || testMediaQuery('@media ('+prefixes.join('touch-enabled),(')+'modernizr)');
-
+        return !!('ontouchstart' in window);
+        
     };
-
+    */
 
     /**
      * geolocation tests for the new Geolocation API specification.
@@ -332,118 +295,84 @@ window.Modernizr = (function(window,doc,undefined){
      * or view a fallback solution using google's geo API:
      *   http://gist.github.com/366184
      */
-    tests['geolocation'] = function() {
+    tests[geolocation] = function() {
         return !!navigator.geolocation;
     };
 
-    // Per 1.6: 
-    // This used to be Modernizr.crosswindowmessaging but the longer
-    // name has been deprecated in favor of a shorter and property-matching one.
-    // The old API is still available in 1.6, but as of 2.0 will throw a warning,
-    // and in the first release thereafter disappear entirely.
-    tests['postmessage'] = function() {
+    tests[crosswindowmessaging] = function() {
       return !!window.postMessage;
     };
 
-    // Web SQL database detection is tricky:
-
-    // In chrome incognito mode, openDatabase is truthy, but using it will 
-    //   throw an exception: http://crbug.com/42380
-    // We can create a dummy database, but there is no way to delete it afterwards. 
-    
-    // Meanwhile, Safari users can get prompted on any database creation.
-    //   If they do, any page with Modernizr will give them a prompt:
-    //   http://github.com/Modernizr/Modernizr/issues/closed#issue/113
-    
-    // We have chosen to allow the Chrome incognito false positive, so that Modernizr
-    //   doesn't litter the web with these test databases. As a developer, you'll have
-    //   to account for this gotcha yourself.
-    tests['websqldatabase'] = function() {
+    tests[websqldatabase] = function() {
       var result = !!window.openDatabase;
-      /*
       if (result){
         try {
-          result = !!openDatabase( mod + "testdb", "1.0", mod + "testdb", 2e4);
-        } catch(e) {
+          result = !!openDatabase("testdb", "1.0", "html5 test db", 200000);
+        } catch(err) {
+          result = false;
         }
       }
-      */
       return result;
     };
     
-    // Vendors have inconsistent prefixing with the experimental Indexed DB:
-    // - Firefox is shipping indexedDB in FF4 as moz_indexedDB
-    // - Webkit's implementation is accessible through webkitIndexedDB
-    // We test both styles.
-    tests['indexedDB'] = function(){
-      for (var i = -1, len = domPrefixes.length; ++i < len; ){ 
-        var prefix = domPrefixes[i].toLowerCase();
-        if (window[prefix + '_indexedDB'] || window[prefix + 'IndexedDB']){
-          return true;
-        } 
-      }
-      return false;
+    tests[indexedDB] = function(){
+      return !!window[indexedDB];
     };
 
     // documentMode logic from YUI to filter out IE8 Compat Mode
     //   which false positives.
-    tests['hashchange'] = function() {
-      return isEventSupported('hashchange', window) && ( document.documentMode === undefined || document.documentMode > 7 );
+    tests[hashchange] = function() {
+      return isEventSupported(hashchange, window) && ( document.documentMode === undefined || document.documentMode > 7 );
     };
 
-    // Per 1.6: 
-    // This used to be Modernizr.historymanagement but the longer
-    // name has been deprecated in favor of a shorter and property-matching one.
-    // The old API is still available in 1.6, but as of 2.0 will throw a warning,
-    // and in the first release thereafter disappear entirely.
-    tests['history'] = function() {
+    tests[historymanagement] = function() {
       return !!(window.history && history.pushState);
     };
 
-    tests['draganddrop'] = function() {
-        return  isEventSupported('drag') && 
-                isEventSupported('dragstart') && 
-                isEventSupported('dragenter') &&
-                isEventSupported('dragover') &&
-                isEventSupported('dragleave') &&
-                isEventSupported('dragend') &&
-                isEventSupported('drop');
+    tests[draganddrop] = function() {
+        return isEventSupported('drag')
+            && isEventSupported('dragstart')
+            && isEventSupported('dragenter')
+            && isEventSupported('dragover')
+            && isEventSupported('dragleave')
+            && isEventSupported('dragend')
+            && isEventSupported('drop');
     };
+
     
-    tests['websockets'] = function(){
+    tests[websockets] = function(){
         return ('WebSocket' in window);
     };
     
     
     // http://css-tricks.com/rgba-browser-support/
-    tests['rgba'] = function() {
+    tests[rgba] = function() {
         // Set an rgba() color and check the returned value
         
-        set_css(  'background-color:rgba(150,255,150,.5)' );
+        set_css( background + '-color:rgba(150,255,150,.5)' );
         
-        return contains( m_style.backgroundColor, 'rgba' );
+        return contains( m_style[backgroundColor], rgba );
     };
     
-    tests['hsla'] = function() {
-        // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally,
-        //   except IE9 who retains it as hsla
+    tests[hsla] = function() {
+        // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally
         
-        set_css('background-color:hsla(120,40%,100%,.5)' );
+        set_css( background + '-color:hsla(120,40%,100%,.5)' );
         
-        return contains( m_style.backgroundColor, 'rgba' ) || contains( m_style.backgroundColor, 'hsla' );
+        return contains( m_style[backgroundColor], rgba );
     };
     
-    tests['multiplebgs'] = function() {
+    tests[multiplebgs] = function() {
         // Setting multiple images AND a color on the background shorthand property
         //  and then querying the style.background property value for the number of
         //  occurrences of "url(" is a reliable method for detecting ACTUAL support for this!
         
-        set_css( 'background:url(//:),url(//:),red url(//:)' );
+        set_css( background + ':url(//:),url(//:),red url(//:)' );
         
         // If the UA supports multiple backgrounds, there should be three occurrences
-        //   of the string "url(" in the return value for elem_style.background
+        //  of the string "url(" in the return value for elem_style.background
 
-        return new RegExp("(url\\s*\\(.*?){3}").test(m_style.background);
+        return new RegExp("(url\\s*\\(.*?){3}").test(m_style[background]);
     };
     
     
@@ -455,24 +384,24 @@ window.Modernizr = (function(window,doc,undefined){
     // on our modernizr element, but instead just testing undefined vs
     // empty string.
     // The legacy set_css_all calls will remain in the source 
-    // (however, commented) for clarity, yet functionally they are 
+    // (however, commented) in for clarity, yet functionally they are 
     // no longer needed.
     
 
-    tests['backgroundsize'] = function() {
-        return test_props_all( 'backgroundSize' );
+    tests[backgroundsize] = function() {
+        return test_props_all( background + 'Size' );
     };
     
-    tests['borderimage'] = function() {
+    tests[borderimage] = function() {
         //  set_css_all( 'border-image:url(m.png) 1 1 stretch' );
         return test_props_all( 'borderImage' );
     };
     
     
-    // Super comprehensive table about all the unique implementations of 
+    // super comprehensive table about all the unique implementations of 
     // border-radius: http://muddledramblings.com/table-of-css3-border-radius-compliance
     
-    tests['borderradius'] = function() {
+    tests[borderradius] = function() {
         //  set_css_all( 'border-radius:10px' );
         return test_props_all( 'borderRadius', '', function( prop ) {
             return contains( prop, 'orderRadius' );
@@ -480,41 +409,36 @@ window.Modernizr = (function(window,doc,undefined){
     };
     
     
-    tests['boxshadow'] = function() {
+    tests[boxshadow] = function() {
         //  set_css_all( 'box-shadow:#000 1px 1px 3px' );
         return test_props_all( 'boxShadow' );
     };
     
-    // Note: FF3.0 will false positive on this test 
-    tests['textshadow'] = function(){
-        return doc.createElement('div').style.textShadow === '';
-    };
     
-    
-    tests['opacity'] = function() {
+    tests[opacity] = function() {
         // Browsers that actually have CSS Opacity implemented have done so
         //  according to spec, which means their return values are within the
         //  range of [0.0,1.0] - including the leading zero.
         
         set_css_all( 'opacity:.5' );
         
-        return contains( m_style.opacity, '0.5' );
+        return contains( m_style[opacity], '0.5' );
     };
     
     
-    tests['cssanimations'] = function() {
+    tests[cssanimations] = function() {
         //  set_css_all( 'animation:"animate" 2s ease 2', 'position:relative' );
         return test_props_all( 'animationName' );
     };
     
     
-    tests['csscolumns'] = function() {
+    tests[csscolumns] = function() {
         //  set_css_all( 'column-count:3' );
         return test_props_all( 'columnCount' );
     };
     
     
-    tests['cssgradients'] = function() {
+    tests[cssgradients] = function() {
         /**
          * For CSS Gradients syntax, please see:
          * http://webkit.org/blog/175/introducing-css-gradients/
@@ -523,7 +447,7 @@ window.Modernizr = (function(window,doc,undefined){
          * http://dev.w3.org/csswg/css3-images/#gradients-
          */
         
-        var str1 = 'background-image:',
+        var str1 = background + '-image:',
             str2 = 'gradient(linear,left top,right bottom,from(#9f9),to(white));',
             str3 = 'linear-gradient(left top,#9f9, white);';
         
@@ -535,149 +459,169 @@ window.Modernizr = (function(window,doc,undefined){
     };
     
     
-    tests['cssreflections'] = function() {
+    tests[cssreflections] = function() {
         //  set_css_all( 'box-reflect:right 1px' );
         return test_props_all( 'boxReflect' );
     };
     
     
-    tests['csstransforms'] = function() {
+    tests[csstransforms] = function() {
         //  set_css_all( 'transform:rotate(3deg)' );
         return !!test_props([ 'transformProperty', 'WebkitTransform', 'MozTransform', 'OTransform', 'msTransform' ]);
     };
     
     
-    tests['csstransforms3d'] = function() {
+    tests[csstransforms3d] = function() {
         //  set_css_all( 'perspective:500' );
         
         var ret = !!test_props([ 'perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective' ]);
         
-        // Webkit’s 3D transforms are passed off to the browser's own graphics renderer.
-        //   It works fine in Safari on Leopard and Snow Leopard, but not in Chrome (yet?).
-        //   As a result, Webkit typically recognizes the syntax but will sometimes throw a false
-        //   positive, thus we must do a more thorough check:
+        // webkit has 3d transforms disabled for chrome, though
+        //   it works fine in safari on leopard and snow leopard
+        // as a result, it 'recognizes' the syntax and throws a false positive
+        // thus we must do a more thorough check:
         if (ret){
-          
-          // Webkit allows this media query to succeed only if the feature is enabled.    
-          // "@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),(-ms-transform-3d),(-webkit-transform-3d),(modernizr){ ... }"      
-          ret = testMediaQuery('@media ('+prefixes.join('transform-3d),(')+'modernizr)');
+            var st = document.createElement('style'),
+                div = doc.createElement('div');
+                
+            // webkit allows this media query to succeed only if the feature is enabled.    
+            // "@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),(-ms-transform-3d),(-webkit-transform-3d),(modernizr){#modernizr{height:3px}}"
+            st.textContent = '@media ('+prefixes.join('transform-3d),(')+'modernizr){#modernizr{height:3px}}';
+            doc.getElementsByTagName('head')[0].appendChild(st);
+            div.id = 'modernizr';
+            docElement.appendChild(div);
+            
+            ret = div.offsetHeight === 3;
+            
+            st.parentNode.removeChild(st);
+            div.parentNode.removeChild(div);
         }
         return ret;
     };
     
     
-    tests['csstransitions'] = function() {
+    tests[csstransitions] = function() {
         //  set_css_all( 'transition:all .5s linear' );
         return test_props_all( 'transitionProperty' );
     };
 
 
-    // @font-face detection routine by Diego Perini
-    // http://javascript.nwbox.com/CSSSupport/
-    tests['fontface'] = function(){
+    // @font-face detection routine created by Paul Irish - paulirish.com
+    // Merged into Modernizr with approval. Read more about Paul's work here:
+    // http://paulirish.com/2009/font-face-feature-detection/  
+    tests[fontface] = function(){
 
-        var 
-        sheet,
-        head = doc.head || doc.getElementsByTagName('head')[0] || docElement,
-        style = doc.createElement("style"),
-        impl = doc.implementation || { hasFeature: function() { return false; } };
-        
-        style.type = 'text/css';
-        head.insertBefore(style, head.firstChild);
-        sheet = style.sheet || style.styleSheet;
+        var fontret;
+        if (/*@cc_on@if(@_jscript_version>=5)!@end@*/0) fontret = true;
+  
+        else {
+      
+          // Create variables for dedicated @font-face test
+          var st  = doc.createElement('style'),
+            spn = doc.createElement('span'),
+            size, isFakeBody = false, body = doc.body,
+            callback, isCallbackCalled;
+  
+          // The following is a font-face + glyph definition for the . character:
+          st.textContent = "@font-face{font-family:testfont;src:url('data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMliohmwAAADMAAAAVmNtYXCp5qrBAAABJAAAANhjdnQgACICiAAAAfwAAAAEZ2FzcP//AAMAAAIAAAAACGdseWYv5OZoAAACCAAAANxoZWFk69bnvwAAAuQAAAA2aGhlYQUJAt8AAAMcAAAAJGhtdHgGDgC4AAADQAAAABRsb2NhAIQAwgAAA1QAAAAMbWF4cABVANgAAANgAAAAIG5hbWUgXduAAAADgAAABPVwb3N03NkzmgAACHgAAAA4AAECBAEsAAUAAAKZAswAAACPApkCzAAAAesAMwEJAAACAAMDAAAAAAAAgAACbwAAAAoAAAAAAAAAAFBmRWQAAAAgqS8DM/8zAFwDMwDNAAAABQAAAAAAAAAAAAMAAAADAAAAHAABAAAAAABGAAMAAQAAAK4ABAAqAAAABgAEAAEAAgAuqQD//wAAAC6pAP///9ZXAwAAAAAAAAACAAAABgBoAAAAAAAvAAEAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEACoAAAAGAAQAAQACAC6pAP//AAAALqkA////1lcDAAAAAAAAAAIAAAAiAogAAAAB//8AAgACACIAAAEyAqoAAwAHAC6xAQAvPLIHBADtMrEGBdw8sgMCAO0yALEDAC88sgUEAO0ysgcGAfw8sgECAO0yMxEhESczESMiARDuzMwCqv1WIgJmAAACAFUAAAIRAc0ADwAfAAATFRQWOwEyNj0BNCYrASIGARQGKwEiJj0BNDY7ATIWFX8aIvAiGhoi8CIaAZIoN/43KCg3/jcoAWD0JB4eJPQkHh7++EY2NkbVRjY2RgAAAAABAEH/+QCdAEEACQAANjQ2MzIWFAYjIkEeEA8fHw8QDxwWFhwWAAAAAQAAAAIAAIuYbWpfDzz1AAsEAAAAAADFn9IuAAAAAMWf0i797/8zA4gDMwAAAAgAAgAAAAAAAAABAAADM/8zAFwDx/3v/98DiAABAAAAAAAAAAAAAAAAAAAABQF2ACIAAAAAAVUAAAJmAFUA3QBBAAAAKgAqACoAWgBuAAEAAAAFAFAABwBUAAQAAgAAAAEAAQAAAEAALgADAAMAAAAQAMYAAQAAAAAAAACLAAAAAQAAAAAAAQAhAIsAAQAAAAAAAgAFAKwAAQAAAAAAAwBDALEAAQAAAAAABAAnAPQAAQAAAAAABQAKARsAAQAAAAAABgAmASUAAQAAAAAADgAaAUsAAwABBAkAAAEWAWUAAwABBAkAAQBCAnsAAwABBAkAAgAKAr0AAwABBAkAAwCGAscAAwABBAkABABOA00AAwABBAkABQAUA5sAAwABBAkABgBMA68AAwABBAkADgA0A/tDb3B5cmlnaHQgMjAwOSBieSBEYW5pZWwgSm9obnNvbi4gIFJlbGVhc2VkIHVuZGVyIHRoZSB0ZXJtcyBvZiB0aGUgT3BlbiBGb250IExpY2Vuc2UuIEtheWFoIExpIGdseXBocyBhcmUgcmVsZWFzZWQgdW5kZXIgdGhlIEdQTCB2ZXJzaW9uIDMuYmFlYzJhOTJiZmZlNTAzMiAtIHN1YnNldCBvZiBKdXJhTGlnaHRiYWVjMmE5MmJmZmU1MDMyIC0gc3Vic2V0IG9mIEZvbnRGb3JnZSAyLjAgOiBKdXJhIExpZ2h0IDogMjMtMS0yMDA5YmFlYzJhOTJiZmZlNTAzMiAtIHN1YnNldCBvZiBKdXJhIExpZ2h0VmVyc2lvbiAyIGJhZWMyYTkyYmZmZTUwMzIgLSBzdWJzZXQgb2YgSnVyYUxpZ2h0aHR0cDovL3NjcmlwdHMuc2lsLm9yZy9PRkwAQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMAA5ACAAYgB5ACAARABhAG4AaQBlAGwAIABKAG8AaABuAHMAbwBuAC4AIAAgAFIAZQBsAGUAYQBzAGUAZAAgAHUAbgBkAGUAcgAgAHQAaABlACAAdABlAHIAbQBzACAAbwBmACAAdABoAGUAIABPAHAAZQBuACAARgBvAG4AdAAgAEwAaQBjAGUAbgBzAGUALgAgAEsAYQB5AGEAaAAgAEwAaQAgAGcAbAB5AHAAaABzACAAYQByAGUAIAByAGUAbABlAGEAcwBlAGQAIAB1AG4AZABlAHIAIAB0AGgAZQAgAEcAUABMACAAdgBlAHIAcwBpAG8AbgAgADMALgBiAGEAZQBjADIAYQA5ADIAYgBmAGYAZQA1ADAAMwAyACAALQAgAHMAdQBiAHMAZQB0ACAAbwBmACAASgB1AHIAYQBMAGkAZwBoAHQAYgBhAGUAYwAyAGEAOQAyAGIAZgBmAGUANQAwADMAMgAgAC0AIABzAHUAYgBzAGUAdAAgAG8AZgAgAEYAbwBuAHQARgBvAHIAZwBlACAAMgAuADAAIAA6ACAASgB1AHIAYQAgAEwAaQBnAGgAdAAgADoAIAAyADMALQAxAC0AMgAwADAAOQBiAGEAZQBjADIAYQA5ADIAYgBmAGYAZQA1ADAAMwAyACAALQAgAHMAdQBiAHMAZQB0ACAAbwBmACAASgB1AHIAYQAgAEwAaQBnAGgAdABWAGUAcgBzAGkAbwBuACAAMgAgAGIAYQBlAGMAMgBhADkAMgBiAGYAZgBlADUAMAAzADIAIAAtACAAcwB1AGIAcwBlAHQAIABvAGYAIABKAHUAcgBhAEwAaQBnAGgAdABoAHQAdABwADoALwAvAHMAYwByAGkAcAB0AHMALgBzAGkAbAAuAG8AcgBnAC8ATwBGAEwAAAAAAgAAAAAAAP+BADMAAAAAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAQACAQIAEQt6ZXJva2F5YWhsaQ==')}";
+          doc.getElementsByTagName('head')[0].appendChild(st);
+      
+          // we don't use `serif` and we don't use `monospace`
+          // http://github.com/Modernizr/Modernizr/issues/closed#issue/39
+          // http://neugierig.org/software/chromium/notes/2009/09/monospace-fonts-workaround.html
+          spn.setAttribute('style','font:99px _,arial,helvetica;position:absolute;visibility:hidden'); 
+      
+          if  (!body){
+            body = docElement.appendChild(doc.createElement(fontface));
+            isFakeBody = true;
+          } 
+      
+          // the data-uri'd font only has the . glyph; which is 3 pixels wide.
+          spn.innerHTML = '........';
+          spn.id        = 'fonttest';
+      
+          body.appendChild(spn);
+          size = spn.offsetWidth*spn.offsetHeight;
+          spn.style.font = '99px testfont,_,arial,helvetica';
+      
+          // needed for the CSSFontFaceRule false positives (ff3, chrome, op9)
+          fontret = size !== spn.offsetWidth*spn.offsetHeight;
+      
+          function delayedCheck(){
+            if (!body.parentNode) return;
+            fontret = ret[fontface] = size !== spn.offsetWidth*spn.offsetHeight;
+            docElement.className = docElement.className.replace(/(no-)?fontface\b/,'') + (fontret ? ' ' : ' no-') + fontface;
+          }
 
-        // removing it crashes IE browsers
-        //head.removeChild(style);
+          setTimeout(delayedCheck,fontfaceCheckDelay);
+          setTimeout(delayedCheck,fontfaceCheckDelay*2);
+          addEventListener('load',function(){
+              delayedCheck();
+              (isCallbackCalled = true) && callback && callback(fontret);
+              setTimeout(function(){
+                  if (!isFakeBody) body = spn;
+                  body.parentNode.removeChild(body);
+                  st.parentNode.removeChild(st);
+              }, 50);
+          },false);
+        }
 
-        var supportAtRule = impl.hasFeature('CSS2', '') ?
-                function(rule) {
-                    if (!(sheet && rule)) return false;
-                    var result = false;
-                    try {
-                        sheet.insertRule(rule, 0);
-                        result = !(/unknown/i).test(sheet.cssRules[0].cssText);
-                        sheet.deleteRule(sheet.cssRules.length - 1);
-                    } catch(e) { }
-                    return result;
-                } :
-                function(rule) {
-                    if (!(sheet && rule)) return false;
-                    sheet.cssText = rule;
-                    
-                    return sheet.cssText.length !== 0 && !(/unknown/i).test(sheet.cssText) &&
-                      sheet.cssText
-                            .replace(/\r+|\n+/g, '')
-                            .indexOf(rule.split(' ')[0]) === 0;
-                };
-
-
-        // DEPRECATED - allow for a callback
+        // allow for a callback
         ret._fontfaceready = function(fn){
-          fn(ret.fontface);
-        };
-        
-        return supportAtRule('@font-face { font-family: "font"; src: "font.ttf"; }');
-        
+          (isCallbackCalled || fontret) ? fn(fontret) : (callback = fn);
+        }
+      
+        return fontret || size !== spn.offsetWidth;
+    
     };
     
 
     // These tests evaluate support of the video/audio elements, as well as
     // testing what types of content they support.
     //
-    // We're using the Boolean constructor here, so that we can extend the value
+    // we're using the Boolean constructor here, so that we can extend the value
     // e.g.  Modernizr.video     // true
     //       Modernizr.video.ogg // 'probably'
     //
-    // Codec values from : http://github.com/NielsLeenheer/html5test/blob/9106a8/index.html#L845
+    // codec values from : http://github.com/NielsLeenheer/html5test/blob/9106a8/index.html#L845
     //                     thx to NielsLeenheer and zcorpan
     
-    // Note: in FF 3.5.1 and 3.5.0, "no" was a return value instead of empty string.
-    //   Modernizr does not normalize for that.
-    
-    tests['video'] = function() {
-        var elem = doc.createElement('video'),
-            bool = !!elem.canPlayType;
+    tests[video] = function() {
+        var elem = doc.createElement(video),
+            bool = !!elem[canPlayType];
         
         if (bool){  
             bool      = new Boolean(bool);  
-            bool.ogg  = elem.canPlayType('video/ogg; codecs="theora"');
-            
-            // Workaround required for IE9, which doesn't report video support without audio codec specified.
-            //   bug 599718 @ msft connect
-            var h264 = 'video/mp4; codecs="avc1.42E01E';
-            bool.h264 = elem.canPlayType(h264 + '"') || elem.canPlayType(h264 + ', mp4a.40.2"');
-            
-            bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"');
+            bool.ogg  = elem[canPlayType]('video/ogg; codecs="theora"');
+            bool.h264 = elem[canPlayType]('video/mp4; codecs="avc1.42E01E"');
+            bool.webm = elem[canPlayType]('video/webm; codecs="vp8, vorbis"');
         }
         return bool;
     };
     
-    tests['audio'] = function() {
-        var elem = doc.createElement('audio'),
-            bool = !!elem.canPlayType;
+    tests[audio] = function() {
+        var elem = doc.createElement(audio),
+            bool = !!elem[canPlayType];
         
         if (bool){  
             bool      = new Boolean(bool);  
-            bool.ogg  = elem.canPlayType('audio/ogg; codecs="vorbis"');
-            bool.mp3  = elem.canPlayType('audio/mpeg;');
+            bool.ogg  = elem[canPlayType]('audio/ogg; codecs="vorbis"');
+            bool.mp3  = elem[canPlayType]('audio/mpeg;');
             
-            // Mimetypes accepted: 
+            // mimetypes accepted: 
             //   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
             //   http://bit.ly/iphoneoscodecs
-            bool.wav  = elem.canPlayType('audio/wav; codecs="1"');
-            bool.m4a  = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;');
+            bool.wav  = elem[canPlayType]('audio/wav; codecs="1"');
+            bool.m4a  = elem[canPlayType]('audio/x-m4a;') || elem[canPlayType]('audio/aac;');
         }
         return bool;
     };
 
 
-    // Both localStorage and sessionStorage are
-    //   tested via the `in` operator because otherwise Firefox will
+    // both localStorage and sessionStorage are
+    // tested in this method because otherwise Firefox will
     //   throw an error: https://bugzilla.mozilla.org/show_bug.cgi?id=365772
-    //   if cookies are disabled
-    
-    // They require try/catch because of possible firefox configuration:
-    //   http://github.com/Modernizr/Modernizr/issues#issue/92
+    // if cookies are disabled
     
     // FWIW miller device resolves to [object Storage] in all supporting browsers
     //   except for IE who does [object Object]
@@ -685,58 +629,50 @@ window.Modernizr = (function(window,doc,undefined){
     // IE8 Compat mode supports these features completely:
     //   http://www.quirksmode.org/dom/html5.html
     
-    tests['localstorage'] = function() {
-        try {
-          return ('localStorage' in window) && window.localStorage !== null;
-        } catch(e) {
-          return false;
-        }
+    tests[localstorage] = function() {
+        return ('localStorage' in window) && window[localstorage] !== null;
     };
 
-    tests['sessionstorage'] = function() {
+    tests[sessionstorage] = function() {
+        // try/catch required for pissy FF behavior
         try {
-            return ('sessionStorage' in window) && window.sessionStorage !== null;
+            return ('sessionStorage' in window) && window[sessionstorage] !== null;
         } catch(e){
             return false;
         }
     };
 
 
-    tests['webWorkers'] = function () {
+    tests[webWorkers] = function () {
         return !!window.Worker;
     };
 
 
-    tests['applicationcache'] =  function() {
-        return !!window.applicationCache;
+    tests[applicationcache] =  function() {
+        var cache = window[applicationcache];
+        return !!(cache && (typeof cache.status != 'undefined') && (typeof cache.update == 'function') && (typeof cache.swapCache == 'function'));
     };
 
  
-    // Thanks to Erik Dahlstrom
-    tests['svg'] = function(){
-        return !!doc.createElementNS && !!doc.createElementNS(ns.svg, "svg").createSVGRect;
+    // thanks to Erik Dahlstrom
+    tests[svg] = function(){
+        return !!doc.createElementNS && !!doc.createElementNS( "http://www.w3.org/2000/svg", "svg").createSVGRect;
     };
-
-    tests['inlinesvg'] = function() {
-      var div = document.createElement('div');
-      div.innerHTML = '<svg/>';
-      return (div.firstChild && div.firstChild.namespaceURI) == ns.svg;
-    };
-
-    // Thanks to F1lt3r and lucideer
+    
+    // thanks to F1lt3r and lucideer
     // http://github.com/Modernizr/Modernizr/issues#issue/35
-    tests['smil'] = function(){
-        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS(ns.svg,'animate')));
+    tests[smil] = function(){
+        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS('http://www.w3.org/2000/svg','animate')));
     };
 
-    tests['svgclippaths'] = function(){
-        // Possibly returns a false positive in Safari 3.2?
-        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS(ns.svg,'clipPath')));
+    tests[svgclippaths] = function(){
+        // returns a false positive in saf 3.2?
+        return !!doc.createElementNS && /SVG/.test(tostring.call(doc.createElementNS('http://www.w3.org/2000/svg','clipPath')));
     };
 
 
     // input features and input types go directly onto the ret object, bypassing the tests loop.
-    // Hold this guy to execute in a moment.
+    // hold this guy to execute in a moment.
     function webforms(){
     
         // Run through HTML5's new input attributes to see if the UA understands any.
@@ -745,7 +681,7 @@ window.Modernizr = (function(window,doc,undefined){
         //   when applied to all input types: 
         //   http://miketaylr.com/code/input-type-attr.html
         // spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-input-element.html#input-type-attr-summary
-        ret['input'] = (function(props) {
+        ret[input] = (function(props) {
             for (var i = 0,len=props.length;i<len;i++) {
                 attrs[ props[i] ] = !!(props[i] in f);
             }
@@ -757,48 +693,34 @@ window.Modernizr = (function(window,doc,undefined){
         //   true/false like all the other tests; instead, it returns an object
         //   containing each input type with its corresponding true/false value 
         
-        // Big thanks to @miketaylr for the html5 forms expertise. http://miketaylr.com/
-        ret['inputtypes'] = (function(props) {
-            for (var i = 0, bool, len=props.length ; i < len ; i++) {
-              
+        // Big thx to @miketaylr for the html5 forms expertise. http://miketaylr.com/
+        ret[inputtypes] = (function(props) {
+            for (var i = 0,bool,len=props.length;i<len;i++) {
                 f.setAttribute('type', props[i]);
                 bool = f.type !== 'text';
                 
-                // Chrome likes to falsely purport support, so we feed it a textual value;
+                // chrome likes to falsely purport support, so we feed it a textual value
                 // if that doesnt succeed then we know there's a custom UI
                 if (bool){  
 
                     f.value = smile;
-     
-                    if (/^range$/.test(f.type) && f.style.WebkitAppearance !== undefined){
-                      
-                      docElement.appendChild(f);
-                      var defaultView = doc.defaultView;
-                      
-                      // Safari 2-4 allows the smiley as a value, despite making a slider
-                      bool =  defaultView.getComputedStyle && 
-                              defaultView.getComputedStyle(f, null).WebkitAppearance !== 'textfield' && 
-                      
-                              // Mobile android web browser has false positive, so must
-                              // check the height to see if the widget is actually there.
-                              (f.offsetHeight !== 0);
-                              
-                      docElement.removeChild(f);
-                              
-                    } else if (/^(search|tel)$/.test(f.type)){
-                      // Spec doesnt define any special parsing or detectable UI 
+                    
+                    /* Safari 4 is allowing the smiley as a value, and incorrecty failing..
+                       the test fixes for webkit only, but breaks Opera.. 
+                    if (/range/.test(f.type)){
+                      bool =  test_props_all('appearance',function(prop,m){ return m_style[prop] !== 'textfield' })  
+                    } 
+                    */
+                            
+                    if (/tel|search/.test(f.type)){
+                      // spec doesnt define any special parsing or detectable UI 
                       //   behaviors so we pass these through as true
                       
-                      // Interestingly, opera fails the earlier test, so it doesn't
-                      //  even make it here.
-                      
-                    } else if (/^(url|email)$/.test(f.type)) {
-
-                      // Real url and email support comes with prebaked validation.
+                    } else if (/url|email/.test(f.type)) {
+                      // real url and email support comes with prebaked validation.
                       bool = f.checkValidity && f.checkValidity() === false;
                       
                     } else {
-                      // If the upgraded input compontent rejects the :) text, we got a winner
                       bool = f.value != smile;
                     }
                 }
@@ -812,8 +734,7 @@ window.Modernizr = (function(window,doc,undefined){
 
 
 
-    // End of test definitions
-
+    // end of test definitions
 
 
     // Run through all tests and detect their support in the current UA.
@@ -823,21 +744,15 @@ window.Modernizr = (function(window,doc,undefined){
             // run the test, throw the return value into the Modernizr,
             //   then based on that boolean, define an appropriate className
             //   and push it into an array of classes we'll join later.
-            featurename  = feature.toLowerCase();
-            ret[ featurename ] = tests[ feature ]();
-
-            classes.push( ( ret[ featurename ] ? '' : 'no-' ) + featurename );
+            classes.push( ( ( ret[ feature.toLowerCase() ] = tests[ feature ]() ) ?  '' : 'no-' ) + feature.toLowerCase() );
         }
     }
     
     // input tests need to run.
-    if (!ret.input) webforms();
+    if (!ret[input]) webforms();
     
 
    
-    // Per 1.6: deprecated API is still accesible for now:
-    ret.crosswindowmessaging = ret.postmessage;
-    ret.historymanagement = ret.history;
 
 
 
@@ -870,11 +785,11 @@ window.Modernizr = (function(window,doc,undefined){
     // Enable HTML 5 elements for styling in IE. 
     // fyi: jscript version does not reflect trident version
     //      therefore ie9 in ie7 mode will still have a jScript v.9
-    if ( enableHTML5 && window.attachEvent && (function(){ var elem = doc.createElement("div");
+    if ( enableHTML5 && (function(){ var elem = doc.createElement("div");
                                       elem.innerHTML = "<elem></elem>";
                                       return elem.childNodes.length !== 1; })()) {
-        // iepp v1.6 by @jon_neal : code.google.com/p/ie-print-protector
-        (function(f,l){var j="abbr|article|aside|audio|canvas|details|figcaption|figure|footer|header|hgroup|mark|meter|nav|output|progress|section|summary|time|video",n=j.split("|"),k=n.length,g=new RegExp("<(/*)("+j+")","gi"),h=new RegExp("\\b("+j+")\\b(?!.*[;}])","gi"),m=l.createDocumentFragment(),d=l.documentElement,i=d.firstChild,b=l.createElement("style"),e=l.createElement("body");b.media="all";function c(p){var o=-1;while(++o<k){p.createElement(n[o])}}c(l);c(m);function a(t,s){var r=t.length,q=-1,o,p=[];while(++q<r){o=t[q];s=o.media||s;p.push(a(o.imports,s));p.push(o.cssText)}return p.join("")}f.attachEvent("onbeforeprint",function(){var r=-1;while(++r<k){var o=l.getElementsByTagName(n[r]),q=o.length,p=-1;while(++p<q){if(o[p].className.indexOf("iepp_")<0){o[p].className+=" iepp_"+n[r]}}}i.insertBefore(b,i.firstChild);b.styleSheet.cssText=a(l.styleSheets,"all").replace(h,".iepp_$1");m.appendChild(l.body);d.appendChild(e);e.innerHTML=m.firstChild.innerHTML.replace(g,"<$1bdo")});f.attachEvent("onafterprint",function(){e.innerHTML="";d.removeChild(e);i.removeChild(b);d.appendChild(m.firstChild)})})(this,document);
+        // iepp v1.5.1 MIT @jon_neal  http://code.google.com/p/ie-print-protector/
+        (function(p,e){function q(a,b){if(g[a])g[a].styleSheet.cssText+=b;else{var c=r[l],d=e[j]("style");d.media=a;c.insertBefore(d,c[l]);g[a]=d;q(a,b)}}function s(a,b){for(var c=new RegExp("\\b("+m+")\\b(?!.*[;}])","gi"),d=function(k){return".iepp_"+k},h=-1;++h<a.length;){b=a[h].media||b;s(a[h].imports,b);q(b,a[h].cssText.replace(c,d))}}function t(){for(var a,b=e.getElementsByTagName("*"),c,d,h=new RegExp("^"+m+"$","i"),k=-1;++k<b.length;)if((a=b[k])&&(d=a.nodeName.match(h))){c=new RegExp("^\\s*<"+d+"(.*)\\/"+d+">\\s*$","i");i.innerHTML=a.outerHTML.replace(/\r|\n/g," ").replace(c,a.currentStyle.display=="block"?"<div$1/div>":"<span$1/span>");c=i.childNodes[0];c.className+=" iepp_"+d;c=f[f.length]=[a,c];a.parentNode.replaceChild(c[1],c[0])}s(e.styleSheets,"all")}function u(){for(var a=-1,b;++a<f.length;)f[a][1].parentNode.replaceChild(f[a][0],f[a][1]);for(b in g)r[l].removeChild(g[b]);g={};f=[]}for(var r=e.documentElement,i=e.createDocumentFragment(),g={},m="abbr|article|aside|audio|canvas|command|datalist|details|figure|figcaption|footer|header|hgroup|keygen|mark|meter|nav|output|progress|section|source|summary|time|video",n=m.split("|"),f=[],o=-1,l="firstChild",j="createElement";++o<n.length;){e[j](n[o]);i[j](n[o])}i=i.appendChild(e[j]("div"));p.attachEvent("onbeforeprint",t);p.attachEvent("onafterprint",u)})(this,doc);
     }
 
     // Assign private properties to the return object with prefix
@@ -891,364 +806,40 @@ window.Modernizr = (function(window,doc,undefined){
 
 })(this,this.document);
 
-/*
-  mustache.js — Logic-less templates in JavaScript
-
-  See http://mustache.github.com/ for more info.
-*/
-
-var Mustache = function() {
-  var Renderer = function() {};
-
-  Renderer.prototype = {
-    otag: "{{",
-    ctag: "}}",
-    pragmas: {},
-    buffer: [],
-    pragmas_implemented: {
-      "IMPLICIT-ITERATOR": true
-    },
-    context: {},
-
-    render: function(template, context, partials, in_recursion) {
-      // reset buffer & set context
-      if(!in_recursion) {
-        this.context = context;
-        this.buffer = []; // TODO: make this non-lazy
-      }
-
-      // fail fast
-      if(!this.includes("", template)) {
-        if(in_recursion) {
-          return template;
-        } else {
-          this.send(template);
-          return;
-        }
-      }
-
-      template = this.render_pragmas(template);
-      var html = this.render_section(template, context, partials);
-      if(in_recursion) {
-        return this.render_tags(html, context, partials, in_recursion);
-      }
-
-      this.render_tags(html, context, partials, in_recursion);
-    },
-
-    /*
-      Sends parsed lines
-    */
-    send: function(line) {
-      if(line != "") {
-        this.buffer.push(line);
-      }
-    },
-
-    /*
-      Looks for %PRAGMAS
-    */
-    render_pragmas: function(template) {
-      // no pragmas
-      if(!this.includes("%", template)) {
-        return template;
-      }
-
-      var that = this;
-      var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
-            this.ctag);
-      return template.replace(regex, function(match, pragma, options) {
-        if(!that.pragmas_implemented[pragma]) {
-          throw({message: 
-            "This implementation of mustache doesn't understand the '" +
-            pragma + "' pragma"});
-        }
-        that.pragmas[pragma] = {};
-        if(options) {
-          var opts = options.split("=");
-          that.pragmas[pragma][opts[0]] = opts[1];
-        }
-        return "";
-        // ignore unknown pragmas silently
-      });
-    },
-
-    /*
-      Tries to find a partial in the curent scope and render it
-    */
-    render_partial: function(name, context, partials) {
-      name = this.trim(name);
-      if(!partials || partials[name] === undefined) {
-        throw({message: "unknown_partial '" + name + "'"});
-      }
-      if(typeof(context[name]) != "object") {
-        return this.render(partials[name], context, partials, true);
-      }
-      return this.render(partials[name], context[name], partials, true);
-    },
-
-    /*
-      Renders inverted (^) and normal (#) sections
-    */
-    render_section: function(template, context, partials) {
-      if(!this.includes("#", template) && !this.includes("^", template)) {
-        return template;
-      }
-
-      var that = this;
-      // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
-              "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
-              "\\s*", "mg");
-
-      // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, type, name, content) {
-        var value = that.find(name, context);
-        if(type == "^") { // inverted section
-          if(!value || that.is_array(value) && value.length === 0) {
-            // false or empty list, render it
-            return that.render(content, context, partials, true);
-          } else {
-            return "";
-          }
-        } else if(type == "#") { // normal section
-          if(that.is_array(value)) { // Enumerable, Let's loop!
-            return that.map(value, function(row) {
-              return that.render(content, that.create_context(row),
-                partials, true);
-            }).join("");
-          } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value),
-              partials, true);
-          } else if(typeof value === "function") {
-            // higher order section
-            return value.call(context, content, function(text) {
-              return that.render(text, context, partials, true);
-            });
-          } else if(value) { // boolean section
-            return that.render(content, context, partials, true);
-          } else {
-            return "";
-          }
-        }
-      });
-    },
-
-    /*
-      Replace {{foo}} and friends with values from our view
-    */
-    render_tags: function(template, context, partials, in_recursion) {
-      // tit for tat
-      var that = this;
-
-      var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
-          that.ctag + "+", "g");
-      };
-
-      var regex = new_regex();
-      var tag_replace_callback = function(match, operator, name) {
-        switch(operator) {
-        case "!": // ignore comments
-          return "";
-        case "=": // set new delimiters, rebuild the replace regexp
-          that.set_delimiters(name);
-          regex = new_regex();
-          return "";
-        case ">": // render partial
-          return that.render_partial(name, context, partials);
-        case "{": // the triple mustache is unescaped
-          return that.find(name, context);
-        default: // escape the value
-          return that.escape(that.find(name, context));
-        }
-      };
-      var lines = template.split("\n");
-      for(var i = 0; i < lines.length; i++) {
-        lines[i] = lines[i].replace(regex, tag_replace_callback, this);
-        if(!in_recursion) {
-          this.send(lines[i]);
-        }
-      }
-
-      if(in_recursion) {
-        return lines.join("\n");
-      }
-    },
-
-    set_delimiters: function(delimiters) {
-      var dels = delimiters.split(" ");
-      this.otag = this.escape_regex(dels[0]);
-      this.ctag = this.escape_regex(dels[1]);
-    },
-
-    escape_regex: function(text) {
-      // thank you Simon Willison
-      if(!arguments.callee.sRE) {
-        var specials = [
-          '/', '.', '*', '+', '?', '|',
-          '(', ')', '[', ']', '{', '}', '\\'
-        ];
-        arguments.callee.sRE = new RegExp(
-          '(\\' + specials.join('|\\') + ')', 'g'
-        );
-      }
-      return text.replace(arguments.callee.sRE, '\\$1');
-    },
-
-    /*
-      find `name` in current `context`. That is find me a value
-      from the view object
-    */
-    find: function(name, context) {
-      name = this.trim(name);
-
-      // Checks whether a value is thruthy or false or 0
-      function is_kinda_truthy(bool) {
-        return bool === false || bool === 0 || bool;
-      }
-
-      var value;
-      if(is_kinda_truthy(context[name])) {
-        value = context[name];
-      } else if(is_kinda_truthy(this.context[name])) {
-        value = this.context[name];
-      }
-
-      if(typeof value === "function") {
-        return value.apply(context);
-      }
-      if(value !== undefined) {
-        return value;
-      }
-      // silently ignore unkown variables
-      return "";
-    },
-
-    // Utility methods
-
-    /* includes tag */
-    includes: function(needle, haystack) {
-      return haystack.indexOf(this.otag + needle) != -1;
-    },
-
-    /*
-      Does away with nasty characters
-    */
-    escape: function(s) {
-      s = String(s === null ? "" : s);
-      return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
-        switch(s) {
-        case "&": return "&amp;";
-        case "\\": return "\\\\";
-        case '"': return '\"';
-        case "<": return "&lt;";
-        case ">": return "&gt;";
-        default: return s;
-        }
-      });
-    },
-
-    // by @langalex, support for arrays of strings
-    create_context: function(_context) {
-      if(this.is_object(_context)) {
-        return _context;
-      } else {
-        var iterator = ".";
-        if(this.pragmas["IMPLICIT-ITERATOR"]) {
-          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
-        }
-        var ctx = {};
-        ctx[iterator] = _context;
-        return ctx;
-      }
-    },
-
-    is_object: function(a) {
-      return a && typeof a == "object";
-    },
-
-    is_array: function(a) {
-      return Object.prototype.toString.call(a) === '[object Array]';
-    },
-
-    /*
-      Gets rid of leading and trailing whitespace
-    */
-    trim: function(s) {
-      return s.replace(/^\s*|\s*$/g, "");
-    },
-
-    /*
-      Why, why, why? Because IE. Cry, cry cry.
-    */
-    map: function(array, fn) {
-      if (typeof array.map == "function") {
-        return array.map(fn);
-      } else {
-        var r = [];
-        var l = array.length;
-        for(var i = 0; i < l; i++) {
-          r.push(fn(array[i]));
-        }
-        return r;
-      }
-    }
-  };
-
-  return({
-    name: "mustache.js",
-    version: "0.3.0",
-
-    /*
-      Turns a template and view into HTML
-    */
-    to_html: function(template, view, partials, send_fun) {
-      var renderer = new Renderer();
-      if(send_fun) {
-        renderer.send = send_fun;
-      }
-      renderer.render(template, view, partials);
-      if(!send_fun) {
-        return renderer.buffer.join("\n");
-      }
-    }
-  });
-}();
-
-//     Underscore.js 1.1.3
-//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
-//     Underscore is freely distributable under the MIT license.
-//     Portions of Underscore are inspired or borrowed from Prototype,
-//     Oliver Steele's Functional, and John Resig's Micro-Templating.
-//     For all details and documentation:
-//     http://documentcloud.github.com/underscore
+// Underscore.js
+// (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
+// Underscore is freely distributable under the terms of the MIT license.
+// Portions of Underscore are inspired by or borrowed from Prototype.js,
+// Oliver Steele's Functional, and John Resig's Micro-Templating.
+// For all details and documentation:
+// http://documentcloud.github.com/underscore
 
 (function() {
+  // ------------------------- Baseline setup ---------------------------------
 
-  // Baseline setup
-  // --------------
-
-  // Establish the root object, `window` in the browser, or `global` on the server.
+  // Establish the root object, "window" in the browser, or "global" on the server.
   var root = this;
 
-  // Save the previous value of the `_` variable.
+  // Save the previous value of the "_" variable.
   var previousUnderscore = root._;
 
-  // Establish the object that gets returned to break out of a loop iteration.
-  var breaker = {};
+  // Establish the object that gets thrown to break out of a loop iteration.
+  var breaker = typeof StopIteration !== 'undefined' ? StopIteration : '__break__';
+
+  // Quick regexp-escaping function, because JS doesn't have RegExp.escape().
+  var escapeRegExp = function(s) { return s.replace(/([.*+?^${}()|[\]\/\\])/g, '\\$1'); };
 
   // Save bytes in the minified (but not gzipped) version:
   var ArrayProto = Array.prototype, ObjProto = Object.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
-  var slice            = ArrayProto.slice,
-      unshift          = ArrayProto.unshift,
-      toString         = ObjProto.toString,
-      hasOwnProperty   = ObjProto.hasOwnProperty;
+  var slice                 = ArrayProto.slice,
+      unshift               = ArrayProto.unshift,
+      toString              = ObjProto.toString,
+      hasOwnProperty        = ObjProto.hasOwnProperty,
+      propertyIsEnumerable  = ObjProto.propertyIsEnumerable;
 
-  // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
+  // All ECMA5 native implementations we hope to use are declared here.
   var
     nativeForEach      = ArrayProto.forEach,
     nativeMap          = ArrayProto.map,
@@ -1265,102 +856,91 @@ var Mustache = function() {
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) { return new wrapper(obj); };
 
-  // Export the Underscore object for **CommonJS**, with backwards-compatibility
-  // for the old `require()` API. If we're not in CommonJS, add `_` to the
-  // global object.
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = _;
-    _._ = _;
-  } else {
-    root._ = _;
-  }
+  // Export the Underscore object for CommonJS.
+  if (typeof exports !== 'undefined') exports._ = _;
+
+  // Export underscore to global scope.
+  root._ = _;
 
   // Current version.
-  _.VERSION = '1.1.3';
+  _.VERSION = '1.1.0';
 
-  // Collection Functions
-  // --------------------
+  // ------------------------ Collection Functions: ---------------------------
 
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects implementing `forEach`, arrays, and raw objects.
-  // Delegates to **ECMAScript 5**'s native `forEach` if available.
-  var each = _.each = _.forEach = function(obj, iterator, context) {
-    var value;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (_.isNumber(obj.length)) {
-      for (var i = 0, l = obj.length; i < l; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
-      }
-    } else {
-      for (var key in obj) {
-        if (hasOwnProperty.call(obj, key)) {
-          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+  // The cornerstone, an each implementation.
+  // Handles objects implementing forEach, arrays, and raw objects.
+  // Delegates to JavaScript 1.6's native forEach if available.
+  var each = _.forEach = function(obj, iterator, context) {
+    try {
+      if (nativeForEach && obj.forEach === nativeForEach) {
+        obj.forEach(iterator, context);
+      } else if (_.isNumber(obj.length)) {
+        for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
+      } else {
+        for (var key in obj) {
+          if (hasOwnProperty.call(obj, key)) iterator.call(context, obj[key], key, obj);
         }
       }
+    } catch(e) {
+      if (e != breaker) throw e;
     }
+    return obj;
   };
 
   // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
+  // Delegates to JavaScript 1.6's native map if available.
   _.map = function(obj, iterator, context) {
     if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
     var results = [];
     each(obj, function(value, index, list) {
-      results[results.length] = iterator.call(context, value, index, list);
+      results.push(iterator.call(context, value, index, list));
     });
     return results;
   };
 
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = memo !== void 0;
+  // Reduce builds up a single result from a list of values, aka inject, or foldl.
+  // Delegates to JavaScript 1.8's native reduce if available.
+  _.reduce = function(obj, iterator, memo, context) {
     if (nativeReduce && obj.reduce === nativeReduce) {
       if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+      return obj.reduce(iterator, memo);
     }
     each(obj, function(value, index, list) {
-      if (!initial && index === 0) {
-        memo = value;
-      } else {
-        memo = iterator.call(context, memo, value, index, list);
-      }
+      memo = iterator.call(context, memo, value, index, list);
     });
     return memo;
   };
 
-  // The right-associative version of reduce, also known as `foldr`.
-  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+  // The right-associative version of reduce, also known as foldr. Uses
+  // Delegates to JavaScript 1.8's native reduceRight if available.
+  _.reduceRight = function(obj, iterator, memo, context) {
     if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
       if (context) iterator = _.bind(iterator, context);
-      return memo !== void 0 ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+      return obj.reduceRight(iterator, memo);
     }
-    var reversed = (_.isArray(obj) ? obj.slice() : _.toArray(obj)).reverse();
+    var reversed = _.clone(_.toArray(obj)).reverse();
     return _.reduce(reversed, iterator, memo, context);
   };
 
-  // Return the first value which passes a truth test. Aliased as `detect`.
-  _.find = _.detect = function(obj, iterator, context) {
+  // Return the first value which passes a truth test.
+  _.detect = function(obj, iterator, context) {
     var result;
-    any(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       if (iterator.call(context, value, index, list)) {
         result = value;
-        return true;
+        _.breakLoop();
       }
     });
     return result;
   };
 
   // Return all the elements that pass a truth test.
-  // Delegates to **ECMAScript 5**'s native `filter` if available.
-  // Aliased as `select`.
-  _.filter = _.select = function(obj, iterator, context) {
+  // Delegates to JavaScript 1.6's native filter if available.
+  _.filter = function(obj, iterator, context) {
     if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
     var results = [];
     each(obj, function(value, index, list) {
-      if (iterator.call(context, value, index, list)) results[results.length] = value;
+      iterator.call(context, value, index, list) && results.push(value);
     });
     return results;
   };
@@ -1369,62 +949,59 @@ var Mustache = function() {
   _.reject = function(obj, iterator, context) {
     var results = [];
     each(obj, function(value, index, list) {
-      if (!iterator.call(context, value, index, list)) results[results.length] = value;
+      !iterator.call(context, value, index, list) && results.push(value);
     });
     return results;
   };
 
   // Determine whether all of the elements match a truth test.
-  // Delegates to **ECMAScript 5**'s native `every` if available.
-  // Aliased as `all`.
-  _.every = _.all = function(obj, iterator, context) {
+  // Delegates to JavaScript 1.6's native every if available.
+  _.every = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
     var result = true;
     each(obj, function(value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+      if (!(result = result && iterator.call(context, value, index, list))) _.breakLoop();
     });
     return result;
   };
 
   // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
-  // Aliased as `any`.
-  var any = _.some = _.any = function(obj, iterator, context) {
+  // Delegates to JavaScript 1.6's native some if available.
+  _.some = function(obj, iterator, context) {
     iterator = iterator || _.identity;
     if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
     var result = false;
     each(obj, function(value, index, list) {
-      if (result = iterator.call(context, value, index, list)) return breaker;
+      if (result = iterator.call(context, value, index, list)) _.breakLoop();
     });
     return result;
   };
 
-  // Determine if a given value is included in the array or object using `===`.
-  // Aliased as `contains`.
-  _.include = _.contains = function(obj, target) {
+  // Determine if a given value is included in the array or object using '==='.
+  _.include = function(obj, target) {
     if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
     var found = false;
-    any(obj, function(value) {
-      if (found = value === target) return true;
+    each(obj, function(value) {
+      if (found = value === target) _.breakLoop();
     });
     return found;
   };
 
-  // Invoke a method (with arguments) on every item in a collection.
+  // Invoke a method with arguments on every item in a collection.
   _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
+    var args = _.rest(arguments, 2);
     return _.map(obj, function(value) {
       return (method ? value[method] : value).apply(value, args);
     });
   };
 
-  // Convenience version of a common use case of `map`: fetching a property.
+  // Convenience version of a common use case of map: fetching a property.
   _.pluck = function(obj, key) {
     return _.map(obj, function(value){ return value[key]; });
   };
 
-  // Return the maximum element or (element-based computation).
+  // Return the maximum item or (item-based computation).
   _.max = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
     var result = {computed : -Infinity};
@@ -1471,7 +1048,7 @@ var Mustache = function() {
     return low;
   };
 
-  // Safely convert anything iterable into a real, live array.
+  // Convert anything iterable into a real, live array.
   _.toArray = function(iterable) {
     if (!iterable)                return [];
     if (iterable.toArray)         return iterable.toArray();
@@ -1485,21 +1062,20 @@ var Mustache = function() {
     return _.toArray(obj).length;
   };
 
-  // Array Functions
-  // ---------------
+  // -------------------------- Array Functions: ------------------------------
 
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head`. The **guard** check allows it to work
-  // with `_.map`.
-  _.first = _.head = function(array, n, guard) {
+  // Get the first element of an array. Passing "n" will return the first N
+  // values in the array. Aliased as "head". The "guard" check allows it to work
+  // with _.map.
+  _.first = function(array, n, guard) {
     return n && !guard ? slice.call(array, 0, n) : array[0];
   };
 
-  // Returns everything but the first entry of the array. Aliased as `tail`.
-  // Especially useful on the arguments object. Passing an **index** will return
-  // the rest of the values in the array from that index onward. The **guard**
-  // check allows it to work with `_.map`.
-  _.rest = _.tail = function(array, index, guard) {
+  // Returns everything but the first entry of the array. Aliased as "tail".
+  // Especially useful on the arguments object. Passing an "index" will return
+  // the rest of the values in the array from that index onward. The "guard"
+   //check allows it to work with _.map.
+  _.rest = function(array, index, guard) {
     return slice.call(array, _.isUndefined(index) || guard ? 1 : index);
   };
 
@@ -1517,23 +1093,22 @@ var Mustache = function() {
   _.flatten = function(array) {
     return _.reduce(array, function(memo, value) {
       if (_.isArray(value)) return memo.concat(_.flatten(value));
-      memo[memo.length] = value;
+      memo.push(value);
       return memo;
     }, []);
   };
 
   // Return a version of the array that does not contain the specified value(s).
   _.without = function(array) {
-    var values = slice.call(arguments, 1);
+    var values = _.rest(arguments);
     return _.filter(array, function(value){ return !_.include(values, value); });
   };
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
-  // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted) {
+  _.uniq = function(array, isSorted) {
     return _.reduce(array, function(memo, el, i) {
-      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo[memo.length] = el;
+      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo.push(el);
       return memo;
     }, []);
   };
@@ -1541,7 +1116,7 @@ var Mustache = function() {
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
   _.intersect = function(array) {
-    var rest = slice.call(arguments, 1);
+    var rest = _.rest(arguments);
     return _.filter(_.uniq(array), function(item) {
       return _.every(rest, function(other) {
         return _.indexOf(other, item) >= 0;
@@ -1552,17 +1127,17 @@ var Mustache = function() {
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
   _.zip = function() {
-    var args = slice.call(arguments);
+    var args = _.toArray(arguments);
     var length = _.max(_.pluck(args, 'length'));
     var results = new Array(length);
-    for (var i = 0; i < length; i++) results[i] = _.pluck(args, "" + i);
+    for (var i = 0; i < length; i++) results[i] = _.pluck(args, String(i));
     return results;
   };
 
-  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
-  // we need this function. Return the position of the first occurrence of an
+  // If the browser doesn't supply us with indexOf (I'm looking at you, MSIE),
+  // we need this function. Return the position of the first occurence of an
   // item in an array, or -1 if the item is not included in the array.
-  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // Delegates to JavaScript 1.8's native indexOf if available.
   _.indexOf = function(array, item) {
     if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
     for (var i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
@@ -1570,7 +1145,7 @@ var Mustache = function() {
   };
 
 
-  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  // Delegates to JavaScript 1.6's native lastIndexOf if available.
   _.lastIndexOf = function(array, item) {
     if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
     var i = array.length;
@@ -1579,40 +1154,36 @@ var Mustache = function() {
   };
 
   // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  // the native Python range() function. See:
+  // http://docs.python.org/library/functions.html#range
   _.range = function(start, stop, step) {
-    var args  = slice.call(arguments),
-        solo  = args.length <= 1,
-        start = solo ? 0 : args[0],
-        stop  = solo ? args[0] : args[1],
-        step  = args[2] || 1,
-        len   = Math.max(Math.ceil((stop - start) / step), 0),
-        idx   = 0,
-        range = new Array(len);
-    while (idx < len) {
-      range[idx++] = start;
-      start += step;
+    var a     = _.toArray(arguments);
+    var solo  = a.length <= 1;
+    var start = solo ? 0 : a[0], stop = solo ? a[0] : a[1], step = a[2] || 1;
+    var len   = Math.ceil((stop - start) / step);
+    if (len <= 0) return [];
+    var range = new Array(len);
+    for (var i = start, idx = 0; true; i += step) {
+      if ((step > 0 ? i - stop : stop - i) >= 0) return range;
+      range[idx++] = i;
     }
-    return range;
   };
 
-  // Function (ahem) Functions
-  // ------------------
+  // ----------------------- Function Functions: ------------------------------
 
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Binding with arguments is also known as `curry`.
+  // Create a function bound to a given object (assigning 'this', and arguments,
+  // optionally). Binding with arguments is also known as 'curry'.
   _.bind = function(func, obj) {
-    var args = slice.call(arguments, 2);
+    var args = _.rest(arguments, 2);
     return function() {
-      return func.apply(obj || {}, args.concat(slice.call(arguments)));
+      return func.apply(obj || {}, args.concat(_.toArray(arguments)));
     };
   };
 
   // Bind all of an object's methods to that object. Useful for ensuring that
   // all callbacks defined on an object belong to it.
   _.bindAll = function(obj) {
-    var funcs = slice.call(arguments, 1);
+    var funcs = _.rest(arguments);
     if (funcs.length == 0) funcs = _.functions(obj);
     each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
     return obj;
@@ -1631,41 +1202,14 @@ var Mustache = function() {
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
   _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
+    var args = _.rest(arguments, 2);
     return setTimeout(function(){ return func.apply(func, args); }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
   _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
-  };
-
-  // Internal function used to implement `_.throttle` and `_.debounce`.
-  var limit = function(func, wait, debounce) {
-    var timeout;
-    return function() {
-      var context = this, args = arguments;
-      var throttler = function() {
-        timeout = null;
-        func.apply(context, args);
-      };
-      if (debounce) clearTimeout(timeout);
-      if (debounce || !timeout) timeout = setTimeout(throttler, wait);
-    };
-  };
-
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time.
-  _.throttle = function(func, wait) {
-    return limit(func, wait, false);
-  };
-
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds.
-  _.debounce = function(func, wait) {
-    return limit(func, wait, true);
+    return _.delay.apply(_, [func, 1].concat(_.rest(arguments)));
   };
 
   // Returns the first function passed as an argument to the second,
@@ -1673,7 +1217,7 @@ var Mustache = function() {
   // conditionally execute the original function.
   _.wrap = function(func, wrapper) {
     return function() {
-      var args = [func].concat(slice.call(arguments));
+      var args = [func].concat(_.toArray(arguments));
       return wrapper.apply(wrapper, args);
     };
   };
@@ -1681,9 +1225,9 @@ var Mustache = function() {
   // Returns a function that is the composition of a list of functions, each
   // consuming the return value of the function that follows.
   _.compose = function() {
-    var funcs = slice.call(arguments);
+    var funcs = _.toArray(arguments);
     return function() {
-      var args = slice.call(arguments);
+      var args = _.toArray(arguments);
       for (var i=funcs.length-1; i >= 0; i--) {
         args = [funcs[i].apply(this, args)];
       }
@@ -1691,15 +1235,14 @@ var Mustache = function() {
     };
   };
 
-  // Object Functions
-  // ----------------
+  // ------------------------- Object Functions: ------------------------------
 
   // Retrieve the names of an object's properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  // Delegates to ECMA5's native Object.keys
   _.keys = nativeKeys || function(obj) {
     if (_.isArray(obj)) return _.range(0, obj.length);
     var keys = [];
-    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys.push(key);
     return keys;
   };
 
@@ -1709,14 +1252,13 @@ var Mustache = function() {
   };
 
   // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
-  _.functions = _.methods = function(obj) {
+  _.functions = function(obj) {
     return _.filter(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
   };
 
   // Extend a given object with all the properties in passed-in object(s).
   _.extend = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
+    each(_.rest(arguments), function(source) {
       for (var prop in source) obj[prop] = source[prop];
     });
     return obj;
@@ -1724,12 +1266,12 @@ var Mustache = function() {
 
   // Create a (shallow-cloned) duplicate of an object.
   _.clone = function(obj) {
-    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+    if (_.isArray(obj)) return obj.slice(0);
+    return _.extend({}, obj);
   };
 
   // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
+  // The primary purpose of this method is to "tap into" a method chain, in order to perform operations on intermediate results within the chain.
   _.tap = function(obj, interceptor) {
     interceptor(obj);
     return obj;
@@ -1791,7 +1333,7 @@ var Mustache = function() {
 
   // Is a given variable an arguments object?
   _.isArguments = function(obj) {
-    return !!(obj && obj.callee);
+    return obj && obj.callee;
   };
 
   // Is a given value a function?
@@ -1806,13 +1348,7 @@ var Mustache = function() {
 
   // Is a given value a number?
   _.isNumber = function(obj) {
-    return !!(obj === 0 || (obj && obj.toExponential && obj.toFixed));
-  };
-
-  // Is the given value NaN -- this one is interesting. NaN != NaN, and
-  // isNaN(undefined) == true, so we make sure it's a number first.
-  _.isNaN = function(obj) {
-    return toString.call(obj) === '[object Number]' && isNaN(obj);
+    return (obj === +obj) || (toString.call(obj) === '[object Number]');
   };
 
   // Is a given value a boolean?
@@ -1830,6 +1366,12 @@ var Mustache = function() {
     return !!(obj && obj.test && obj.exec && (obj.ignoreCase || obj.ignoreCase === false));
   };
 
+  // Is the given value NaN -- this one is interesting. NaN != NaN, and
+  // isNaN(undefined) == true, so we make sure it's a number first.
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && isNaN(obj);
+  };
+
   // Is a given value equal to null?
   _.isNull = function(obj) {
     return obj === null;
@@ -1837,13 +1379,12 @@ var Mustache = function() {
 
   // Is a given variable undefined?
   _.isUndefined = function(obj) {
-    return obj === void 0;
+    return typeof obj == 'undefined';
   };
 
-  // Utility Functions
-  // -----------------
+  // -------------------------- Utility Functions: ----------------------------
 
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // Run Underscore.js in noConflict mode, returning the '_' variable to its
   // previous owner. Returns a reference to the Underscore object.
   _.noConflict = function() {
     root._ = previousUnderscore;
@@ -1855,9 +1396,14 @@ var Mustache = function() {
     return value;
   };
 
-  // Run a function **n** times.
+  // Run a function n times.
   _.times = function (n, iterator, context) {
     for (var i = 0; i < n; i++) iterator.call(context, i);
+  };
+
+  // Break out of the middle of an iteration.
+  _.breakLoop = function() {
+    throw breaker;
   };
 
   // Add your own custom functions to the Underscore object, ensuring that
@@ -1879,44 +1425,53 @@ var Mustache = function() {
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g
+    start       : '<%',
+    end         : '%>',
+    interpolate : /<%=(.+?)%>/g
   };
 
-  // JavaScript micro-templating, similar to John Resig's implementation.
-  // Underscore templating handles arbitrary delimiters, preserves whitespace,
-  // and correctly escapes quotes within interpolated code.
+  // JavaScript templating a-la ERB, pilfered from John Resig's
+  // "Secrets of the JavaScript Ninja", page 83.
+  // Single-quote fix from Rick Strahl's version.
+  // With alterations for arbitrary delimiters, and to preserve whitespace.
   _.template = function(str, data) {
     var c  = _.templateSettings;
-    var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
-      'with(obj||{}){__p.push(\'' +
-      str.replace(/\\/g, '\\\\')
-         .replace(/'/g, "\\'")
-         .replace(c.interpolate, function(match, code) {
-           return "'," + code.replace(/\\'/g, "'") + ",'";
-         })
-         .replace(c.evaluate || null, function(match, code) {
-           return "');" + code.replace(/\\'/g, "'")
-                              .replace(/[\r\n\t]/g, ' ') + "__p.push('";
-         })
-         .replace(/\r/g, '\\r')
+    var endMatch = new RegExp("'(?=[^"+c.end.substr(0, 1)+"]*"+escapeRegExp(c.end)+")","g");
+    var fn = new Function('obj',
+      'var p=[],print=function(){p.push.apply(p,arguments);};' +
+      'with(obj||{}){p.push(\'' +
+      str.replace(/\r/g, '\\r')
          .replace(/\n/g, '\\n')
          .replace(/\t/g, '\\t')
-         + "');}return __p.join('');";
-    var func = new Function('obj', tmpl);
-    return data ? func(data) : func;
+         .replace(endMatch,"✄")
+         .split("'").join("\\'")
+         .split("✄").join("'")
+         .replace(c.interpolate, "',$1,'")
+         .split(c.start).join("');")
+         .split(c.end).join("p.push('")
+         + "');}return p.join('');");
+    return data ? fn(data) : fn;
   };
 
-  // The OOP Wrapper
-  // ---------------
+  // ------------------------------- Aliases ----------------------------------
+
+  _.each     = _.forEach;
+  _.foldl    = _.inject       = _.reduce;
+  _.foldr    = _.reduceRight;
+  _.select   = _.filter;
+  _.all      = _.every;
+  _.any      = _.some;
+  _.contains = _.include;
+  _.head     = _.first;
+  _.tail     = _.rest;
+  _.methods  = _.functions;
+
+  // ------------------------ Setup the OOP Wrapper: --------------------------
 
   // If Underscore is called as a function, it returns a wrapped object that
   // can be used OO-style. This wrapper holds altered versions of all the
   // underscore functions. Wrapped objects may be chained.
   var wrapper = function(obj) { this._wrapped = obj; };
-
-  // Expose `wrapper.prototype` as `_.prototype`
-  _.prototype = wrapper.prototype;
 
   // Helper function to continue chaining intermediate results.
   var result = function(obj, chain) {
@@ -1926,7 +1481,7 @@ var Mustache = function() {
   // A method to easily add functions to the OOP wrapper.
   var addToWrapper = function(name, func) {
     wrapper.prototype[name] = function() {
-      var args = slice.call(arguments);
+      var args = _.toArray(arguments);
       unshift.call(args, this._wrapped);
       return result(func.apply(_, args), this._chain);
     };
@@ -8205,6 +7760,1018 @@ jQuery.each([ "Height", "Width" ], function( i, name ) {
 window.jQuery = window.$ = jQuery;
 
 })(window);
+
+//     Backbone.js 0.3.3
+//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
+//     Backbone may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     http://documentcloud.github.com/backbone
+
+(function(){
+
+  // Initial Setup
+  // -------------
+
+  // The top-level namespace. All public Backbone classes and modules will
+  // be attached to this. Exported for both CommonJS and the browser.
+  var Backbone;
+  if (typeof exports !== 'undefined') {
+    Backbone = exports;
+  } else {
+    Backbone = this.Backbone = {};
+  }
+
+  // Current version of the library. Keep in sync with `package.json`.
+  Backbone.VERSION = '0.3.3';
+
+  // Require Underscore, if we're on the server, and it's not already present.
+  var _ = this._;
+  if (!_ && (typeof require !== 'undefined')) _ = require("underscore")._;
+
+  // For Backbone's purposes, either jQuery or Zepto owns the `$` variable.
+  var $ = this.jQuery || this.Zepto;
+
+  // Turn on `emulateHTTP` to use support legacy HTTP servers. Setting this option will
+  // fake `"PUT"` and `"DELETE"` requests via the `_method` parameter and set a
+  // `X-Http-Method-Override` header.
+  Backbone.emulateHTTP = false;
+
+  // Turn on `emulateJSON` to support legacy servers that can't deal with direct
+  // `application/json` requests ... will encode the body as
+  // `application/x-www-form-urlencoded` instead and will send the model in a
+  // form param named `model`.
+  Backbone.emulateJSON = false;
+
+  // Backbone.Events
+  // -----------------
+
+  // A module that can be mixed in to *any object* in order to provide it with
+  // custom events. You may `bind` or `unbind` a callback function to an event;
+  // `trigger`-ing an event fires all callbacks in succession.
+  //
+  //     var object = {};
+  //     _.extend(object, Backbone.Events);
+  //     object.bind('expand', function(){ alert('expanded'); });
+  //     object.trigger('expand');
+  //
+  Backbone.Events = {
+
+    // Bind an event, specified by a string name, `ev`, to a `callback` function.
+    // Passing `"all"` will bind the callback to all events fired.
+    bind : function(ev, callback) {
+      var calls = this._callbacks || (this._callbacks = {});
+      var list  = this._callbacks[ev] || (this._callbacks[ev] = []);
+      list.push(callback);
+      return this;
+    },
+
+    // Remove one or many callbacks. If `callback` is null, removes all
+    // callbacks for the event. If `ev` is null, removes all bound callbacks
+    // for all events.
+    unbind : function(ev, callback) {
+      var calls;
+      if (!ev) {
+        this._callbacks = {};
+      } else if (calls = this._callbacks) {
+        if (!callback) {
+          calls[ev] = [];
+        } else {
+          var list = calls[ev];
+          if (!list) return this;
+          for (var i = 0, l = list.length; i < l; i++) {
+            if (callback === list[i]) {
+              list.splice(i, 1);
+              break;
+            }
+          }
+        }
+      }
+      return this;
+    },
+
+    // Trigger an event, firing all bound callbacks. Callbacks are passed the
+    // same arguments as `trigger` is, apart from the event name.
+    // Listening for `"all"` passes the true event name as the first argument.
+    trigger : function(ev) {
+      var list, calls, i, l;
+      if (!(calls = this._callbacks)) return this;
+      if (list = calls[ev]) {
+        for (i = 0, l = list.length; i < l; i++) {
+          list[i].apply(this, Array.prototype.slice.call(arguments, 1));
+        }
+      }
+      if (list = calls['all']) {
+        for (i = 0, l = list.length; i < l; i++) {
+          list[i].apply(this, arguments);
+        }
+      }
+      return this;
+    }
+
+  };
+
+  // Backbone.Model
+  // --------------
+
+  // Create a new model, with defined attributes. A client id (`cid`)
+  // is automatically generated and assigned for you.
+  Backbone.Model = function(attributes, options) {
+    attributes || (attributes = {});
+    if (this.defaults) attributes = _.extend({}, this.defaults, attributes);
+    this.attributes = {};
+    this._escapedAttributes = {};
+    this.cid = _.uniqueId('c');
+    this.set(attributes, {silent : true});
+    this._previousAttributes = _.clone(this.attributes);
+    if (options && options.collection) this.collection = options.collection;
+    this.initialize(attributes, options);
+  };
+
+  // Attach all inheritable methods to the Model prototype.
+  _.extend(Backbone.Model.prototype, Backbone.Events, {
+
+    // A snapshot of the model's previous attributes, taken immediately
+    // after the last `"change"` event was fired.
+    _previousAttributes : null,
+
+    // Has the item been changed since the last `"change"` event?
+    _changed : false,
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize : function(){},
+
+    // Return a copy of the model's `attributes` object.
+    toJSON : function() {
+      return _.clone(this.attributes);
+    },
+
+    // Get the value of an attribute.
+    get : function(attr) {
+      return this.attributes[attr];
+    },
+
+    // Get the HTML-escaped value of an attribute.
+    escape : function(attr) {
+      var html;
+      if (html = this._escapedAttributes[attr]) return html;
+      var val = this.attributes[attr];
+      return this._escapedAttributes[attr] = escapeHTML(val == null ? '' : val);
+    },
+
+    // Set a hash of model attributes on the object, firing `"change"` unless you
+    // choose to silence it.
+    set : function(attrs, options) {
+
+      // Extract attributes and options.
+      options || (options = {});
+      if (!attrs) return this;
+      if (attrs.attributes) attrs = attrs.attributes;
+      var now = this.attributes, escaped = this._escapedAttributes;
+
+      // Run validation.
+      if (!options.silent && this.validate && !this._performValidation(attrs, options)) return false;
+
+      // Check for changes of `id`.
+      if ('id' in attrs) this.id = attrs.id;
+
+      // Update attributes.
+      for (var attr in attrs) {
+        var val = attrs[attr];
+        if (!_.isEqual(now[attr], val)) {
+          now[attr] = val;
+          delete escaped[attr];
+          if (!options.silent) {
+            this._changed = true;
+            this.trigger('change:' + attr, this, val, options);
+          }
+        }
+      }
+
+      // Fire the `"change"` event, if the model has been changed.
+      if (!options.silent && this._changed) this.change(options);
+      return this;
+    },
+
+    // Remove an attribute from the model, firing `"change"` unless you choose
+    // to silence it.
+    unset : function(attr, options) {
+      options || (options = {});
+      var value = this.attributes[attr];
+
+      // Run validation.
+      var validObj = {};
+      validObj[attr] = void 0;
+      if (!options.silent && this.validate && !this._performValidation(validObj, options)) return false;
+
+      // Remove the attribute.
+      delete this.attributes[attr];
+      delete this._escapedAttributes[attr];
+      if (!options.silent) {
+        this._changed = true;
+        this.trigger('change:' + attr, this, void 0, options);
+        this.change(options);
+      }
+      return this;
+    },
+
+    // Clear all attributes on the model, firing `"change"` unless you choose
+    // to silence it.
+    clear : function(options) {
+      options || (options = {});
+      var old = this.attributes;
+
+      // Run validation.
+      var validObj = {};
+      for (attr in old) validObj[attr] = void 0;
+      if (!options.silent && this.validate && !this._performValidation(validObj, options)) return false;
+
+      this.attributes = {};
+      this._escapedAttributes = {};
+      if (!options.silent) {
+        this._changed = true;
+        for (attr in old) {
+          this.trigger('change:' + attr, this, void 0, options);
+        }
+        this.change(options);
+      }
+      return this;
+    },
+
+    // Fetch the model from the server. If the server's representation of the
+    // model differs from its current attributes, they will be overriden,
+    // triggering a `"change"` event.
+    fetch : function(options) {
+      options || (options = {});
+      var model = this;
+      var success = function(resp) {
+        if (!model.set(model.parse(resp), options)) return false;
+        if (options.success) options.success(model, resp);
+      };
+      var error = wrapError(options.error, model, options);
+      (this.sync || Backbone.sync)('read', this, success, error);
+      return this;
+    },
+
+    // Set a hash of model attributes, and sync the model to the server.
+    // If the server returns an attributes hash that differs, the model's
+    // state will be `set` again.
+    save : function(attrs, options) {
+      options || (options = {});
+      if (attrs && !this.set(attrs, options)) return false;
+      var model = this;
+      var success = function(resp) {
+        if (!model.set(model.parse(resp), options)) return false;
+        if (options.success) options.success(model, resp);
+      };
+      var error = wrapError(options.error, model, options);
+      var method = this.isNew() ? 'create' : 'update';
+      (this.sync || Backbone.sync)(method, this, success, error);
+      return this;
+    },
+
+    // Destroy this model on the server. Upon success, the model is removed
+    // from its collection, if it has one.
+    destroy : function(options) {
+      options || (options = {});
+      var model = this;
+      var success = function(resp) {
+        if (model.collection) model.collection.remove(model);
+        if (options.success) options.success(model, resp);
+      };
+      var error = wrapError(options.error, model, options);
+      (this.sync || Backbone.sync)('delete', this, success, error);
+      return this;
+    },
+
+    // Default URL for the model's representation on the server -- if you're
+    // using Backbone's restful methods, override this to change the endpoint
+    // that will be called.
+    url : function() {
+      var base = getUrl(this.collection);
+      if (this.isNew()) return base;
+      return base + (base.charAt(base.length - 1) == '/' ? '' : '/') + this.id;
+    },
+
+    // **parse** converts a response into the hash of attributes to be `set` on
+    // the model. The default implementation is just to pass the response along.
+    parse : function(resp) {
+      return resp;
+    },
+
+    // Create a new model with identical attributes to this one.
+    clone : function() {
+      return new this.constructor(this);
+    },
+
+    // A model is new if it has never been saved to the server, and has a negative
+    // ID.
+    isNew : function() {
+      return !this.id;
+    },
+
+    // Call this method to manually fire a `change` event for this model.
+    // Calling this will cause all objects observing the model to update.
+    change : function(options) {
+      this.trigger('change', this, options);
+      this._previousAttributes = _.clone(this.attributes);
+      this._changed = false;
+    },
+
+    // Determine if the model has changed since the last `"change"` event.
+    // If you specify an attribute name, determine if that attribute has changed.
+    hasChanged : function(attr) {
+      if (attr) return this._previousAttributes[attr] != this.attributes[attr];
+      return this._changed;
+    },
+
+    // Return an object containing all the attributes that have changed, or false
+    // if there are no changed attributes. Useful for determining what parts of a
+    // view need to be updated and/or what attributes need to be persisted to
+    // the server.
+    changedAttributes : function(now) {
+      now || (now = this.attributes);
+      var old = this._previousAttributes;
+      var changed = false;
+      for (var attr in now) {
+        if (!_.isEqual(old[attr], now[attr])) {
+          changed = changed || {};
+          changed[attr] = now[attr];
+        }
+      }
+      return changed;
+    },
+
+    // Get the previous value of an attribute, recorded at the time the last
+    // `"change"` event was fired.
+    previous : function(attr) {
+      if (!attr || !this._previousAttributes) return null;
+      return this._previousAttributes[attr];
+    },
+
+    // Get all of the attributes of the model at the time of the previous
+    // `"change"` event.
+    previousAttributes : function() {
+      return _.clone(this._previousAttributes);
+    },
+
+    // Run validation against a set of incoming attributes, returning `true`
+    // if all is well. If a specific `error` callback has been passed,
+    // call that instead of firing the general `"error"` event.
+    _performValidation : function(attrs, options) {
+      var error = this.validate(attrs);
+      if (error) {
+        if (options.error) {
+          options.error(this, error);
+        } else {
+          this.trigger('error', this, error, options);
+        }
+        return false;
+      }
+      return true;
+    }
+
+  });
+
+  // Backbone.Collection
+  // -------------------
+
+  // Provides a standard collection class for our sets of models, ordered
+  // or unordered. If a `comparator` is specified, the Collection will maintain
+  // its models in sort order, as they're added and removed.
+  Backbone.Collection = function(models, options) {
+    options || (options = {});
+    if (options.comparator) {
+      this.comparator = options.comparator;
+      delete options.comparator;
+    }
+    this._boundOnModelEvent = _.bind(this._onModelEvent, this);
+    this._reset();
+    if (models) this.refresh(models, {silent: true});
+    this.initialize(models, options);
+  };
+
+  // Define the Collection's inheritable methods.
+  _.extend(Backbone.Collection.prototype, Backbone.Events, {
+
+    // The default model for a collection is just a **Backbone.Model**.
+    // This should be overridden in most cases.
+    model : Backbone.Model,
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize : function(){},
+
+    // The JSON representation of a Collection is an array of the
+    // models' attributes.
+    toJSON : function() {
+      return this.map(function(model){ return model.toJSON(); });
+    },
+
+    // Add a model, or list of models to the set. Pass **silent** to avoid
+    // firing the `added` event for every new model.
+    add : function(models, options) {
+      if (_.isArray(models)) {
+        for (var i = 0, l = models.length; i < l; i++) {
+          this._add(models[i], options);
+        }
+      } else {
+        this._add(models, options);
+      }
+      return this;
+    },
+
+    // Remove a model, or a list of models from the set. Pass silent to avoid
+    // firing the `removed` event for every model removed.
+    remove : function(models, options) {
+      if (_.isArray(models)) {
+        for (var i = 0, l = models.length; i < l; i++) {
+          this._remove(models[i], options);
+        }
+      } else {
+        this._remove(models, options);
+      }
+      return this;
+    },
+
+    // Get a model from the set by id.
+    get : function(id) {
+      if (id == null) return null;
+      return this._byId[id.id != null ? id.id : id];
+    },
+
+    // Get a model from the set by client id.
+    getByCid : function(cid) {
+      return cid && this._byCid[cid.cid || cid];
+    },
+
+    // Get the model at the given index.
+    at: function(index) {
+      return this.models[index];
+    },
+
+    // Force the collection to re-sort itself. You don't need to call this under normal
+    // circumstances, as the set will maintain sort order as each item is added.
+    sort : function(options) {
+      options || (options = {});
+      if (!this.comparator) throw new Error('Cannot sort a set without a comparator');
+      this.models = this.sortBy(this.comparator);
+      if (!options.silent) this.trigger('refresh', this, options);
+      return this;
+    },
+
+    // Pluck an attribute from each model in the collection.
+    pluck : function(attr) {
+      return _.map(this.models, function(model){ return model.get(attr); });
+    },
+
+    // When you have more items than you want to add or remove individually,
+    // you can refresh the entire set with a new list of models, without firing
+    // any `added` or `removed` events. Fires `refresh` when finished.
+    refresh : function(models, options) {
+      models  || (models = []);
+      options || (options = {});
+      this._reset();
+      this.add(models, {silent: true});
+      if (!options.silent) this.trigger('refresh', this, options);
+      return this;
+    },
+
+    // Fetch the default set of models for this collection, refreshing the
+    // collection when they arrive.
+    fetch : function(options) {
+      options || (options = {});
+      var collection = this;
+      var success = function(resp) {
+        collection.refresh(collection.parse(resp));
+        if (options.success) options.success(collection, resp);
+      };
+      var error = wrapError(options.error, collection, options);
+      (this.sync || Backbone.sync)('read', this, success, error);
+      return this;
+    },
+
+    // Create a new instance of a model in this collection. After the model
+    // has been created on the server, it will be added to the collection.
+    create : function(model, options) {
+      var coll = this;
+      options || (options = {});
+      if (!(model instanceof Backbone.Model)) {
+        model = new this.model(model, {collection: coll});
+      } else {
+        model.collection = coll;
+      }
+      var success = function(nextModel, resp) {
+        coll.add(nextModel);
+        if (options.success) options.success(nextModel, resp);
+      };
+      return model.save(null, {success : success, error : options.error});
+    },
+
+    // **parse** converts a response into a list of models to be added to the
+    // collection. The default implementation is just to pass it through.
+    parse : function(resp) {
+      return resp;
+    },
+
+    // Proxy to _'s chain. Can't be proxied the same way the rest of the
+    // underscore methods are proxied because it relies on the underscore
+    // constructor.
+    chain: function () {
+      return _(this.models).chain();
+    },
+
+    // Reset all internal state. Called when the collection is refreshed.
+    _reset : function(options) {
+      this.length = 0;
+      this.models = [];
+      this._byId  = {};
+      this._byCid = {};
+    },
+
+    // Internal implementation of adding a single model to the set, updating
+    // hash indexes for `id` and `cid` lookups.
+    _add : function(model, options) {
+      options || (options = {});
+      if (!(model instanceof Backbone.Model)) {
+        model = new this.model(model, {collection: this});
+      }
+      var already = this.getByCid(model);
+      if (already) throw new Error(["Can't add the same model to a set twice", already.id]);
+      this._byId[model.id] = model;
+      this._byCid[model.cid] = model;
+      model.collection = this;
+      var index = this.comparator ? this.sortedIndex(model, this.comparator) : this.length;
+      this.models.splice(index, 0, model);
+      model.bind('all', this._boundOnModelEvent);
+      this.length++;
+      if (!options.silent) model.trigger('add', model, this, options);
+      return model;
+    },
+
+    // Internal implementation of removing a single model from the set, updating
+    // hash indexes for `id` and `cid` lookups.
+    _remove : function(model, options) {
+      options || (options = {});
+      model = this.getByCid(model) || this.get(model);
+      if (!model) return null;
+      delete this._byId[model.id];
+      delete this._byCid[model.cid];
+      delete model.collection;
+      this.models.splice(this.indexOf(model), 1);
+      this.length--;
+      if (!options.silent) model.trigger('remove', model, this, options);
+      model.unbind('all', this._boundOnModelEvent);
+      return model;
+    },
+
+    // Internal method called every time a model in the set fires an event.
+    // Sets need to update their indexes when models change ids. All other
+    // events simply proxy through.
+    _onModelEvent : function(ev, model) {
+      if (ev === 'change:id') {
+        delete this._byId[model.previous('id')];
+        this._byId[model.id] = model;
+      }
+      this.trigger.apply(this, arguments);
+    }
+
+  });
+
+  // Underscore methods that we want to implement on the Collection.
+  var methods = ['forEach', 'each', 'map', 'reduce', 'reduceRight', 'find', 'detect',
+    'filter', 'select', 'reject', 'every', 'all', 'some', 'any', 'include',
+    'invoke', 'max', 'min', 'sortBy', 'sortedIndex', 'toArray', 'size',
+    'first', 'rest', 'last', 'without', 'indexOf', 'lastIndexOf', 'isEmpty'];
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+  _.each(methods, function(method) {
+    Backbone.Collection.prototype[method] = function() {
+      return _[method].apply(_, [this.models].concat(_.toArray(arguments)));
+    };
+  });
+
+  // Backbone.Controller
+  // -------------------
+
+  // Controllers map faux-URLs to actions, and fire events when routes are
+  // matched. Creating a new one sets its `routes` hash, if not set statically.
+  Backbone.Controller = function(options) {
+    options || (options = {});
+    if (options.routes) this.routes = options.routes;
+    this._bindRoutes();
+    this.initialize(options);
+  };
+
+  // Cached regular expressions for matching named param parts and splatted
+  // parts of route strings.
+  var namedParam = /:([\w\d]+)/g;
+  var splatParam = /\*([\w\d]+)/g;
+
+  // Set up all inheritable **Backbone.Controller** properties and methods.
+  _.extend(Backbone.Controller.prototype, Backbone.Events, {
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize : function(){},
+
+    // Manually bind a single named route to a callback. For example:
+    //
+    //     this.route('search/:query/p:num', 'search', function(query, num) {
+    //       ...
+    //     });
+    //
+    route : function(route, name, callback) {
+      Backbone.history || (Backbone.history = new Backbone.History);
+      if (!_.isRegExp(route)) route = this._routeToRegExp(route);
+      Backbone.history.route(route, _.bind(function(fragment) {
+        var args = this._extractParameters(route, fragment);
+        callback.apply(this, args);
+        this.trigger.apply(this, ['route:' + name].concat(args));
+      }, this));
+    },
+
+    // Simple proxy to `Backbone.history` to save a fragment into the history,
+    // without triggering routes.
+    saveLocation : function(fragment) {
+      Backbone.history.saveLocation(fragment);
+    },
+
+    // Bind all defined routes to `Backbone.history`.
+    _bindRoutes : function() {
+      if (!this.routes) return;
+      for (var route in this.routes) {
+        var name = this.routes[route];
+        this.route(route, name, this[name]);
+      }
+    },
+
+    // Convert a route string into a regular expression, suitable for matching
+    // against the current location fragment.
+    _routeToRegExp : function(route) {
+      route = route.replace(namedParam, "([^\/]*)").replace(splatParam, "(.*?)");
+      return new RegExp('^' + route + '$');
+    },
+
+    // Given a route, and a URL fragment that it matches, return the array of
+    // extracted parameters.
+    _extractParameters : function(route, fragment) {
+      return route.exec(fragment).slice(1);
+    }
+
+  });
+
+  // Backbone.History
+  // ----------------
+
+  // Handles cross-browser history management, based on URL hashes. If the
+  // browser does not support `onhashchange`, falls back to polling.
+  Backbone.History = function() {
+    this.handlers = [];
+    this.fragment = this.getFragment();
+    _.bindAll(this, 'checkUrl');
+  };
+
+  // Cached regex for cleaning hashes.
+  var hashStrip = /^#*/;
+
+  // Set up all inheritable **Backbone.History** properties and methods.
+  _.extend(Backbone.History.prototype, {
+
+    // The default interval to poll for hash changes, if necessary, is
+    // twenty times a second.
+    interval: 50,
+
+    // Get the cross-browser normalized URL fragment.
+    getFragment : function(loc) {
+      return (loc || window.location).hash.replace(hashStrip, '');
+    },
+
+    // Start the hash change handling, returning `true` if the current URL matches
+    // an existing route, and `false` otherwise.
+    start : function() {
+      var docMode = document.documentMode;
+      var oldIE = ($.browser.msie && (!docMode || docMode <= 7));
+      if (oldIE) {
+        this.iframe = $('<iframe src="javascript:0" tabindex="-1" />').hide().appendTo('body')[0].contentWindow;
+      }
+      if ('onhashchange' in window && !oldIE) {
+        $(window).bind('hashchange', this.checkUrl);
+      } else {
+        setInterval(this.checkUrl, this.interval);
+      }
+      return this.loadUrl();
+    },
+
+    // Add a route to be tested when the hash changes. Routes are matched in the
+    // order they are added.
+    route : function(route, callback) {
+      this.handlers.push({route : route, callback : callback});
+    },
+
+    // Checks the current URL to see if it has changed, and if it has,
+    // calls `loadUrl`, normalizing across the hidden iframe.
+    checkUrl : function() {
+      var current = this.getFragment();
+      if (current == this.fragment && this.iframe) {
+        current = this.getFragment(this.iframe.location);
+      }
+      if (current == this.fragment ||
+          current == decodeURIComponent(this.fragment)) return false;
+      if (this.iframe) {
+        window.location.hash = this.iframe.location.hash = current;
+      }
+      this.loadUrl();
+    },
+
+    // Attempt to load the current URL fragment. If a route succeeds with a
+    // match, returns `true`. If no defined routes matches the fragment,
+    // returns `false`.
+    loadUrl : function() {
+      var fragment = this.fragment = this.getFragment();
+      var matched = _.any(this.handlers, function(handler) {
+        if (handler.route.test(fragment)) {
+          handler.callback(fragment);
+          return true;
+        }
+      });
+      return matched;
+    },
+
+    // Save a fragment into the hash history. You are responsible for properly
+    // URL-encoding the fragment in advance. This does not trigger
+    // a `hashchange` event.
+    saveLocation : function(fragment) {
+      fragment = (fragment || '').replace(hashStrip, '');
+      if (this.fragment == fragment) return;
+      window.location.hash = this.fragment = fragment;
+      if (this.iframe && (fragment != this.getFragment(this.iframe.location))) {
+        this.iframe.document.open().close();
+        this.iframe.location.hash = fragment;
+      }
+    }
+
+  });
+
+  // Backbone.View
+  // -------------
+
+  // Creating a Backbone.View creates its initial element outside of the DOM,
+  // if an existing element is not provided...
+  Backbone.View = function(options) {
+    this._configure(options || {});
+    this._ensureElement();
+    this.delegateEvents();
+    this.initialize(options);
+  };
+
+  // Element lookup, scoped to DOM elements within the current view.
+  // This should be prefered to global lookups, if you're dealing with
+  // a specific view.
+  var selectorDelegate = function(selector) {
+    return $(selector, this.el);
+  };
+
+  // Cached regex to split keys for `delegate`.
+  var eventSplitter = /^(\w+)\s*(.*)$/;
+
+  // Set up all inheritable **Backbone.View** properties and methods.
+  _.extend(Backbone.View.prototype, Backbone.Events, {
+
+    // The default `tagName` of a View's element is `"div"`.
+    tagName : 'div',
+
+    // Attach the `selectorDelegate` function as the `$` property.
+    $       : selectorDelegate,
+
+    // Initialize is an empty function by default. Override it with your own
+    // initialization logic.
+    initialize : function(){},
+
+    // **render** is the core function that your view should override, in order
+    // to populate its element (`this.el`), with the appropriate HTML. The
+    // convention is for **render** to always return `this`.
+    render : function() {
+      return this;
+    },
+
+    // Remove this view from the DOM. Note that the view isn't present in the
+    // DOM by default, so calling this method may be a no-op.
+    remove : function() {
+      $(this.el).remove();
+      return this;
+    },
+
+    // For small amounts of DOM Elements, where a full-blown template isn't
+    // needed, use **make** to manufacture elements, one at a time.
+    //
+    //     var el = this.make('li', {'class': 'row'}, this.model.get('title'));
+    //
+    make : function(tagName, attributes, content) {
+      var el = document.createElement(tagName);
+      if (attributes) $(el).attr(attributes);
+      if (content) $(el).html(content);
+      return el;
+    },
+
+    // Set callbacks, where `this.callbacks` is a hash of
+    //
+    // *{"event selector": "callback"}*
+    //
+    //     {
+    //       'mousedown .title':  'edit',
+    //       'click .button':     'save'
+    //     }
+    //
+    // pairs. Callbacks will be bound to the view, with `this` set properly.
+    // Uses event delegation for efficiency.
+    // Omitting the selector binds the event to `this.el`.
+    // This only works for delegate-able events: not `focus`, `blur`, and
+    // not `change`, `submit`, and `reset` in Internet Explorer.
+    delegateEvents : function(events) {
+      if (!(events || (events = this.events))) return;
+      $(this.el).unbind();
+      for (var key in events) {
+        var methodName = events[key];
+        var match = key.match(eventSplitter);
+        var eventName = match[1], selector = match[2];
+        var method = _.bind(this[methodName], this);
+        if (selector === '') {
+          $(this.el).bind(eventName, method);
+        } else {
+          $(this.el).delegate(selector, eventName, method);
+        }
+      }
+    },
+
+    // Performs the initial configuration of a View with a set of options.
+    // Keys with special meaning *(model, collection, id, className)*, are
+    // attached directly to the view.
+    _configure : function(options) {
+      if (this.options) options = _.extend({}, this.options, options);
+      if (options.model)      this.model      = options.model;
+      if (options.collection) this.collection = options.collection;
+      if (options.el)         this.el         = options.el;
+      if (options.id)         this.id         = options.id;
+      if (options.className)  this.className  = options.className;
+      if (options.tagName)    this.tagName    = options.tagName;
+      this.options = options;
+    },
+
+    // Ensure that the View has a DOM element to render into.
+    _ensureElement : function() {
+      if (this.el) return;
+      var attrs = {};
+      if (this.id) attrs.id = this.id;
+      if (this.className) attrs["class"] = this.className;
+      this.el = this.make(this.tagName, attrs);
+    }
+
+  });
+
+  // The self-propagating extend function that Backbone classes use.
+  var extend = function (protoProps, classProps) {
+    var child = inherits(this, protoProps, classProps);
+    child.extend = extend;
+    return child;
+  };
+
+  // Set up inheritance for the model, collection, and view.
+  Backbone.Model.extend = Backbone.Collection.extend =
+    Backbone.Controller.extend = Backbone.View.extend = extend;
+
+  // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
+  var methodMap = {
+    'create': 'POST',
+    'update': 'PUT',
+    'delete': 'DELETE',
+    'read'  : 'GET'
+  };
+
+  // Backbone.sync
+  // -------------
+
+  // Override this function to change the manner in which Backbone persists
+  // models to the server. You will be passed the type of request, and the
+  // model in question. By default, uses makes a RESTful Ajax request
+  // to the model's `url()`. Some possible customizations could be:
+  //
+  // * Use `setTimeout` to batch rapid-fire updates into a single request.
+  // * Send up the models as XML instead of JSON.
+  // * Persist models via WebSockets instead of Ajax.
+  //
+  // Turn on `Backbone.emulateHTTP` in order to send `PUT` and `DELETE` requests
+  // as `POST`, with a `_method` parameter containing the true HTTP method,
+  // as well as all requests with the body as `application/x-www-form-urlencoded` instead of
+  // `application/json` with the model in a param named `model`.
+  // Useful when interfacing with server-side languages like **PHP** that make
+  // it difficult to read the body of `PUT` requests.
+  Backbone.sync = function(method, model, success, error) {
+    var type = methodMap[method];
+    var modelJSON = (method === 'create' || method === 'update') ?
+                    JSON.stringify(model.toJSON()) : null;
+
+    // Default JSON-request options.
+    var params = {
+      url:          getUrl(model),
+      type:         type,
+      contentType:  'application/json',
+      data:         modelJSON,
+      dataType:     'json',
+      processData:  false,
+      success:      success,
+      error:        error
+    };
+
+    // For older servers, emulate JSON by encoding the request into an HTML-form.
+    if (Backbone.emulateJSON) {
+      params.contentType = 'application/x-www-form-urlencoded';
+      params.processData = true;
+      params.data        = modelJSON ? {model : modelJSON} : {};
+    }
+
+    // For older servers, emulate HTTP by mimicking the HTTP method with `_method`
+    // And an `X-HTTP-Method-Override` header.
+    if (Backbone.emulateHTTP) {
+      if (type === 'PUT' || type === 'DELETE') {
+        if (Backbone.emulateJSON) params.data._method = type;
+        params.type = 'POST';
+        params.beforeSend = function(xhr) {
+          xhr.setRequestHeader("X-HTTP-Method-Override", type);
+        };
+      }
+    }
+
+    // Make the request.
+    $.ajax(params);
+  };
+
+  // Helpers
+  // -------
+
+  // Shared empty constructor function to aid in prototype-chain creation.
+  var ctor = function(){};
+
+  // Helper function to correctly set up the prototype chain, for subclasses.
+  // Similar to `goog.inherits`, but uses a hash of prototype properties and
+  // class properties to be extended.
+  var inherits = function(parent, protoProps, staticProps) {
+    var child;
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call `super()`.
+    if (protoProps && protoProps.hasOwnProperty('constructor')) {
+      child = protoProps.constructor;
+    } else {
+      child = function(){ return parent.apply(this, arguments); };
+    }
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent`'s constructor function.
+    ctor.prototype = parent.prototype;
+    child.prototype = new ctor();
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Add static properties to the constructor function, if supplied.
+    if (staticProps) _.extend(child, staticProps);
+
+    // Correctly set child's `prototype.constructor`, for `instanceof`.
+    child.prototype.constructor = child;
+
+    // Set a convenience property in case the parent's prototype is needed later.
+    child.__super__ = parent.prototype;
+
+    return child;
+  };
+
+  // Helper function to get a URL from a Model or Collection as a property
+  // or as a function.
+  var getUrl = function(object) {
+    if (!(object && object.url)) throw new Error("A 'url' property or function must be specified");
+    return _.isFunction(object.url) ? object.url() : object.url;
+  };
+
+  // Wrap an optional error callback with a fallback error event.
+  var wrapError = function(onError, model, options) {
+    return function(resp) {
+      if (onError) {
+        onError(model, resp);
+      } else {
+        model.trigger('error', model, resp, options);
+      }
+    };
+  };
+
+  // Helper function to escape a string for HTML rendering.
+  var escapeHTML = function(string) {
+    return string.replace(/&(?!\w+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+
+})();
 
 /*!
  * jQuery UI 1.8.4
@@ -19483,7 +20050,7 @@ $.extend( $.ui.tabs.prototype, {
 /*
  * jQuery UI Menu @VERSION
  * 
- * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Copyright 2010, AUTHORS.txt
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
@@ -19494,21 +20061,18 @@ $.extend( $.ui.tabs.prototype, {
  *	jquery.ui.widget.js
  */
 (function($) {
-	
-var idIncrement = 0;
 
 $.widget("ui.menu", {
 	_create: function() {
 		var self = this;
-		this.menuId = this.element.attr( "id" ) || "ui-menu-" + idIncrement++;
 		this.element
-			.addClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
+			.addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
 			.attr({
-				id: this.menuId,
-				role: "listbox"
+				role: "listbox",
+				"aria-activedescendant": "ui-active-menuitem"
 			})
-			.bind( "click.menu", function( event ) {
-				if ( self.options.disabled ) {
+			.bind("click.menu", function( event ) {
+				if (self.options.disabled) {
 					return false;
 				}
 				if ( !$( event.target ).closest( ".ui-menu-item a" ).length ) {
@@ -19517,35 +20081,17 @@ $.widget("ui.menu", {
 				// temporary
 				event.preventDefault();
 				self.select( event );
-			})
-			.bind( "mouseover.menu", function( event ) {
-				if ( self.options.disabled ) {
-					return;
-				}
-				var target = $( event.target ).closest( ".ui-menu-item" );
-				if ( target.length && target.parent()[0] === self.element[0] ) {
-					self.activate( event, target );
-				}
-			})
-			.bind("mouseout.menu", function( event ) {
-				if ( self.options.disabled ) {
-					return;
-				}
-				var target = $( event.target ).closest( ".ui-menu-item" );
-				if ( target.length && target.parent()[0] === self.element[0] ) {
-					self.deactivate( event );
-				}
 			});
 		this.refresh();
 		
-		if ( !this.options.input ) {
-			this.options.input = this.element.attr( "tabIndex", 0 );
+		if (!this.options.input) {
+			this.options.input = this.element.attr("tabIndex", 0);
 		}
-		this.options.input.bind( "keydown.menu", function( event ) {
-			if ( self.options.disabled ) {
+		this.options.input.bind("keydown.menu", function(event) {
+			if (self.options.disabled) {
 				return;
 			}
-			switch ( event.keyCode ) {
+			switch (event.keyCode) {
 			case $.ui.keyCode.PAGE_UP:
 				self.previousPage();
 				event.preventDefault();
@@ -19576,159 +20122,171 @@ $.widget("ui.menu", {
 	},
 	
 	destroy: function() {
-		$.Widget.prototype.destroy.apply( this, arguments );
+		$.Widget.prototype.destroy.apply(this, arguments);
 		
 		this.element
-			.removeClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
-			.removeAttr( "tabIndex" )
-			.removeAttr( "role" )
-			.removeAttr( "aria-activedescendant" );
+			.removeClass("ui-menu ui-widget ui-widget-content ui-corner-all")
+			.removeAttr("tabIndex")
+			.removeAttr("role")
+			.removeAttr("aria-activedescendant");
 		
-		this.element.children( ".ui-menu-item" )
-			.removeClass( "ui-menu-item" )
-			.removeAttr( "role" )
-			.children( "a" )
-			.removeClass( "ui-corner-all" )
-			.removeAttr( "tabIndex" )
-			.unbind( ".menu" );
+		this.element.children(".ui-menu-item")
+			.removeClass("ui-menu-item")
+			.removeAttr("role")
+			.children("a")
+			.removeClass("ui-corner-all")
+			.removeAttr("tabIndex")
+			.unbind(".menu");
 	},
 	
 	refresh: function() {
+		var self = this;
+
 		// don't refresh list items that are already adapted
-		var items = this.element.children( "li:not(.ui-menu-item):has(a)" )
-			.addClass( "ui-menu-item" )
-			.attr( "role", "menuitem" );
+		var items = this.element.children("li:not(.ui-menu-item):has(a)")
+			.addClass("ui-menu-item")
+			.attr("role", "menuitem");
 		
-		items.children( "a" )
-			.addClass( "ui-corner-all" )
-			.attr( "tabIndex", -1 );
+		items.children("a")
+			.addClass("ui-corner-all")
+			.attr("tabIndex", -1)
+			// mouseenter doesn't work with event delegation
+			.bind("mouseenter.menu", function( event ) {
+				if (self.options.disabled) {
+					return;
+				}
+				self.activate( event, $(this).parent() );
+			})
+			.bind("mouseleave.menu", function() {
+				if (self.options.disabled) {
+					return;
+				}
+				self.deactivate();
+			});
 	},
 
 	activate: function( event, item ) {
-		var self = this;
 		this.deactivate();
-		if ( this._hasScroll() ) {
-			var borderTop = parseFloat( $.curCSS( this.element[0], "borderTopWidth", true) ) || 0,
-				paddingtop = parseFloat( $.curCSS( this.element[0], "paddingTop", true) ) || 0,
-				offset = item.offset().top - this.element.offset().top - borderTop - paddingtop,
-				scroll = this.element.attr( "scrollTop" ),
-				elementHeight = this.element.height(),
-				itemHeight = item.height();
-			if ( offset < 0 ) {
-				this.element.attr( "scrollTop", scroll + offset );
-			} else if ( offset + itemHeight > elementHeight ) {
-				this.element.attr( "scrollTop", scroll + offset - elementHeight + itemHeight );
+		if (this._hasScroll()) {
+			var offset = item.offset().top - this.element.offset().top,
+				scroll = this.element.attr("scrollTop"),
+				elementHeight = this.element.height();
+			if (offset < 0) {
+				this.element.attr("scrollTop", scroll + offset);
+			} else if (offset > elementHeight) {
+				this.element.attr("scrollTop", scroll + offset - elementHeight + item.height());
 			}
 		}
-		this.active = item.first()
-			.children( "a" )
-				.addClass( "ui-state-hover" )
-				.attr( "id", function(index, id) {
-					return (self.itemId = id || self.menuId + "-activedescendant");
-				})
+		this.active = item.eq(0)
+			.children("a")
+				.addClass("ui-state-hover")
+				.attr("id", "ui-active-menuitem")
 			.end();
-		// need to remove the attribute before adding it for the screenreader to pick up the change
-		// see http://groups.google.com/group/jquery-a11y/msg/929e0c1e8c5efc8f
-		this.element.removeAttr("aria-activedescenant").attr("aria-activedescenant", self.itemId);
-		this._trigger( "focus", event, { item: item } );
+		this._trigger("focus", event, { item: item });
 	},
 
-	deactivate: function(event) {
-		if (!this.active) {
-			return;
-		}
+	deactivate: function() {
+		if (!this.active) { return; }
 
-		var self = this;
-		this.active.children( "a" ).removeClass( "ui-state-hover" );
-		// remove only generated id
-		$( "#" + self.menuId + "-activedescendant" ).removeAttr( "id" );
-		this.element.removeAttr( "aria-activedescenant" );
-		this._trigger( "blur", event );
+		this.active.children("a")
+			.removeClass("ui-state-hover")
+			.removeAttr("id");
+		this._trigger("blur");
 		this.active = null;
 	},
 
 	next: function(event) {
-		this._move( "next", ".ui-menu-item", "first", event );
+		this._move("next", ".ui-menu-item:first", event);
 	},
 
 	previous: function(event) {
-		this._move( "prev", ".ui-menu-item", "last", event );
+		this._move("prev", ".ui-menu-item:last", event);
 	},
 
 	first: function() {
-		return this.active && !this.active.prevAll( ".ui-menu-item" ).length;
+		return this.active && !this.active.prevAll(".ui-menu-item").length;
 	},
 
 	last: function() {
-		return this.active && !this.active.nextAll( ".ui-menu-item" ).length;
+		return this.active && !this.active.nextAll(".ui-menu-item").length;
 	},
 
-	_move: function(direction, edge, filter, event) {
-		if ( !this.active ) {
-			this.activate( event, this.element.children(edge)[filter]() );
+	_move: function(direction, edge, event) {
+		if (!this.active) {
+			this.activate(event, this.element.children(edge));
 			return;
 		}
-		var next = this.active[ direction + "All" ]( ".ui-menu-item" ).eq( 0 );
-		if ( next.length ) {
-			this.activate( event, next );
+		var next = this.active[direction + "All"](".ui-menu-item").eq(0);
+		if (next.length) {
+			this.activate(event, next);
 		} else {
-			this.activate( event, this.element.children(edge)[filter]() );
+			this.activate(event, this.element.children(edge));
 		}
 	},
-	
-	nextPage: function( event ) {
-		if ( this._hasScroll() ) {
-			if ( !this.active || this.last() ) {
-				this.activate( event, this.element.children( ".ui-menu-item" ).first() );
+
+	// TODO merge with previousPage
+	nextPage: function(event) {
+		if (this._hasScroll()) {
+			// TODO merge with no-scroll-else
+			if (!this.active || this.last()) {
+				this.activate(event, this.element.children(":first"));
 				return;
 			}
 			var base = this.active.offset().top,
 				height = this.element.height(),
-				result;
-			this.active.nextAll( ".ui-menu-item" ).each( function() {
-				result = $( this );
-				return $( this ).offset().top - base - height < 0;
-			});
+				result = this.element.children("li").filter(function() {
+					var close = $(this).offset().top - base - height + $(this).height();
+					// TODO improve approximation
+					return close < 10 && close > -10;
+				});
 
-			this.activate( event, result );
+			// TODO try to catch this earlier when scrollTop indicates the last page anyway
+			if (!result.length) {
+				result = this.element.children(":last");
+			}
+			this.activate(event, result);
 		} else {
-			this.activate( event, this.element.children( ".ui-menu-item" )
-				[ !this.active || this.last() ? "first" : "last" ]() );
+			this.activate(event, this.element.children(!this.active || this.last() ? ":first" : ":last"));
 		}
 	},
 
-	previousPage: function( event ) {
-		if ( this._hasScroll() ) {
-			if ( !this.active || this.first() ) {
-				this.activate( event, this.element.children( ".ui-menu-item" ).last() );
+	// TODO merge with nextPage
+	previousPage: function(event) {
+		if (this._hasScroll()) {
+			// TODO merge with no-scroll-else
+			if (!this.active || this.first()) {
+				this.activate(event, this.element.children(":last"));
 				return;
 			}
 
 			var base = this.active.offset().top,
-				height = this.element.height(),
-				result;
-			this.active.prevAll( ".ui-menu-item" ).each( function() {
-				result = $( this );
-				return $(this).offset().top - base + height > 0;
-			});
+				height = this.element.height();
+				result = this.element.children("li").filter(function() {
+					var close = $(this).offset().top - base + height - $(this).height();
+					// TODO improve approximation
+					return close < 10 && close > -10;
+				});
 
-			this.activate( event, result );
+			// TODO try to catch this earlier when scrollTop indicates the last page anyway
+			if (!result.length) {
+				result = this.element.children(":first");
+			}
+			this.activate(event, result);
 		} else {
-			this.activate( event, this.element.children( ".ui-menu-item" )
-				[ !this.active || this.first() ? ":last" : ":first" ]() );
+			this.activate(event, this.element.children(!this.active || this.first() ? ":last" : ":first"));
 		}
 	},
 
 	_hasScroll: function() {
-		return this.element.height() < this.element.attr( "scrollHeight" );
+		return this.element.height() < this.element.attr("scrollHeight");
 	},
 
 	select: function( event ) {
-		this._trigger( "select", event, { item: this.active } );
+		this._trigger("select", event, { item: this.active });
 	}
 });
 
-}( jQuery ));
+}(jQuery));
 
 /*
  * Metadata - jQuery plugin for parsing metadata from elements
@@ -20271,7 +20829,7 @@ $.fn.metadata = function( opts ){
 
 /*
 
-Uniform v1.7.5
+Uniform v1.7.3
 Copyright © 2009 Josh Pyles / Pixelmatrix Design LLC
 http://pixelmatrixdesign.com
 
@@ -20310,8 +20868,7 @@ Enjoy!
       hoverClass: 'hover',
       useID: true,
       idPrefix: 'uniform',
-      resetSelector: false,
-      autoHide: true
+      resetSelector: false
     },
     elements: []
   };
@@ -20349,7 +20906,7 @@ Enjoy!
     }
     
     function doButton(elem){
-      var $el = $(elem);
+      $el = elem;
       
       var divTag = $("<div>"),
           spanTag = $("<span>");
@@ -20360,17 +20917,19 @@ Enjoy!
       
       var btnText;
       
-      if($el.is("a") || $el.is("button")){
+      if($el.is("a")){
         btnText = $el.text();
-      }else if($el.is(":submit") || $el.is(":reset") || $el.is("input[type=button]")){
+      }else if($el.is("button")){
+        btnText = $el.text();
+      }else if($el.is(":submit") || $el.is("input[type=button]")){
         btnText = $el.attr("value");
       }
       
-      btnText = btnText == "" ? $el.is(":reset") ? "Reset" : "Submit" : btnText;
+      if(btnText == "") btnText = "Submit";
       
       spanTag.html(btnText);
       
-      $el.css("opacity", 0);
+      $el.hide();
       $el.wrap(divTag);
       $el.wrap(spanTag);
       
@@ -20386,7 +20945,6 @@ Enjoy!
         },
         "mouseleave.uniform": function(){
           divTag.removeClass(options.hoverClass);
-          divTag.removeClass(options.activeClass);
         },
         "mousedown.uniform touchbegin.uniform": function(){
           divTag.addClass(options.activeClass);
@@ -20418,18 +20976,12 @@ Enjoy!
       
       $.uniform.noSelect(divTag);
       storeElement(elem);
-      
     }
 
     function doSelect(elem){
-      var $el = $(elem);
-      
+
       var divTag = $('<div />'),
           spanTag = $('<span />');
-      
-      if(!$el.css("display") == "none" && options.autoHide){
-        divTag.hide();
-      }
 
       divTag.addClass(options.selectClass);
 
@@ -20441,7 +20993,7 @@ Enjoy!
       if(selected.length == 0){
         selected = elem.find("option:first");
       }
-      spanTag.html(selected.html());
+      spanTag.html(selected.text());
       
       elem.css('opacity', 0);
       elem.wrap(divTag);
@@ -20453,7 +21005,7 @@ Enjoy!
 
       elem.bind({
         "change.uniform": function() {
-          spanTag.text(elem.find(":selected").html());
+          spanTag.text(elem.find(":selected").text());
           divTag.removeClass(options.activeClass);
         },
         "focus.uniform": function() {
@@ -20477,10 +21029,9 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
-          divTag.removeClass(options.activeClass);
         },
         "keyup.uniform": function(){
-          spanTag.text(elem.find(":selected").html());
+          spanTag.text(elem.find(":selected").text());
         }
       });
       
@@ -20496,15 +21047,10 @@ Enjoy!
     }
 
     function doCheckbox(elem){
-      var $el = $(elem);
-      
+
       var divTag = $('<div />'),
           spanTag = $('<span />');
-      
-      if(!$el.css("display") == "none" && options.autoHide){
-        divTag.hide();
-      }
-      
+
       divTag.addClass(options.checkboxClass);
 
       //assign the id of the element
@@ -20550,7 +21096,6 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
-          divTag.removeClass(options.activeClass);
         }
       });
       
@@ -20567,17 +21112,13 @@ Enjoy!
       }
 
       storeElement(elem);
+
     }
 
     function doRadio(elem){
-      var $el = $(elem);
-      
+
       var divTag = $('<div />'),
           spanTag = $('<span />');
-          
-      if(!$el.css("display") == "none" && options.autoHide){
-        divTag.hide();
-      }
 
       divTag.addClass(options.radioClass);
 
@@ -20609,8 +21150,7 @@ Enjoy!
             spanTag.removeClass(options.checkedClass);
           }else{
             //box was just checked, check span
-            var classes = options.radioClass.split(" ")[0];
-            $("." + classes + " span." + options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
+            $("."+options.radioClass + " span."+options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
             spanTag.addClass(options.checkedClass);
           }
         },
@@ -20627,7 +21167,6 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
-          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -20653,10 +21192,6 @@ Enjoy!
       var divTag = $('<div />'),
           filenameTag = $('<span>'+options.fileDefaultText+'</span>'),
           btnTag = $('<span>'+options.fileBtnText+'</span>');
-      
-      if(!$el.css("display") == "none" && options.autoHide){
-        divTag.hide();
-      }
 
       divTag.addClass(options.fileClass);
       filenameTag.addClass(options.filenameClass);
@@ -20724,7 +21259,6 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
-          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -20748,7 +21282,6 @@ Enjoy!
       
       $.uniform.noSelect(filenameTag);
       $.uniform.noSelect(btnTag);
-      
       storeElement(elem);
 
     }
@@ -20775,7 +21308,7 @@ Enjoy!
           $(this).siblings("span").remove();
           //unwrap parent div
           $(this).unwrap();
-        }else if($(this).is("button, :submit, :reset, a, input[type='button']")){
+        }else if($(this).is("button, :submit, a, input[type='button']")){
           //unwrap from span and div
           $(this).unwrap().unwrap();
         }
@@ -20837,7 +21370,7 @@ Enjoy!
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
 
           //reset current selected text
-          spanTag.html($e.find(":selected").html());
+          spanTag.html($e.find(":selected").text());
 
           if($e.is(":disabled")){
             divTag.addClass(options.disabledClass);
@@ -20893,7 +21426,7 @@ Enjoy!
           }else{
             divTag.removeClass(options.disabledClass);
           }
-        }else if($e.is(":submit") || $e.is(":reset") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
+        }else if($e.is(":submit") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
           var divTag = $e.closest("div");
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
           
@@ -20904,7 +21437,6 @@ Enjoy!
           }
           
         }
-        
       });
     };
 
@@ -20933,7 +21465,7 @@ Enjoy!
           doInput(elem);
         }else if(elem.is("textarea")){
           doTextarea(elem);
-        }else if(elem.is("a") || elem.is(":submit") || elem.is(":reset") || elem.is("button") || elem.is("input[type=button]")){
+        }else if(elem.is("a") || elem.is(":submit") || elem.is("button") || elem.is("input[type=button]")){
           doButton(elem);
         }
           
@@ -20941,2913 +21473,9 @@ Enjoy!
     });
   };
 })(jQuery);
-/**
- * Flexify 1.1 | jQuery Plugin
- *
- * Copyright (c) 2008 Tim Cameron Ryan
- * http://plugins.jquery.com/project/Flexify
- *
- * Dual licensed under the MIT and GPL licenses:
- *   http://www.opensource.org/licenses/mit-license.php
- *   http://www.gnu.org/licenses/gpl.html
- */
- 
-(function ($) {
-	/*
-	 * Flexification
-	 */
-	 
-	$.fn.flexify = function ()
-	{		
-		// find flexible elements
-		var elements = this.add(this.find('*')), flexDimensions = {}, flexPositioned = {};
-		$.each(['horizontal', 'vertical'], function (i, axis) {
-			// the parents of flexible dimension elements
-			flexDimensions[axis] = elements.filter(function () {
-				return $(this).data('flexify-parent') && $(this).data('flexify-parent').axes[axis];
-			});
-			// flexibly positioned elements
-			flexPositioned[axis] = elements.filter(function () {
-				return $(this).data('flexify-position') && $(this).data('flexify-position').axes[axis];
-			});
-		});
-		
-		// flexification function
-		var closure = this;
-		function flex()
-		{
-			// flex horizontal
-			flexDimensions.horizontal.flexifyDimensions('horizontal');
-			flexPositioned.horizontal.flexifyPosition('horizontal');
-			// cache current width
-			var width = closure.dimension('horizontal');
-			// reset vertical
-			flexDimensions.vertical.flexifyDimensions('vertical');
-			flexPositioned.vertical.flexifyPosition('vertical');
-			// reflexify if vertical scrollbar has disappeared
-			if (width < closure.dimension('horizontal'))
-				return flex();
-				
-			// add resize handler
-			$(window).one('reflow', flex);
-		}		
-		// initial call
-		flex();	
-		
-		// continue object chain
-		return this;
-	}
-
-	$.fn.flexifyDimensions = function (axis)
-	{
-		// reset stage (iterate backwards)
-		for (var i = this.length - 1, parent = this[i]; i > -1; parent = this[--i])
-		{
-			// reset flexible styles and calculate minimum flex unit size
-			var data = $(parent).data('flexify-parent'), flexUnit = [0];
-			data.children[axis].each(function resetChildFlexAndGetMinimums() {
-				var childData = $(this).data('flexify-child');
-				
-				// iterate flexible properties
-				for (var property in childData.properties[axis])
-					$(this).css(property, 0);
-					
-				// reset flexible dimensions and check flex unit
-				if (childData.dimensions.hasOwnProperty(axis))
-				{
-					$(this).dimension(axis, 'content', childData.intrinsic[axis]);
-					flexUnit.push((parseInt(childData.intrinsic[axis]) || $(this).dimension(axis, 'content')) / childData.dimensions[axis]);
-				}
-			});
-			
-			// normalize flex unit
-			data.flexUnit = Math.max.apply(null, flexUnit);
-			// equalize flexible sizes
-			data.children[axis].each(function equalizeFlexChild() {
-				// set minimum flex size
-				var childData = $(this).data('flexify-child');
-				for (var property in childData.properties[axis])
-					$(this).css(property, data.flexUnit * childData.properties[axis][property])
-				if (childData.dimensions.hasOwnProperty(axis))
-					$(this).dimension(axis, 'content', data.flexUnit * childData.dimensions[axis]);
-			});
-
-			// trigger handler
-			$(parent).trigger('FlexifyReset', [axis]);
-		}
-		
-		// apply stage (iterates forwards)
-		for (var i = 0, parent = this[i]; i < this.length; parent = this[++i])
-		{
-			// calculate space
-			var data = $(parent).data('flexify-parent');
-			var freeSpace = $(parent).dimension(axis, 'content'), usedSpace;
-			if (axis == $(parent).flow())
-				usedSpace = $(parent).contentDimension(axis, 'offset');
-
-			// iterate flexible children
-			data.children[axis].each(function applyFlexToChild(i, child) {			
-				// calculate used space
-				if (axis != $(parent).flow())
-//[TODO] this should be using 'margin', but safari adds phantom margins to fixed-width elements
-					usedSpace = $(this).dimension(axis, 'border');
-
-				var childData = $(this).data('flexify-child');
-				// calculate flexible space
-				var flexUnit = data.flexUnit + Math.max(Math.floor((freeSpace - usedSpace) / (axis == $(parent).flow() ? data.childDivisor[axis] : childData.divisor[axis])), 0);
-
-				// iterate flexible properties
-				for (var property in childData.properties[axis])
-					$(this).css(property, flexUnit * childData.properties[axis][property]);
-				if (childData.dimensions.hasOwnProperty(axis))
-					$(this).dimension(axis, 'content', flexUnit * childData.dimensions[axis]);
-			});
-
-			// trigger handler
-			$(parent).trigger('FlexifyApply', [axis]);
-		}
-		
-		// continue object chain
-		return this;
-	}
-	
-	$.fn.flexifyPosition = function (axis)
-	{
-		for (var i = 0, child = this[i], parent; i < this.length; child = this[++i])
-		{
-			// check parent
-			if (!(parent = child.offsetParent))
-				return;
-				
-			// get divisor
-			var data = $(child).data('flexify-position'), divisor = 0;
-			for (var property in data.properties[axis])
-				divisor += data.properties[axis][property];				
-			// calculate flexible space
-			var flexUnit = Math.max(($(parent).dimension(axis, 'border') - $(child).dimension(axis, 'border')) / divisor, 0);
-			// iterate properties
-			for (var property in data.properties[axis])
-				$(child).css(property, data.properties[axis][property] * flexUnit);
-		}
-		
-		// continue object chain
-		return this;
-	}
-	
-	/*
-	 * Flex property
-	 */
-
-	$.fn.flex = function (property, value)
-	{	
-		// rewrite border properties
-		property = property.replace(/^(border-[a-z]+)$/, '$1-width');
-		// property lists
-		var flexibleProps = {
-			horizontal: 'margin-left|margin-right|border-left-width|border-right-width|padding-left|padding-right|width|left|right'.split('|'),
-			vertical: 'margin-top|margin-bottom|border-top-width|border-bottom-width|padding-top|padding-bottom|height|top|bottom'.split('|')
-		};
-		var positionProps = 'left|right|top|bottom'.split('|');
-		var dimensionProps = 'width|height'.split('|');
-
-		// get dimension axis
-		for (var axis in flexibleProps)
-			if ($.inArray(property, flexibleProps[axis]) != -1)
-				break;
-		if ($.inArray(property, flexibleProps[axis]) == -1)
-			return false;
-		
-		// getter
-		if (arguments.length < 2)
-			return $.inArray(property, dimensionProps) != -1 ?
-			    $(this).data('flexify-child').dimensions[axis] :
-			    $.inArray(property, positionProps) != -1 ?
-			    $(this).data('flexify-position')[axis][property] :
-			    $(this).data('flexify-child').properties[axis][property];
-		
-		// setter for position
-		if ($.inArray(property, positionProps) != -1)
-		{
-			return this.each(function (i, child) {
-				// initialize data
-				if (!$(this).data('flexify-position'))
-					$(this).data('flexify-position', {
-					    properties: {horizontal: {}, vertical: {}},
-					    axes: {horizontal: false, vertical: false}
-					});
-				// set axis flag and add property
-				$(this).data('flexify-position').axes[axis] = true;
-				$(this).data('flexify-position').properties[axis][property] = value;
-			});
-		}
-		
-		//[FIX] flexifying documentElement/body in some browsers causes issues
-		var flexFilter = $.browser.msie ? 'html' :
-		    $.browser.opera && $.browser.version < 9.5 ? 'html, body' : '';
-		// setter for dimension
-		return this.not(flexFilter).each(function (i, child) {
-			// flexible parents must have flow
-			if (!$(this).parent().flow())
-				$(this).parent().flow('vertical');
-		
-			// initialize parent data
-			if (!$(this).parent().data('flexify-parent'))
-			    $(this).parent().data('flexify-parent', {
-				flexUnit: 0,
-				children: {horizontal: $([]), vertical: $([])},
-				childDivisor: {horizontal: 0, vertical: 0},
-				axes: {horizontal: false, vertical: false}
-			    });			    
-			// initialize child data
-			if (!$(this).data('flexify-child'))
-			    $(this).data('flexify-child', {
-				divisor: {horizontal: 0, vertical: 0},
-				intrinsic: {horizontal: null, vertical: null},
-				properties: {horizontal: {}, vertical: {}},
-				dimensions: {}
-			    });
-		
-			// add to free space divisor
-			$(this).data('flexify-child').divisor[axis] += value;
-			$(this).parent().data('flexify-parent').childDivisor[axis] += value;
-			// set axis flag and append to parent's children array
-			$(this).parent().data('flexify-parent').axes[axis] = true;
-			$(this).parent().data('flexify-parent').children[axis] = $(this).parent().data('flexify-parent').children[axis].add(this);
-			
-			// save dimension property and its intrinsic size
-			if (property == 'width' || property == 'height')
-			{
-				$(this).data('flexify-child').dimensions[axis] = value;
-				$(this).data('flexify-child').intrinsic[axis] = this.style[property];
-				
-				//[FIX] opera 9.0 has to manually reset form element dimensions
-				// because reading body.clientWidth prevents textarea width: auto from working!?
-				if ($.browser.opera && $.browser.version < 9.5 && $(this).is(':button, input, textarea, iframe'))
-					$(this).data('flexify-child').intrinsic[axis] = $(this).dimension(axis);
-			}
-			// save property
-			else
-				$(this).data('flexify-child').properties[axis][property] = value;
-			
-			// add flexify reset handler to define (just once!) horizontal flow minimums
-//[TODO] could this be called every time? it would prevent float jogging on initial resize
-			var parentChain = $(this).add($(this).parents());
-			$(this).parent().unbind('FlexifyReset.setMinimums')
-			    .one('FlexifyReset.setMinimums', function (e, axis) {
-				// only on horizontal axis
-				if (axis == 'horizontal')
-					parentChain.trigger('ResetFlow');
-			});
-		});
-	}
-	
-	// :flexible selector
-	 
-	function flexSelector(elem, i, selector) {
-		return $(elem).data('flexify-child');
-	}
-	$.extend($.expr[':'], {flexible: flexSelector});
-
-	/*
-	 * Reflow event
-	 */
-	
-	// window resize polling function
-	//[FIX] we create our own window resize event, because:
-	// Mozilla is too slow.
-	// IE can't immediately resetFlex in a resize event thread.
-	var wWidth, wHeight;
-	function pollWindowResize() {
-		var flag = wWidth != $(window).dimension('horizontal') || wHeight != $(window).dimension('vertical');
-		wWidth = $(window).dimension('horizontal');
-		wHeight = $(window).dimension('vertical');
-		return flag;
-	}
-	// getting window width requires the DOM to be loaded
-	$(function () {
-		// initial call
-		pollWindowResize();
-		// check window resize at set intervals
-		setInterval(function () {
-			if (pollWindowResize())
-				$(window).trigger('reflow');
-		}, 250);
-	});
-	
-//[TODO] font resize/page zoom
-	
-	/*
-	 * Flow property
-	 */
-
-	$.fn.flow = function flow(axis)
-	{
-		// getter
-		if (arguments.length < 1)
-			return this.data('flow');
-	
-		// setter
-		return this.each(function (i, parent) {
-			// initialize flow box
-			$(this).data('flow', axis == 'horizontal' ? 'horizontal' : 'vertical');
-
-			// flow can only work with elements; remove whitespace and wrap child text nodes
-			for (var child = this.firstChild; child; child = child.nextSibling)
-				if (child.nodeType == 3)
-					/^\s+$/.test(child.nodeValue) ? this.removeChild(child)
-					    : $(child).wrap('<div class="text"></div>');
-			//[FIX] flow children generally need layout in IE to check dimensions
-			$(this).children().css('zoom', 1);
-			
-			// horizontal flow requires some changes
-			if (axis == 'horizontal')
-			{
-				// filter children widths
-				var shrinkWrap = $([]);
-				$(this).children().each(function () {
-					// non-replaced elements of width: auto are shrink-wrapped
-					if (!$(this).is(':button') && $(this).dimensionIsAuto(axis))
-						// overfloW : auto has no intrinsic width
-						$(this).dimension(axis, 'content',
-						    $(this).css('overflow') == 'auto' ? 0 :
-						    $(this).contentDimension(axis, 'scroll'));
-				});
-				
-				// overflow: auto to contain floats (not hidden, because of <body> tag!)
-				//[FIX] this screws up IE (naturally), so force layout instead
-				$(this).css($.browser.msie ? {'zoom': 1} : {'overflow': 'auto'});
-				// float: left for horizontal row
-				$(this).children().css({'float': 'left'});
-
-				// add minimum-setting handler
-				$(this).bind('ResetFlow', function () {
-					$.swap(this, {width: '10000px'}, function () {
-						//[FIX] just give a bit of extra wiggle room for Mozilla
-						$(this).dimension(axis, 'min', $(this).contentDimension(axis, 'offset') + 1);
-					});
-				}).trigger('ResetFlow');
-			}
-		});
-	}
-	
-	// :vertical, :horizontal selectors
-	 
-	function flowSelector(elem, i, selector) {
-		return $(elem).data('flow') == selector[2];
-	}
-	$.extend($.expr[':'], {vertical: flowSelector, horizontal: flowSelector});
-	
-	/*
-	 * Dimensions
-	 */
-	
-	// adapted from code by Mike Helgeson
-	// http://dev.jquery.com/ticket/3082
-	(function ()
-	{
-		// get numeric attr value of the local element
-//[TODO] a private curCSS would speed up num() reading
-		function num(elem, attr)
-		{
-			return parseFloat($.curCSS( elem, attr, true)) || 0;
-		}
-		
-		// properties
-		var Prop = {horizontal: 'Width', vertical: 'Height'},
-		    tl = {horizontal: 'Left', vertical: 'Top'}, br = {horizontal: 'Right', vertical: 'Bottom'};
-		    
-		/*
-		 * Dimensions
-		 */
-		
-		// get/set dimension
-		$.fn.dimension = function (axis, prefix, value)
-		{
-			// check that there be any elements
-			if (!this.length)
-				return null;
-			var elem = this[0];
-			// default prefix
-			prefix = prefix || 'content';
-			
-			// for document/window size, use <html> or <body> (depending on Quirks vs Standards mode)
-			if (elem == window || elem == document)
-				return (document.compatMode == 'CSS1Compat' ? document.documentElement : document.body)['client' + Prop[axis]];
-			// get the dimensions of a single element
-			if (value == undefined)
-			{
-				// using offset dimension
-				if (prefix == 'margin' || prefix == 'border')
-					value = elem['offset' + Prop[axis]]
-					    + (prefix == 'margin' ? num(elem, 'margin' + tl[axis]) + num(elem, 'margin' + br[axis]) : 0);
-				// using client dimension
-				if (prefix == 'padding' || prefix == 'content')
-					// element size from padding to padding
-					value = elem['client' + Prop[axis]]
-					    - (prefix == 'content' ? num(elem, 'padding' + tl[axis]) + num(elem, 'padding' + br[axis]) : 0);
-					
-				return Math.max(0, Math.ceil(value));					    
-			}
-				
-			// set value via jQuery function
-			return this[prefix == 'content' ? Prop[axis].toLowerCase() : prefix + Prop[axis]](value); 
-		}
-		
-		//[FIX] in IE, the <html> element has a default border of medium
-		// rather than support border word values in .dimension(), just rewrite this to '2px'
-		if ($.browser.msie)
-		{
-			$(function () {
-				var html = document.documentElement;
-				$.each(['Left', 'Right', 'Top', 'Bottom'], function (i, prop) {
-					if (html.currentStyle['border' + prop + 'Style'] != 'none' &&
-					    html.currentStyle['border' + prop + 'Width'] == 'medium')
-						html.style['border' + prop + 'Width'] = '2px';
-				});
-			});
-		}
-		
-		/*
-		 * Content dimensions
-		 */
-		
-		// get content dimension
-		$.fn.contentDimension = function (axis, means)
-		{
-			// check that there be any elements
-			if (!this.length)
-				return null;
-			var elem = this[0];
-			
-			//[FIX] in IE, scrollHeight always has this value; this also avoids other bugs
-			if ($.browser.msie && axis == 'vertical')
-				return this[0].scrollHeight - (this[0] != document ? 
-				    num(this[0], 'padding' + tl[axis]) - num(this[0], 'padding' + br[axis]) : 0);
-		
-			// get dimension by scroll
-			if (means == 'scroll')
-			{
-				// shrink element and use overflow to determine children size
-				var css = {'float': 'left', 'border': '2px solid black'}, val;
-				//[FIX] Safari doesn't like dimensions of '0'
-				css[Prop[axis].toLowerCase()] = '1px';
-				$.swap(elem, css, function () {
-					val = elem['scroll' + Prop[axis]] - num(elem, 'padding' + tl[axis]) - num(elem, 'padding' + br[axis]);
-				});
-				return Math.max(0, Math.ceil(val));
-			}
-			
-			// get dimension by offset between first and last elements
-			for (var firstChild = elem.firstChild;
-			    firstChild && firstChild.nodeType != 1;
-			    firstChild = firstChild.nextSibling);
-			if (!firstChild)
-				return null;
-			for (var lastChild = elem.lastChild;
-			    lastChild && lastChild.nodeType != 1;
-			    lastChild = lastChild.previousSibling);
-			// calculate offset difference and add last element's height
-			return Math.max(0, Math.ceil(
-				num(firstChild, 'margin' + tl[axis])
-				+ (lastChild['offset' + tl[axis]] - firstChild['offset' + tl[axis]]) + lastChild['offset' + Prop[axis]]
-				+ num(lastChild, 'margin' + br[axis])
-			    ));
-		}
-		
-		/*
-		 * Dimension analysis
-		 */
-		
-		// check if a dimension is set to 'auto'
-		$.fn.dimensionIsAuto = function (axis)
-		{
-			// check that there be any elements
-			if (!this.length)
-				return;
-			// auto will not expand offset dimension with padding
-			var oldPadding = this[0].style['padding' + tl[axis]];
-			this[0].style['padding' + tl[axis]] = 0;
-			var dimension = this[0]['offset' + Prop[axis]];
-			this[0].style['padding' + tl[axis]] = '1px';
-			var flag = this[0]['offset' + Prop[axis]] == dimension;
-			this[0].style['padding' + tl[axis]] = oldPadding;
-			return flag;
-		}
-	})();
-	
-	/*
-	 * Min-width/height
-	 */
-	
-	// min-height and width setters
-	$.each({Height: 'height', Width: 'width'}, function (Prop, prop)
-	{		
-		$.fn['min' + Prop] = function (value)
-		{
-			// set minimum dimension property
-			return this.css('min' + Prop, typeof value == 'string' ? value : value + 'px');
-		}
-	});
-	
-	//[FIX] add min-width to IE6
-	if ($.browser.msie && $.browser.version < 7)
-	{
-		// replace min-width and min-height functions
-		$.each({Height: 'height', Width: 'width'}, function (Prop, prop)
-		{		
-			$.fn['min' + Prop] = function (value)
-			{
-				return this.each(function (i, child) {
-					// add reflow handler
-					$(window).bind('reflow.minDimensions', function () {
-						child.runtimeStyle[prop] = '';
-					});
-					// trigger hasLayout and add resize handler
-					$(this).css('zoom', 1).unbind('resize.minDimensions').bind('resize.minDimensions', function () {
-						if ($(this)[prop]() < parseInt(value))
-							this.runtimeStyle[prop] = typeof value == 'string' ? value : value + 'px';
-					}).trigger('resize.minDimensions');
-				});
-			}
-			
-			// body tag is an exception
-			$(window).one('resize.minDimensions', function checkBodyResize() {
-				$('body').trigger('resize.minDimensions');
-				$(window).one('resize.minDimensions', checkBodyResize);
-			});
-		});
-	}
-})(jQuery);
-
-// name: sammy
-// version: 0.6.2
-
-(function($, window) {
-
-  var Sammy,
-      PATH_REPLACER = "([^\/]+)",
-      PATH_NAME_MATCHER = /:([\w\d]+)/g,
-      QUERY_STRING_MATCHER = /\?([^#]*)$/,
-      // mainly for making `arguments` an Array
-      _makeArray = function(nonarray) { return Array.prototype.slice.call(nonarray); },
-      // borrowed from jQuery
-      _isFunction = function( obj ) { return Object.prototype.toString.call(obj) === "[object Function]"; },
-      _isArray = function( obj ) { return Object.prototype.toString.call(obj) === "[object Array]"; },
-      _decode = decodeURIComponent,
-      _encode = encodeURIComponent,
-      _escapeHTML = function(s) {
-        return String(s).replace(/&(?!\w+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      },
-      _routeWrapper = function(verb) {
-        return function(path, callback) { return this.route.apply(this, [verb, path, callback]); };
-      },
-      _template_cache = {},
-      loggers = [];
-
-
-  // `Sammy` (also aliased as $.sammy) is not only the namespace for a
-  // number of prototypes, its also a top level method that allows for easy
-  // creation/management of `Sammy.Application` instances. There are a
-  // number of different forms for `Sammy()` but each returns an instance
-  // of `Sammy.Application`. When a new instance is created using
-  // `Sammy` it is added to an Object called `Sammy.apps`. This
-  // provides for an easy way to get at existing Sammy applications. Only one
-  // instance is allowed per `element_selector` so when calling
-  // `Sammy('selector')` multiple times, the first time will create
-  // the application and the following times will extend the application
-  // already added to that selector.
-  //
-  // ### Example
-  //
-  //      // returns the app at #main or a new app
-  //      Sammy('#main')
-  //
-  //      // equivilent to "new Sammy.Application", except appends to apps
-  //      Sammy();
-  //      Sammy(function() { ... });
-  //
-  //      // extends the app at '#main' with function.
-  //      Sammy('#main', function() { ... });
-  //
-  Sammy = function() {
-    var args = _makeArray(arguments),
-        app, selector;
-    Sammy.apps = Sammy.apps || {};
-    if (args.length === 0 || args[0] && _isFunction(args[0])) { // Sammy()
-      return Sammy.apply(Sammy, ['body'].concat(args));
-    } else if (typeof (selector = args.shift()) == 'string') { // Sammy('#main')
-      app = Sammy.apps[selector] || new Sammy.Application();
-      app.element_selector = selector;
-      if (args.length > 0) {
-        $.each(args, function(i, plugin) {
-          app.use(plugin);
-        });
-      }
-      // if the selector changes make sure the refrence in Sammy.apps changes
-      if (app.element_selector != selector) {
-        delete Sammy.apps[selector];
-      }
-      Sammy.apps[app.element_selector] = app;
-      return app;
-    }
-  };
-
-  Sammy.VERSION = '0.6.2';
-
-  // Add to the global logger pool. Takes a function that accepts an
-  // unknown number of arguments and should print them or send them somewhere
-  // The first argument is always a timestamp.
-  Sammy.addLogger = function(logger) {
-    loggers.push(logger);
-  };
-
-  // Sends a log message to each logger listed in the global
-  // loggers pool. Can take any number of arguments.
-  // Also prefixes the arguments with a timestamp.
-  Sammy.log = function()  {
-    var args = _makeArray(arguments);
-    args.unshift("[" + Date() + "]");
-    $.each(loggers, function(i, logger) {
-      logger.apply(Sammy, args);
-    });
-  };
-
-  if (typeof window.console != 'undefined') {
-    if (_isFunction(window.console.log.apply)) {
-      Sammy.addLogger(function() {
-        window.console.log.apply(window.console, arguments);
-      });
-    } else {
-      Sammy.addLogger(function() {
-        window.console.log(arguments);
-      });
-    }
-  } else if (typeof console != 'undefined') {
-    Sammy.addLogger(function() {
-      console.log.apply(console, arguments);
-    });
-  }
-
-  $.extend(Sammy, {
-    makeArray: _makeArray,
-    isFunction: _isFunction,
-    isArray: _isArray
-  })
-
-  // Sammy.Object is the base for all other Sammy classes. It provides some useful
-  // functionality, including cloning, iterating, etc.
-  Sammy.Object = function(obj) { // constructor
-    return $.extend(this, obj || {});
-  };
-
-  $.extend(Sammy.Object.prototype, {
-
-    // Escape HTML in string, use in templates to prevent script injection.
-    // Also aliased as `h()`
-    escapeHTML: _escapeHTML,
-    h: _escapeHTML,
-
-    // Returns a copy of the object with Functions removed.
-    toHash: function() {
-      var json = {};
-      $.each(this, function(k,v) {
-        if (!_isFunction(v)) {
-          json[k] = v;
-        }
-      });
-      return json;
-    },
-
-    // Renders a simple HTML version of this Objects attributes.
-    // Does not render functions.
-    // For example. Given this Sammy.Object:
-    //
-    //    var s = new Sammy.Object({first_name: 'Sammy', last_name: 'Davis Jr.'});
-    //    s.toHTML() //=> '<strong>first_name</strong> Sammy<br /><strong>last_name</strong> Davis Jr.<br />'
-    //
-    toHTML: function() {
-      var display = "";
-      $.each(this, function(k, v) {
-        if (!_isFunction(v)) {
-          display += "<strong>" + k + "</strong> " + v + "<br />";
-        }
-      });
-      return display;
-    },
-
-    // Returns an array of keys for this object. If `attributes_only`
-    // is true will not return keys that map to a `function()`
-    keys: function(attributes_only) {
-      var keys = [];
-      for (var property in this) {
-        if (!_isFunction(this[property]) || !attributes_only) {
-          keys.push(property);
-        }
-      }
-      return keys;
-    },
-
-    // Checks if the object has a value at `key` and that the value is not empty
-    has: function(key) {
-      return this[key] && $.trim(this[key].toString()) != '';
-    },
-
-    // convenience method to join as many arguments as you want
-    // by the first argument - useful for making paths
-    join: function() {
-      var args = _makeArray(arguments);
-      var delimiter = args.shift();
-      return args.join(delimiter);
-    },
-
-    // Shortcut to Sammy.log
-    log: function() {
-      Sammy.log.apply(Sammy, arguments);
-    },
-
-    // Returns a string representation of this object.
-    // if `include_functions` is true, it will also toString() the
-    // methods of this object. By default only prints the attributes.
-    toString: function(include_functions) {
-      var s = [];
-      $.each(this, function(k, v) {
-        if (!_isFunction(v) || include_functions) {
-          s.push('"' + k + '": ' + v.toString());
-        }
-      });
-      return "Sammy.Object: {" + s.join(',') + "}";
-    }
-  });
-
-  // The HashLocationProxy is the default location proxy for all Sammy applications.
-  // A location proxy is a prototype that conforms to a simple interface. The purpose
-  // of a location proxy is to notify the Sammy.Application its bound to when the location
-  // or 'external state' changes. The HashLocationProxy considers the state to be
-  // changed when the 'hash' (window.location.hash / '#') changes. It does this in two
-  // different ways depending on what browser you are using. The newest browsers
-  // (IE, Safari > 4, FF >= 3.6) support a 'onhashchange' DOM event, thats fired whenever
-  // the location.hash changes. In this situation the HashLocationProxy just binds
-  // to this event and delegates it to the application. In the case of older browsers
-  // a poller is set up to track changes to the hash. Unlike Sammy 0.3 or earlier,
-  // the HashLocationProxy allows the poller to be a global object, eliminating the
-  // need for multiple pollers even when thier are multiple apps on the page.
-  Sammy.HashLocationProxy = function(app, run_interval_every) {
-    this.app = app;
-    // set is native to false and start the poller immediately
-    this.is_native = false;
-    this._startPolling(run_interval_every);
-  };
-
-  Sammy.HashLocationProxy.prototype = {
-
-    // bind the proxy events to the current app.
-    bind: function() {
-      var proxy = this, app = this.app;
-      $(window).bind('hashchange.' + this.app.eventNamespace(), function(e, non_native) {
-        // if we receive a native hash change event, set the proxy accordingly
-        // and stop polling
-        if (proxy.is_native === false && !non_native) {
-          Sammy.log('native hash change exists, using');
-          proxy.is_native = true;
-          window.clearInterval(Sammy.HashLocationProxy._interval);
-        }
-        app.trigger('location-changed');
-      });
-      if (!Sammy.HashLocationProxy._bindings) {
-        Sammy.HashLocationProxy._bindings = 0;
-      }
-      Sammy.HashLocationProxy._bindings++;
-    },
-
-    // unbind the proxy events from the current app
-    unbind: function() {
-      $(window).unbind('hashchange.' + this.app.eventNamespace());
-      Sammy.HashLocationProxy._bindings--;
-      if (Sammy.HashLocationProxy._bindings <= 0) {
-        window.clearInterval(Sammy.HashLocationProxy._interval);
-      }
-    },
-
-    // get the current location from the hash.
-    getLocation: function() {
-     // Bypass the `window.location.hash` attribute.  If a question mark
-      // appears in the hash IE6 will strip it and all of the following
-      // characters from `window.location.hash`.
-      var matches = window.location.toString().match(/^[^#]*(#.+)$/);
-      return matches ? matches[1] : '';
-    },
-
-    // set the current location to `new_location`
-    setLocation: function(new_location) {
-      return (window.location = new_location);
-    },
-
-    _startPolling: function(every) {
-      // set up interval
-      var proxy = this;
-      if (!Sammy.HashLocationProxy._interval) {
-        if (!every) { every = 10; }
-        var hashCheck = function() {
-          var current_location = proxy.getLocation();
-          if (!Sammy.HashLocationProxy._last_location ||
-            current_location != Sammy.HashLocationProxy._last_location) {
-            window.setTimeout(function() {
-              $(window).trigger('hashchange', [true]);
-            }, 13);
-          }
-          Sammy.HashLocationProxy._last_location = current_location;
-        };
-        hashCheck();
-        Sammy.HashLocationProxy._interval = window.setInterval(hashCheck, every);
-      }
-    }
-  };
-
-
-  // Sammy.Application is the Base prototype for defining 'applications'.
-  // An 'application' is a collection of 'routes' and bound events that is
-  // attached to an element when `run()` is called.
-  // The only argument an 'app_function' is evaluated within the context of the application.
-  Sammy.Application = function(app_function) {
-    var app = this;
-    this.routes            = {};
-    this.listeners         = new Sammy.Object({});
-    this.arounds           = [];
-    this.befores           = [];
-    // generate a unique namespace
-    this.namespace         = (new Date()).getTime() + '-' + parseInt(Math.random() * 1000, 10);
-    this.context_prototype = function() { Sammy.EventContext.apply(this, arguments); };
-    this.context_prototype.prototype = new Sammy.EventContext();
-
-    if (_isFunction(app_function)) {
-      app_function.apply(this, [this]);
-    }
-    // set the location proxy if not defined to the default (HashLocationProxy)
-    if (!this._location_proxy) {
-      this.setLocationProxy(new Sammy.HashLocationProxy(this, this.run_interval_every));
-    }
-    if (this.debug) {
-      this.bindToAllEvents(function(e, data) {
-        app.log(app.toString(), e.cleaned_type, data || {});
-      });
-    }
-  };
-
-  Sammy.Application.prototype = $.extend({}, Sammy.Object.prototype, {
-
-    // the four route verbs
-    ROUTE_VERBS: ['get','post','put','delete'],
-
-    // An array of the default events triggered by the
-    // application during its lifecycle
-    APP_EVENTS: ['run',
-                 'unload',
-                 'lookup-route',
-                 'run-route',
-                 'route-found',
-                 'event-context-before',
-                 'event-context-after',
-                 'changed',
-                 'error',
-                 'check-form-submission',
-                 'redirect',
-                 'location-changed'],
-
-    _last_route: null,
-    _location_proxy: null,
-    _running: false,
-
-    // Defines what element the application is bound to. Provide a selector
-    // (parseable by `jQuery()`) and this will be used by `$element()`
-    element_selector: 'body',
-
-    // When set to true, logs all of the default events using `log()`
-    debug: false,
-
-    // When set to true, and the error() handler is not overriden, will actually
-    // raise JS errors in routes (500) and when routes can't be found (404)
-    raise_errors: false,
-
-    // The time in milliseconds that the URL is queried for changes
-    run_interval_every: 50,
-
-    // The default template engine to use when using `partial()` in an
-    // `EventContext`. `template_engine` can either be a string that
-    // corresponds to the name of a method/helper on EventContext or it can be a function
-    // that takes two arguments, the content of the unrendered partial and an optional
-    // JS object that contains interpolation data. Template engine is only called/refered
-    // to if the extension of the partial is null or unknown. See `partial()`
-    // for more information
-    template_engine: null,
-
-    // //=> Sammy.Application: body
-    toString: function() {
-      return 'Sammy.Application:' + this.element_selector;
-    },
-
-    // returns a jQuery object of the Applications bound element.
-    $element: function(selector) {
-      return selector ? $(this.element_selector).find(selector) : $(this.element_selector);
-    },
-
-    // `use()` is the entry point for including Sammy plugins.
-    // The first argument to use should be a function() that is evaluated
-    // in the context of the current application, just like the `app_function`
-    // argument to the `Sammy.Application` constructor.
-    //
-    // Any additional arguments are passed to the app function sequentially.
-    //
-    // For much more detail about plugins, check out:
-    // http://code.quirkey.com/sammy/doc/plugins.html
-    //
-    // ### Example
-    //
-    //      var MyPlugin = function(app, prepend) {
-    //
-    //        this.helpers({
-    //          myhelper: function(text) {
-    //            alert(prepend + " " + text);
-    //          }
-    //        });
-    //
-    //      };
-    //
-    //      var app = $.sammy(function() {
-    //
-    //        this.use(MyPlugin, 'This is my plugin');
-    //
-    //        this.get('#/', function() {
-    //          this.myhelper('and dont you forget it!');
-    //          //=> Alerts: This is my plugin and dont you forget it!
-    //        });
-    //
-    //      });
-    //
-    // If plugin is passed as a string it assumes your are trying to load
-    // Sammy."Plugin". This is the prefered way of loading core Sammy plugins
-    // as it allows for better error-messaging.
-    //
-    // ### Example
-    //
-    //      $.sammy(function() {
-    //        this.use('Mustache'); //=> Sammy.Mustache
-    //        this.use('Storage'); //=> Sammy.Storage
-    //      });
-    //
-    use: function() {
-      // flatten the arguments
-      var args = _makeArray(arguments),
-          plugin = args.shift(),
-          plugin_name = plugin || '';
-      try {
-        args.unshift(this);
-        if (typeof plugin == 'string') {
-          plugin_name = 'Sammy.' + plugin;
-          plugin = Sammy[plugin];
-        }
-        plugin.apply(this, args);
-      } catch(e) {
-        if (typeof plugin === 'undefined') {
-          this.error("Plugin Error: called use() but plugin (" + plugin_name.toString() + ") is not defined", e);
-        } else if (!_isFunction(plugin)) {
-          this.error("Plugin Error: called use() but '" + plugin_name.toString() + "' is not a function", e);
-        } else {
-          this.error("Plugin Error", e);
-        }
-      }
-      return this;
-    },
-
-    // Sets the location proxy for the current app. By default this is set to
-    // a new `Sammy.HashLocationProxy` on initialization. However, you can set
-    // the location_proxy inside you're app function to give your app a custom
-    // location mechanism. See `Sammy.HashLocationProxy` and `Sammy.DataLocationProxy`
-    // for examples.
-    //
-    // `setLocationProxy()` takes an initialized location proxy.
-    //
-    // ### Example
-    //
-    //        // to bind to data instead of the default hash;
-    //        var app = $.sammy(function() {
-    //          this.setLocationProxy(new Sammy.DataLocationProxy(this));
-    //        });
-    //
-    setLocationProxy: function(new_proxy) {
-      var original_proxy = this._location_proxy;
-      this._location_proxy = new_proxy;
-      if (this.isRunning()) {
-        if (original_proxy) {
-          // if there is already a location proxy, unbind it.
-          original_proxy.unbind();
-        }
-        this._location_proxy.bind();
-      }
-    },
-
-    // `route()` is the main method for defining routes within an application.
-    // For great detail on routes, check out: http://code.quirkey.com/sammy/doc/routes.html
-    //
-    // This method also has aliases for each of the different verbs (eg. `get()`, `post()`, etc.)
-    //
-    // ### Arguments
-    //
-    // * `verb` A String in the set of ROUTE_VERBS or 'any'. 'any' will add routes for each
-    //    of the ROUTE_VERBS. If only two arguments are passed,
-    //    the first argument is the path, the second is the callback and the verb
-    //    is assumed to be 'any'.
-    // * `path` A Regexp or a String representing the path to match to invoke this verb.
-    // * `callback` A Function that is called/evaluated whent the route is run see: `runRoute()`.
-    //    It is also possible to pass a string as the callback, which is looked up as the name
-    //    of a method on the application.
-    //
-    route: function(verb, path, callback) {
-      var app = this, param_names = [], add_route, path_match;
-
-      // if the method signature is just (path, callback)
-      // assume the verb is 'any'
-      if (!callback && _isFunction(path)) {
-        path = verb;
-        callback = path;
-        verb = 'any';
-      }
-
-      verb = verb.toLowerCase(); // ensure verb is lower case
-
-      // if path is a string turn it into a regex
-      if (path.constructor == String) {
-
-        // Needs to be explicitly set because IE will maintain the index unless NULL is returned,
-        // which means that with two consecutive routes that contain params, the second set of params will not be found and end up in splat instead of params
-        // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/RegExp/lastIndex
-        PATH_NAME_MATCHER.lastIndex = 0;
-
-        // find the names
-        while ((path_match = PATH_NAME_MATCHER.exec(path)) !== null) {
-          param_names.push(path_match[1]);
-        }
-        // replace with the path replacement
-        path = new RegExp("^" + path.replace(PATH_NAME_MATCHER, PATH_REPLACER) + "$");
-      }
-      // lookup callback
-      if (typeof callback == 'string') {
-        callback = app[callback];
-      }
-
-      add_route = function(with_verb) {
-        var r = {verb: with_verb, path: path, callback: callback, param_names: param_names};
-        // add route to routes array
-        app.routes[with_verb] = app.routes[with_verb] || [];
-        // place routes in order of definition
-        app.routes[with_verb].push(r);
-      };
-
-      if (verb === 'any') {
-        $.each(this.ROUTE_VERBS, function(i, v) { add_route(v); });
-      } else {
-        add_route(verb);
-      }
-
-      // return the app
-      return this;
-    },
-
-    // Alias for route('get', ...)
-    get: _routeWrapper('get'),
-
-    // Alias for route('post', ...)
-    post: _routeWrapper('post'),
-
-    // Alias for route('put', ...)
-    put: _routeWrapper('put'),
-
-    // Alias for route('delete', ...)
-    del: _routeWrapper('delete'),
-
-    // Alias for route('any', ...)
-    any: _routeWrapper('any'),
-
-    // `mapRoutes` takes an array of arrays, each array being passed to route()
-    // as arguments, this allows for mass definition of routes. Another benefit is
-    // this makes it possible/easier to load routes via remote JSON.
-    //
-    // ### Example
-    //
-    //    var app = $.sammy(function() {
-    //
-    //      this.mapRoutes([
-    //          ['get', '#/', function() { this.log('index'); }],
-    //          // strings in callbacks are looked up as methods on the app
-    //          ['post', '#/create', 'addUser'],
-    //          // No verb assumes 'any' as the verb
-    //          [/dowhatever/, function() { this.log(this.verb, this.path)}];
-    //        ]);
-    //    })
-    //
-    mapRoutes: function(route_array) {
-      var app = this;
-      $.each(route_array, function(i, route_args) {
-        app.route.apply(app, route_args);
-      });
-      return this;
-    },
-
-    // A unique event namespace defined per application.
-    // All events bound with `bind()` are automatically bound within this space.
-    eventNamespace: function() {
-      return ['sammy-app', this.namespace].join('-');
-    },
-
-    // Works just like `jQuery.fn.bind()` with a couple noteable differences.
-    //
-    // * It binds all events to the application element
-    // * All events are bound within the `eventNamespace()`
-    // * Events are not actually bound until the application is started with `run()`
-    // * callbacks are evaluated within the context of a Sammy.EventContext
-    //
-    // See http://code.quirkey.com/sammy/docs/events.html for more info.
-    //
-    bind: function(name, data, callback) {
-      var app = this;
-      // build the callback
-      // if the arity is 2, callback is the second argument
-      if (typeof callback == 'undefined') { callback = data; }
-      var listener_callback =  function() {
-        // pull off the context from the arguments to the callback
-        var e, context, data;
-        e       = arguments[0];
-        data    = arguments[1];
-        if (data && data.context) {
-          context = data.context;
-          delete data.context;
-        } else {
-          context = new app.context_prototype(app, 'bind', e.type, data, e.target);
-        }
-        e.cleaned_type = e.type.replace(app.eventNamespace(), '');
-        callback.apply(context, [e, data]);
-      };
-
-      // it could be that the app element doesnt exist yet
-      // so attach to the listeners array and then run()
-      // will actually bind the event.
-      if (!this.listeners[name]) { this.listeners[name] = []; }
-      this.listeners[name].push(listener_callback);
-      if (this.isRunning()) {
-        // if the app is running
-        // *actually* bind the event to the app element
-        this._listen(name, listener_callback);
-      }
-      return this;
-    },
-
-    // Triggers custom events defined with `bind()`
-    //
-    // ### Arguments
-    //
-    // * `name` The name of the event. Automatically prefixed with the `eventNamespace()`
-    // * `data` An optional Object that can be passed to the bound callback.
-    // * `context` An optional context/Object in which to execute the bound callback.
-    //   If no context is supplied a the context is a new `Sammy.EventContext`
-    //
-    trigger: function(name, data) {
-      this.$element().trigger([name, this.eventNamespace()].join('.'), [data]);
-      return this;
-    },
-
-    // Reruns the current route
-    refresh: function() {
-      this.last_location = null;
-      this.trigger('location-changed');
-      return this;
-    },
-
-    // Takes a single callback that is pushed on to a stack.
-    // Before any route is run, the callbacks are evaluated in order within
-    // the current `Sammy.EventContext`
-    //
-    // If any of the callbacks explicitly return false, execution of any
-    // further callbacks and the route itself is halted.
-    //
-    // You can also provide a set of options that will define when to run this
-    // before based on the route it proceeds.
-    //
-    // ### Example
-    //
-    //      var app = $.sammy(function() {
-    //
-    //        // will run at #/route but not at #/
-    //        this.before('#/route', function() {
-    //          //...
-    //        });
-    //
-    //        // will run at #/ but not at #/route
-    //        this.before({except: {path: '#/route'}}, function() {
-    //          this.log('not before #/route');
-    //        });
-    //
-    //        this.get('#/', function() {});
-    //
-    //        this.get('#/route', function() {});
-    //
-    //      });
-    //
-    // See `contextMatchesOptions()` for a full list of supported options
-    //
-    before: function(options, callback) {
-      if (_isFunction(options)) {
-        callback = options;
-        options = {};
-      }
-      this.befores.push([options, callback]);
-      return this;
-    },
-
-    // A shortcut for binding a callback to be run after a route is executed.
-    // After callbacks have no guarunteed order.
-    after: function(callback) {
-      return this.bind('event-context-after', callback);
-    },
-
-
-    // Adds an around filter to the application. around filters are functions
-    // that take a single argument `callback` which is the entire route
-    // execution path wrapped up in a closure. This means you can decide whether
-    // or not to proceed with execution by not invoking `callback` or,
-    // more usefuly wrapping callback inside the result of an asynchronous execution.
-    //
-    // ### Example
-    //
-    // The most common use case for around() is calling a _possibly_ async function
-    // and executing the route within the functions callback:
-    //
-    //      var app = $.sammy(function() {
-    //
-    //        var current_user = false;
-    //
-    //        function checkLoggedIn(callback) {
-    //          // /session returns a JSON representation of the logged in user
-    //          // or an empty object
-    //          if (!current_user) {
-    //            $.getJSON('/session', function(json) {
-    //              if (json.login) {
-    //                // show the user as logged in
-    //                current_user = json;
-    //                // execute the route path
-    //                callback();
-    //              } else {
-    //                // show the user as not logged in
-    //                current_user = false;
-    //                // the context of aroundFilters is an EventContext
-    //                this.redirect('#/login');
-    //              }
-    //            });
-    //          } else {
-    //            // execute the route path
-    //            callback();
-    //          }
-    //        };
-    //
-    //        this.around(checkLoggedIn);
-    //
-    //      });
-    //
-    around: function(callback) {
-      this.arounds.push(callback);
-      return this;
-    },
-
-    // Returns `true` if the current application is running.
-    isRunning: function() {
-      return this._running;
-    },
-
-    // Helpers extends the EventContext prototype specific to this app.
-    // This allows you to define app specific helper functions that can be used
-    // whenever you're inside of an event context (templates, routes, bind).
-    //
-    // ### Example
-    //
-    //    var app = $.sammy(function() {
-    //
-    //      helpers({
-    //        upcase: function(text) {
-    //         return text.toString().toUpperCase();
-    //        }
-    //      });
-    //
-    //      get('#/', function() { with(this) {
-    //        // inside of this context I can use the helpers
-    //        $('#main').html(upcase($('#main').text());
-    //      }});
-    //
-    //    });
-    //
-    //
-    // ### Arguments
-    //
-    // * `extensions` An object collection of functions to extend the context.
-    //
-    helpers: function(extensions) {
-      $.extend(this.context_prototype.prototype, extensions);
-      return this;
-    },
-
-    // Helper extends the event context just like `helpers()` but does it
-    // a single method at a time. This is especially useful for dynamically named
-    // helpers
-    //
-    // ### Example
-    //
-    //     // Trivial example that adds 3 helper methods to the context dynamically
-    //     var app = $.sammy(function(app) {
-    //
-    //       $.each([1,2,3], function(i, num) {
-    //         app.helper('helper' + num, function() {
-    //           this.log("I'm helper number " + num);
-    //         });
-    //       });
-    //
-    //       this.get('#/', function() {
-    //         this.helper2(); //=> I'm helper number 2
-    //       });
-    //     });
-    //
-    // ### Arguments
-    //
-    // * `name` The name of the method
-    // * `method` The function to be added to the prototype at `name`
-    //
-    helper: function(name, method) {
-      this.context_prototype.prototype[name] = method;
-      return this;
-    },
-
-    // Actually starts the application's lifecycle. `run()` should be invoked
-    // within a document.ready block to ensure the DOM exists before binding events, etc.
-    //
-    // ### Example
-    //
-    //    var app = $.sammy(function() { ... }); // your application
-    //    $(function() { // document.ready
-    //        app.run();
-    //     });
-    //
-    // ### Arguments
-    //
-    // * `start_url` Optionally, a String can be passed which the App will redirect to
-    //   after the events/routes have been bound.
-    run: function(start_url) {
-      if (this.isRunning()) { return false; }
-      var app = this;
-
-      // actually bind all the listeners
-      $.each(this.listeners.toHash(), function(name, callbacks) {
-        $.each(callbacks, function(i, listener_callback) {
-          app._listen(name, listener_callback);
-        });
-      });
-
-      this.trigger('run', {start_url: start_url});
-      this._running = true;
-      // set last location
-      this.last_location = null;
-      if (this.getLocation() == '' && typeof start_url != 'undefined') {
-        this.setLocation(start_url);
-      }
-      // check url
-      this._checkLocation();
-      this._location_proxy.bind();
-      this.bind('location-changed', function() {
-        app._checkLocation();
-      });
-
-      // bind to submit to capture post/put/delete routes
-      this.bind('submit', function(e) {
-        var returned = app._checkFormSubmission($(e.target).closest('form'));
-        return (returned === false) ? e.preventDefault() : false;
-      });
-
-      // bind unload to body unload
-      $(window).bind('beforeunload', function() {
-        app.unload();
-      });
-
-      // trigger html changed
-      return this.trigger('changed');
-    },
-
-    // The opposite of `run()`, un-binds all event listeners and intervals
-    // `run()` Automaticaly binds a `onunload` event to run this when
-    // the document is closed.
-    unload: function() {
-      if (!this.isRunning()) { return false; }
-      var app = this;
-      this.trigger('unload');
-      // clear interval
-      this._location_proxy.unbind();
-      // unbind form submits
-      this.$element().unbind('submit').removeClass(app.eventNamespace());
-      // unbind all events
-      $.each(this.listeners.toHash() , function(name, listeners) {
-        $.each(listeners, function(i, listener_callback) {
-          app._unlisten(name, listener_callback);
-        });
-      });
-      this._running = false;
-      return this;
-    },
-
-    // Will bind a single callback function to every event that is already
-    // being listened to in the app. This includes all the `APP_EVENTS`
-    // as well as any custom events defined with `bind()`.
-    //
-    // Used internally for debug logging.
-    bindToAllEvents: function(callback) {
-      var app = this;
-      // bind to the APP_EVENTS first
-      $.each(this.APP_EVENTS, function(i, e) {
-        app.bind(e, callback);
-      });
-      // next, bind to listener names (only if they dont exist in APP_EVENTS)
-      $.each(this.listeners.keys(true), function(i, name) {
-        if (app.APP_EVENTS.indexOf(name) == -1) {
-          app.bind(name, callback);
-        }
-      });
-      return this;
-    },
-
-    // Returns a copy of the given path with any query string after the hash
-    // removed.
-    routablePath: function(path) {
-      return path.replace(QUERY_STRING_MATCHER, '');
-    },
-
-    // Given a verb and a String path, will return either a route object or false
-    // if a matching route can be found within the current defined set.
-    lookupRoute: function(verb, path) {
-      var app = this, routed = false;
-      this.trigger('lookup-route', {verb: verb, path: path});
-      if (typeof this.routes[verb] != 'undefined') {
-        $.each(this.routes[verb], function(i, route) {
-          if (app.routablePath(path).match(route.path)) {
-            routed = route;
-            return false;
-          }
-        });
-      }
-      return routed;
-    },
-
-    // First, invokes `lookupRoute()` and if a route is found, parses the
-    // possible URL params and then invokes the route's callback within a new
-    // `Sammy.EventContext`. If the route can not be found, it calls
-    // `notFound()`. If `raise_errors` is set to `true` and
-    // the `error()` has not been overriden, it will throw an actual JS
-    // error.
-    //
-    // You probably will never have to call this directly.
-    //
-    // ### Arguments
-    //
-    // * `verb` A String for the verb.
-    // * `path` A String path to lookup.
-    // * `params` An Object of Params pulled from the URI or passed directly.
-    //
-    // ### Returns
-    //
-    // Either returns the value returned by the route callback or raises a 404 Not Found error.
-    //
-    runRoute: function(verb, path, params, target) {
-      var app = this,
-          route = this.lookupRoute(verb, path),
-          context,
-          wrapped_route,
-          arounds,
-          around,
-          befores,
-          before,
-          callback_args,
-          path_params,
-          final_returned;
-
-      this.log('runRoute', [verb, path].join(' '));
-      this.trigger('run-route', {verb: verb, path: path, params: params});
-      if (typeof params == 'undefined') { params = {}; }
-
-      $.extend(params, this._parseQueryString(path));
-
-      if (route) {
-        this.trigger('route-found', {route: route});
-        // pull out the params from the path
-        if ((path_params = route.path.exec(this.routablePath(path))) !== null) {
-          // first match is the full path
-          path_params.shift();
-          // for each of the matches
-          $.each(path_params, function(i, param) {
-            // if theres a matching param name
-            if (route.param_names[i]) {
-              // set the name to the match
-              params[route.param_names[i]] = _decode(param);
-            } else {
-              // initialize 'splat'
-              if (!params.splat) { params.splat = []; }
-              params.splat.push(_decode(param));
-            }
-          });
-        }
-
-        // set event context
-        context  = new this.context_prototype(this, verb, path, params, target);
-        // ensure arrays
-        arounds = this.arounds.slice(0);
-        befores = this.befores.slice(0);
-        // set the callback args to the context + contents of the splat
-        callback_args = [context].concat(params.splat);
-        // wrap the route up with the before filters
-        wrapped_route = function() {
-          var returned;
-          while (befores.length > 0) {
-            before = befores.shift();
-            // check the options
-            if (app.contextMatchesOptions(context, before[0])) {
-              returned = before[1].apply(context, [context]);
-              if (returned === false) { return false; }
-            }
-          }
-          app.last_route = route;
-          context.trigger('event-context-before', {context: context});
-          returned = route.callback.apply(context, callback_args);
-          context.trigger('event-context-after', {context: context});
-          return returned;
-        };
-        $.each(arounds.reverse(), function(i, around) {
-          var last_wrapped_route = wrapped_route;
-          wrapped_route = function() { return around.apply(context, [last_wrapped_route]); };
-        });
-        try {
-          final_returned = wrapped_route();
-        } catch(e) {
-          this.error(['500 Error', verb, path].join(' '), e);
-        }
-        return final_returned;
-      } else {
-        return this.notFound(verb, path);
-      }
-    },
-
-    // Matches an object of options against an `EventContext` like object that
-    // contains `path` and `verb` attributes. Internally Sammy uses this
-    // for matching `before()` filters against specific options. You can set the
-    // object to _only_ match certain paths or verbs, or match all paths or verbs _except_
-    // those that match the options.
-    //
-    // ### Example
-    //
-    //     var app = $.sammy(),
-    //         context = {verb: 'get', path: '#/mypath'};
-    //
-    //     // match against a path string
-    //     app.contextMatchesOptions(context, '#/mypath'); //=> true
-    //     app.contextMatchesOptions(context, '#/otherpath'); //=> false
-    //     // equivilent to
-    //     app.contextMatchesOptions(context, {only: {path:'#/mypath'}}); //=> true
-    //     app.contextMatchesOptions(context, {only: {path:'#/otherpath'}}); //=> false
-    //     // match against a path regexp
-    //     app.contextMatchesOptions(context, /path/); //=> true
-    //     app.contextMatchesOptions(context, /^path/); //=> false
-    //     // match only a verb
-    //     app.contextMatchesOptions(context, {only: {verb:'get'}}); //=> true
-    //     app.contextMatchesOptions(context, {only: {verb:'post'}}); //=> false
-    //     // match all except a verb
-    //     app.contextMatchesOptions(context, {except: {verb:'post'}}); //=> true
-    //     app.contextMatchesOptions(context, {except: {verb:'get'}}); //=> false
-    //     // match all except a path
-    //     app.contextMatchesOptions(context, {except: {path:'#/otherpath'}}); //=> true
-    //     app.contextMatchesOptions(context, {except: {path:'#/mypath'}}); //=> false
-    //
-    contextMatchesOptions: function(context, match_options, positive) {
-      // empty options always match
-      var options = match_options;
-      if (typeof options === 'undefined' || options == {}) {
-        return true;
-      }
-      if (typeof positive === 'undefined') {
-        positive = true;
-      }
-      // normalize options
-      if (typeof options === 'string' || _isFunction(options.test)) {
-        options = {path: options};
-      }
-      if (options.only) {
-        return this.contextMatchesOptions(context, options.only, true);
-      } else if (options.except) {
-        return this.contextMatchesOptions(context, options.except, false);
-      }
-      var path_matched = true, verb_matched = true;
-      if (options.path) {
-        // wierd regexp test
-        if (_isFunction(options.path.test)) {
-          path_matched = options.path.test(context.path);
-        } else {
-          path_matched = (options.path.toString() === context.path);
-        }
-      }
-      if (options.verb) {
-        verb_matched = options.verb === context.verb;
-      }
-      return positive ? (verb_matched && path_matched) : !(verb_matched && path_matched);
-    },
-
-
-    // Delegates to the `location_proxy` to get the current location.
-    // See `Sammy.HashLocationProxy` for more info on location proxies.
-    getLocation: function() {
-      return this._location_proxy.getLocation();
-    },
-
-    // Delegates to the `location_proxy` to set the current location.
-    // See `Sammy.HashLocationProxy` for more info on location proxies.
-    //
-    // ### Arguments
-    //
-    // * `new_location` A new location string (e.g. '#/')
-    //
-    setLocation: function(new_location) {
-      return this._location_proxy.setLocation(new_location);
-    },
-
-    // Swaps the content of `$element()` with `content`
-    // You can override this method to provide an alternate swap behavior
-    // for `EventContext.partial()`.
-    //
-    // ### Example
-    //
-    //    var app = $.sammy(function() {
-    //
-    //      // implements a 'fade out'/'fade in'
-    //      this.swap = function(content) {
-    //        this.$element().hide('slow').html(content).show('slow');
-    //      }
-    //
-    //      get('#/', function() {
-    //        this.partial('index.html.erb') // will fade out and in
-    //      });
-    //
-    //    });
-    //
-    swap: function(content) {
-      return this.$element().html(content);
-    },
-
-    // a simple global cache for templates. Uses the same semantics as
-    // `Sammy.Cache` and `Sammy.Storage` so can easily be replaced with
-    // a persistant storage that lasts beyond the current request.
-    templateCache: function(key, value) {
-      if (typeof value != 'undefined') {
-        return _template_cache[key] = value;
-      } else {
-        return _template_cache[key];
-      }
-    },
-
-    // clear the templateCache
-    clearTemplateCache: function() {
-      return _template_cache = {};
-    },
-
-    // This thows a '404 Not Found' error by invoking `error()`.
-    // Override this method or `error()` to provide custom
-    // 404 behavior (i.e redirecting to / or showing a warning)
-    notFound: function(verb, path) {
-      var ret = this.error(['404 Not Found', verb, path].join(' '));
-      return (verb === 'get') ? ret : true;
-    },
-
-    // The base error handler takes a string `message` and an `Error`
-    // object. If `raise_errors` is set to `true` on the app level,
-    // this will re-throw the error to the browser. Otherwise it will send the error
-    // to `log()`. Override this method to provide custom error handling
-    // e.g logging to a server side component or displaying some feedback to the
-    // user.
-    error: function(message, original_error) {
-      if (!original_error) { original_error = new Error(); }
-      original_error.message = [message, original_error.message].join(' ');
-      this.trigger('error', {message: original_error.message, error: original_error});
-      if (this.raise_errors) {
-        throw(original_error);
-      } else {
-        this.log(original_error.message, original_error);
-      }
-    },
-
-    _checkLocation: function() {
-      var location, returned;
-      // get current location
-      location = this.getLocation();
-      // compare to see if hash has changed
-      if (!this.last_location || this.last_location[0] != 'get' || this.last_location[1] != location) {
-        // reset last location
-        this.last_location = ['get', location];
-        // lookup route for current hash
-        returned = this.runRoute('get', location);
-      }
-      return returned;
-    },
-
-    _getFormVerb: function(form) {
-      var $form = $(form), verb, $_method;
-      $_method = $form.find('input[name="_method"]');
-      if ($_method.length > 0) { verb = $_method.val(); }
-      if (!verb) { verb = $form[0].getAttribute('method'); }
-      return $.trim(verb.toString().toLowerCase());
-    },
-
-    _checkFormSubmission: function(form) {
-      var $form, path, verb, params, returned;
-      this.trigger('check-form-submission', {form: form});
-      $form = $(form);
-      path  = $form.attr('action');
-      verb  = this._getFormVerb($form);
-      if (!verb || verb == '') { verb = 'get'; }
-      this.log('_checkFormSubmission', $form, path, verb);
-      if (verb === 'get') {
-        this.setLocation(path + '?' + this._serializeFormParams($form));
-        returned = false;
-      } else {
-        params = $.extend({}, this._parseFormParams($form));
-        returned = this.runRoute(verb, path, params, form.get(0));
-      };
-      return (typeof returned == 'undefined') ? false : returned;
-    },
-
-    _serializeFormParams: function($form) {
-       var queryString = "",
-         fields = $form.serializeArray(),
-         i;
-       if (fields.length > 0) {
-         queryString = this._encodeFormPair(fields[0].name, fields[0].value);
-         for (i = 1; i < fields.length; i++) {
-           queryString = queryString + "&" + this._encodeFormPair(fields[i].name, fields[i].value);
-         }
-       }
-       return queryString;
-    },
-
-    _encodeFormPair: function(name, value){
-      return _encode(name) + "=" + _encode(value);
-    },
-
-    _parseFormParams: function($form) {
-      var params = {},
-          form_fields = $form.serializeArray(),
-          i;
-      for (i = 0; i < form_fields.length; i++) {
-        params = this._parseParamPair(params, form_fields[i].name, form_fields[i].value);
-      }
-      return params;
-    },
-
-    _parseQueryString: function(path) {
-      var params = {}, parts, pairs, pair, i;
-
-      parts = path.match(QUERY_STRING_MATCHER);
-      if (parts) {
-        pairs = parts[1].split('&');
-        for (i = 0; i < pairs.length; i++) {
-          pair = pairs[i].split('=');
-          params = this._parseParamPair(params, _decode(pair[0]), _decode(pair[1]));
-        }
-      }
-      return params;
-    },
-
-    _parseParamPair: function(params, key, value) {
-      if (params[key]) {
-        if (_isArray(params[key])) {
-          params[key].push(value);
-        } else {
-          params[key] = [params[key], value];
-        }
-      } else {
-        params[key] = value;
-      }
-      return params;
-    },
-
-    _listen: function(name, callback) {
-      return this.$element().bind([name, this.eventNamespace()].join('.'), callback);
-    },
-
-    _unlisten: function(name, callback) {
-      return this.$element().unbind([name, this.eventNamespace()].join('.'), callback);
-    }
-
-  });
-
-  // `Sammy.RenderContext` is an object that makes sequential template loading,
-  // rendering and interpolation seamless even when dealing with asyncronous
-  // operations.
-  //
-  // `RenderContext` objects are not usually created directly, rather they are
-  // instatiated from an `Sammy.EventContext` by using `render()`, `load()` or
-  // `partial()` which all return `RenderContext` objects.
-  //
-  // `RenderContext` methods always returns a modified `RenderContext`
-  // for chaining (like jQuery itself).
-  //
-  // The core magic is in the `then()` method which puts the callback passed as
-  // an argument into a queue to be executed once the previous callback is complete.
-  // All the methods of `RenderContext` are wrapped in `then()` which allows you
-  // to queue up methods by chaining, but maintaing a guarunteed execution order
-  // even with remote calls to fetch templates.
-  //
-  Sammy.RenderContext = function(event_context) {
-    this.event_context    = event_context;
-    this.callbacks        = [];
-    this.previous_content = null;
-    this.content          = null;
-    this.next_engine      = false;
-    this.waiting          = false;
-  };
-
-  Sammy.RenderContext.prototype = $.extend({}, Sammy.Object.prototype, {
-
-    // The "core" of the `RenderContext` object, adds the `callback` to the
-    // queue. If the context is `waiting` (meaning an async operation is happening)
-    // then the callback will be executed in order, once the other operations are
-    // complete. If there is no currently executing operation, the `callback`
-    // is executed immediately.
-    //
-    // The value returned from the callback is stored in `content` for the
-    // subsiquent operation. If you return `false`, the queue will pause, and
-    // the next callback in the queue will not be executed until `next()` is
-    // called. This allows for the guarunteed order of execution while working
-    // with async operations.
-    //
-    // If then() is passed a string instead of a function, the string is looked
-    // up as a helper method on the event context.
-    //
-    // ### Example
-    //
-    //      this.get('#/', function() {
-    //        // initialize the RenderContext
-    //        // Even though `load()` executes async, the next `then()`
-    //        // wont execute until the load finishes
-    //        this.load('myfile.txt')
-    //            .then(function(content) {
-    //              // the first argument to then is the content of the
-    //              // prev operation
-    //              $('#main').html(content);
-    //            });
-    //      });
-    //
-    then: function(callback) {
-      if (!_isFunction(callback)) {
-        // if a string is passed to then, assume we want to call
-        // a helper on the event context in its context
-        if (typeof callback === 'string' && callback in this.event_context) {
-          var helper = this.event_context[callback];
-          callback = function(content) {
-            return helper.apply(this.event_context, [content]);
-          };
-        } else {
-          return this;
-        }
-      }
-      var context = this;
-      if (this.waiting) {
-        this.callbacks.push(callback);
-      } else {
-        this.wait();
-        window.setTimeout(function() {
-          var returned = callback.apply(context, [context.content, context.previous_content]);
-          if (returned !== false) {
-            context.next(returned);
-          }
-        }, 13);
-      }
-      return this;
-    },
-
-    // Pause the `RenderContext` queue. Combined with `next()` allows for async
-    // operations.
-    //
-    // ### Example
-    //
-    //        this.get('#/', function() {
-    //          this.load('mytext.json')
-    //              .then(function(content) {
-    //                var context = this,
-    //                    data    = JSON.parse(content);
-    //                // pause execution
-    //                context.wait();
-    //                // post to a url
-    //                $.post(data.url, {}, function(response) {
-    //                  context.next(JSON.parse(response));
-    //                });
-    //              })
-    //              .then(function(data) {
-    //                // data is json from the previous post
-    //                $('#message').text(data.status);
-    //              });
-    //        });
-    wait: function() {
-      this.waiting = true;
-    },
-
-    // Resume the queue, setting `content` to be used in the next operation.
-    // See `wait()` for an example.
-    next: function(content) {
-      this.waiting = false;
-      if (typeof content !== 'undefined') {
-        this.previous_content = this.content;
-        this.content = content;
-      }
-      if (this.callbacks.length > 0) {
-        this.then(this.callbacks.shift());
-      }
-    },
-
-    // Load a template into the context.
-    // The `location` can either be a string specifiying the remote path to the
-    // file, a jQuery object, or a DOM element.
-    //
-    // No interpolation happens by default, the content is stored in
-    // `content`.
-    //
-    // In the case of a path, unless the option `{cache: false}` is passed the
-    // data is stored in the app's `templateCache()`.
-    //
-    // If a jQuery or DOM object is passed the `innerHTML` of the node is pulled in.
-    // This is useful for nesting templates as part of the initial page load wrapped
-    // in invisible elements or `<script>` tags. With template paths, the template
-    // engine is looked up by the extension. For DOM/jQuery embedded templates,
-    // this isnt possible, so there are a couple of options:
-    //
-    //  * pass an `{engine:}` option.
-    //  * define the engine in the `data-engine` attribute of the passed node.
-    //  * just store the raw template data and use `interpolate()` manually
-    //
-    // If a `callback` is passed it is executed after the template load.
-    load: function(location, options, callback) {
-      var context = this;
-      return this.then(function() {
-        var should_cache, cached, is_json, location_array;
-        if (_isFunction(options)) {
-          callback = options;
-          options = {};
-        } else {
-          options = $.extend({}, options);
-        }
-        if (callback) { this.then(callback); }
-        if (typeof location === 'string') {
-          // its a path
-          is_json      = (location.match(/\.json$/) || options.json);
-          should_cache = ((is_json && options.cache === true) || options.cache !== false);
-          context.next_engine = context.event_context.engineFor(location);
-          delete options.cache;
-          delete options.json;
-          if (options.engine) {
-            context.next_engine = options.engine;
-            delete options.engine;
-          }
-          if (should_cache && (cached = this.event_context.app.templateCache(location))) {
-            return cached;
-          }
-          this.wait();
-          $.ajax($.extend({
-            url: location,
-            data: {},
-            dataType: is_json ? 'json' : null,
-            type: 'get',
-            success: function(data) {
-              if (should_cache) {
-                context.event_context.app.templateCache(location, data);
-              }
-              context.next(data);
-            }
-          }, options));
-          return false;
-        } else {
-          // its a dom/jQuery
-          if (location.nodeType) {
-            return location.innerHTML;
-          }
-          if (location.selector) {
-            // its a jQuery
-            context.next_engine = location.attr('data-engine');
-            if (options.clone === false) {
-              return location.remove()[0].innerHTML.toString();
-            } else {
-              return location[0].innerHTML.toString();
-            }
-          }
-        }
-      });
-    },
-
-    // `load()` a template and then `interpolate()` it with data.
-    //
-    // ### Example
-    //
-    //      this.get('#/', function() {
-    //        this.render('mytemplate.template', {name: 'test'});
-    //      });
-    //
-    render: function(location, data, callback) {
-      if (_isFunction(location) && !data) {
-        return this.then(location);
-      } else {
-        if (!data && this.content) { data = this.content; }
-        return this.load(location)
-                   .interpolate(data, location)
-                   .then(callback);
-      }
-    },
-
-    // `render()` the the `location` with `data` and then `swap()` the
-    // app's `$element` with the rendered content.
-    partial: function(location, data) {
-      return this.render(location, data).swap();
-    },
-
-    // defers the call of function to occur in order of the render queue.
-    // The function can accept any number of arguments as long as the last
-    // argument is a callback function. This is useful for putting arbitrary
-    // asynchronous functions into the queue. The content passed to the
-    // callback is passed as `content` to the next item in the queue.
-    //
-    // === Example
-    //
-    //        this.send($.getJSON, '/app.json')
-    //            .then(function(json) {
-    //              $('#message).text(json['message']);
-    //            });
-    //
-    //
-    send: function() {
-      var context = this,
-          args = _makeArray(arguments),
-          fun  = args.shift();
-
-      if (_isArray(args[0])) { args = args[0]; }
-
-      return this.then(function(content) {
-        args.push(function(response) { context.next(response); });
-        context.wait();
-        fun.apply(fun, args);
-        return false;
-      });
-    },
-
-    // itterates over an array, applying the callback for each item item. the
-    // callback takes the same style of arguments as `jQuery.each()` (index, item).
-    // The return value of each callback is collected as a single string and stored
-    // as `content` to be used in the next iteration of the `RenderContext`.
-    collect: function(array, callback, now) {
-      var context = this;
-      var coll = function() {
-        if (_isFunction(array)) {
-          callback = array;
-          array = this.content;
-        }
-        var contents = [], doms = false;
-        $.each(array, function(i, item) {
-          var returned = callback.apply(context, [i, item]);
-          if (returned.jquery && returned.length == 1) {
-            returned = returned[0];
-            doms = true;
-          }
-          contents.push(returned);
-          return returned;
-        });
-        return doms ? contents : contents.join('');
-      };
-      return now ? coll() : this.then(coll);
-    },
-
-    // loads a template, and then interpolates it for each item in the `data`
-    // array. If a callback is passed, it will call the callback with each
-    // item in the array _after_ interpolation
-    renderEach: function(location, name, data, callback) {
-      if (_isArray(name)) {
-        callback = data;
-        data = name;
-        name = null;
-      }
-      return this.load(location).then(function(content) {
-          var rctx = this;
-          if (!data) {
-            data = _isArray(this.previous_content) ? this.previous_content : [];
-          }
-          if (callback) {
-            $.each(data, function(i, value) {
-              var idata = {}, engine = this.next_engine || location;
-              name ? (idata[name] = value) : (idata = value);
-              callback(value, rctx.event_context.interpolate(content, idata, engine));
-            });
-          } else {
-            return this.collect(data, function(i, value) {
-              var idata = {}, engine = this.next_engine || location;
-              name ? (idata[name] = value) : (idata = value);
-              return this.event_context.interpolate(content, idata, engine);
-            }, true);
-          }
-      });
-    },
-
-    // uses the previous loaded `content` and the `data` object to interpolate
-    // a template. `engine` defines the templating/interpolation method/engine
-    // that should be used. If `engine` is not passed, the `next_engine` is
-    // used. If `retain` is `true`, the final interpolated data is appended to
-    // the `previous_content` instead of just replacing it.
-    interpolate: function(data, engine, retain) {
-      var context = this;
-      return this.then(function(content, prev) {
-        if (!data && prev) { data = prev; }
-        if (this.next_engine) {
-          engine = this.next_engine;
-          this.next_engine = false;
-        }
-        var rendered = context.event_context.interpolate(content, data, engine);
-        return retain ? prev + rendered : rendered;
-      });
-    },
-
-    // executes `EventContext#swap()` with the `content`
-    swap: function() {
-      return this.then(function(content) {
-        this.event_context.swap(content);
-      }).trigger('changed', {});
-    },
-
-    // Same usage as `jQuery.fn.appendTo()` but uses `then()` to ensure order
-    appendTo: function(selector) {
-      return this.then(function(content) {
-        $(selector).append(content);
-      }).trigger('changed', {});
-    },
-
-    // Same usage as `jQuery.fn.prependTo()` but uses `then()` to ensure order
-    prependTo: function(selector) {
-      return this.then(function(content) {
-        $(selector).prepend(content);
-      }).trigger('changed', {});
-    },
-
-    // Replaces the `$(selector)` using `html()` with the previously loaded
-    // `content`
-    replace: function(selector) {
-      return this.then(function(content) {
-        $(selector).html(content);
-      }).trigger('changed', {});
-    },
-
-    // trigger the event in the order of the event context. Same semantics
-    // as `Sammy.EventContext#trigger()`. If data is ommitted, `content`
-    // is sent as `{content: content}`
-    trigger: function(name, data) {
-      return this.then(function(content) {
-        if (typeof data == 'undefined') { data = {content: content}; }
-        this.event_context.trigger(name, data);
-      });
-    }
-
-  });
-
-  // `Sammy.EventContext` objects are created every time a route is run or a
-  // bound event is triggered. The callbacks for these events are evaluated within a `Sammy.EventContext`
-  // This within these callbacks the special methods of `EventContext` are available.
-  //
-  // ### Example
-  //
-  //  $.sammy(function() {
-  //    // The context here is this Sammy.Application
-  //    this.get('#/:name', function() {
-  //      // The context here is a new Sammy.EventContext
-  //      if (this.params['name'] == 'sammy') {
-  //        this.partial('name.html.erb', {name: 'Sammy'});
-  //      } else {
-  //        this.redirect('#/somewhere-else')
-  //      }
-  //    });
-  //  });
-  //
-  // Initialize a new EventContext
-  //
-  // ### Arguments
-  //
-  // * `app` The `Sammy.Application` this event is called within.
-  // * `verb` The verb invoked to run this context/route.
-  // * `path` The string path invoked to run this context/route.
-  // * `params` An Object of optional params to pass to the context. Is converted
-  //   to a `Sammy.Object`.
-  // * `target` a DOM element that the event that holds this context originates
-  //   from. For post, put and del routes, this is the form element that triggered
-  //   the route.
-  //
-  Sammy.EventContext = function(app, verb, path, params, target) {
-    this.app    = app;
-    this.verb   = verb;
-    this.path   = path;
-    this.params = new Sammy.Object(params);
-    this.target = target;
-  };
-
-  Sammy.EventContext.prototype = $.extend({}, Sammy.Object.prototype, {
-
-    // A shortcut to the app's `$element()`
-    $element: function() {
-      return this.app.$element(_makeArray(arguments).shift());
-    },
-
-    // Look up a templating engine within the current app and context.
-    // `engine` can be one of the following:
-    //
-    // * a function: should conform to `function(content, data) { return interploated; }`
-    // * a template path: 'template.ejs', looks up the extension to match to
-    //   the `ejs()` helper
-    // * a string referering to the helper: "mustache" => `mustache()`
-    //
-    // If no engine is found, use the app's default `template_engine`
-    //
-    engineFor: function(engine) {
-      var context = this, engine_match;
-      // if path is actually an engine function just return it
-      if (_isFunction(engine)) { return engine; }
-      // lookup engine name by path extension
-      engine = (engine || context.app.template_engine).toString();
-      if ((engine_match = engine.match(/\.([^\.]+)$/))) {
-        engine = engine_match[1];
-      }
-      // set the engine to the default template engine if no match is found
-      if (engine && _isFunction(context[engine])) {
-        return context[engine];
-      }
-
-      if (context.app.template_engine) {
-        return this.engineFor(context.app.template_engine);
-      }
-      return function(content, data) { return content; };
-    },
-
-    // using the template `engine` found with `engineFor()`, interpolate the
-    // `data` into `content`
-    interpolate: function(content, data, engine) {
-      return this.engineFor(engine).apply(this, [content, data]);
-    },
-
-    // Create and return a `Sammy.RenderContext` calling `render()` on it.
-    // Loads the template and interpolate the data, however does not actual
-    // place it in the DOM.
-    //
-    // ### Example
-    //
-    //      // mytemplate.mustache <div class="name">{{name}}</div>
-    //      render('mytemplate.mustache', {name: 'quirkey'});
-    //      // sets the `content` to <div class="name">quirkey</div>
-    //      render('mytemplate.mustache', {name: 'quirkey'})
-    //        .appendTo('ul');
-    //      // appends the rendered content to $('ul')
-    //
-    render: function(location, data, callback) {
-      return new Sammy.RenderContext(this).render(location, data, callback);
-    },
-
-    // Create and return a `Sammy.RenderContext` calling `renderEach()` on it.
-    // Loads the template and interpolates the data for each item,
-    // however does not actual place it in the DOM.
-    //
-    // ### Example
-    //
-    //      // mytemplate.mustache <div class="name">{{name}}</div>
-    //      renderEach('mytemplate.mustache', [{name: 'quirkey'}, {name: 'endor'}])
-    //      // sets the `content` to <div class="name">quirkey</div><div class="name">endor</div>
-    //      renderEach('mytemplate.mustache', [{name: 'quirkey'}, {name: 'endor'}]).appendTo('ul');
-    //      // appends the rendered content to $('ul')
-    //
-    renderEach: function(location, name, data, callback) {
-      return new Sammy.RenderContext(this).renderEach(location, name, data, callback);
-    },
-
-    // create a new `Sammy.RenderContext` calling `load()` with `location` and
-    // `options`. Called without interpolation or placement, this allows for
-    // preloading/caching the templates.
-    load: function(location, options, callback) {
-      return new Sammy.RenderContext(this).load(location, options, callback);
-    },
-
-    // `render()` the the `location` with `data` and then `swap()` the
-    // app's `$element` with the rendered content.
-    partial: function(location, data) {
-      return new Sammy.RenderContext(this).partial(location, data);
-    },
-
-    // create a new `Sammy.RenderContext` calling `send()` with an arbitrary
-    // function
-    send: function() {
-      var rctx = new Sammy.RenderContext(this);
-      return rctx.send.apply(rctx, arguments);
-    },
-
-    // Changes the location of the current window. If `to` begins with
-    // '#' it only changes the document's hash. If passed more than 1 argument
-    // redirect will join them together with forward slashes.
-    //
-    // ### Example
-    //
-    //      redirect('#/other/route');
-    //      // equivilent to
-    //      redirect('#', 'other', 'route');
-    //
-    redirect: function() {
-      var to, args = _makeArray(arguments),
-          current_location = this.app.getLocation();
-      if (args.length > 1) {
-        args.unshift('/');
-        to = this.join.apply(this, args);
-      } else {
-        to = args[0];
-      }
-      this.trigger('redirect', {to: to});
-      this.app.last_location = [this.verb, this.path];
-      this.app.setLocation(to);
-      if (current_location == to) {
-        this.app.trigger('location-changed');
-      }
-    },
-
-    // Triggers events on `app` within the current context.
-    trigger: function(name, data) {
-      if (typeof data == 'undefined') { data = {}; }
-      if (!data.context) { data.context = this; }
-      return this.app.trigger(name, data);
-    },
-
-    // A shortcut to app's `eventNamespace()`
-    eventNamespace: function() {
-      return this.app.eventNamespace();
-    },
-
-    // A shortcut to app's `swap()`
-    swap: function(contents) {
-      return this.app.swap(contents);
-    },
-
-    // Raises a possible `notFound()` error for the current path.
-    notFound: function() {
-      return this.app.notFound(this.verb, this.path);
-    },
-
-    // Default JSON parsing uses jQuery's `parseJSON()`. Include `Sammy.JSON`
-    // plugin for the more conformant "crockford special".
-    json: function(string) {
-      return $.parseJSON(string);
-    },
-
-    // //=> Sammy.EventContext: get #/ {}
-    toString: function() {
-      return "Sammy.EventContext: " + [this.verb, this.path, this.params].join(' ');
-    }
-
-  });
-
-  // An alias to Sammy
-  $.sammy = window.Sammy = Sammy;
-
-})(jQuery, window);
-
-(function($) {
-
-  // Simple JavaScript Templating
-  // John Resig - http://ejohn.org/ - MIT Licensed
-  // adapted from: http://ejohn.org/blog/javascript-micro-templating/
-  // originally $.srender by Greg Borenstein http://ideasfordozens.com in Feb 2009
-  // modified for Sammy by Aaron Quint for caching templates by name
-  var srender_cache = {};
-  var srender = function(name, template, data) {
-    // target is an optional element; if provided, the result will be inserted into it
-    // otherwise the result will simply be returned to the caller
-    if (srender_cache[name]) {
-      fn = srender_cache[name];
-    } else {
-      if (typeof template == 'undefined') {
-        // was a cache check, return false
-        return false;
-      }
-      // Generate a reusable function that will serve as a template
-      // generator (and which will be cached).
-      fn = srender_cache[name] = new Function("obj",
-      "var ___$$$___=[],print=function(){___$$$___.push.apply(___$$$___,arguments);};" +
-
-      // Introduce the data as local variables using with(){}
-      "with(obj){___$$$___.push(\"" +
-
-      // Convert the template into pure JavaScript
-      String(template)
-        .replace(/[\r\t\n]/g, " ")
-        .replace(/\"/g, '\\"')
-        .split("<%").join("\t")
-        .replace(/((^|%>)[^\t]*)/g, "$1\r")
-        .replace(/\t=(.*?)%>/g, "\",h($1),\"")
-        .replace(/\t!(.*?)%>/g, "\",$1,\"")
-        .split("\t").join("\");")
-        .split("%>").join("___$$$___.push(\"")
-        .split("\r").join("")
-        + "\");}return ___$$$___.join('');");
-    }
-
-    if (typeof data != 'undefined') {
-      return fn(data);
-    } else {
-      return fn;
-    }
-  };
-
-  Sammy = Sammy || {};
-
-  // <tt>Sammy.Template</tt> is a simple plugin that provides a way to create
-  // and render client side templates. The rendering code is based on John Resig's
-  // quick templates and Greg Borenstien's srender plugin.
-  // This is also a great template/boilerplate for Sammy plugins.
-  //
-  // Templates use <% %> tags to denote embedded javascript.
-  //
-  // ### Examples
-  //
-  // Here is an example template (user.template):
-  //
-  //      <div class="user">
-  //        <div class="user-name"><%= user.name %></div>
-  //        <% if (user.photo_url) { %>
-  //          <div class="photo"><img src="<%= user.photo_url %>" /></div>
-  //        <% } %>
-  //      </div>
-  //
-  // Given that is a publicly accesible file, you would render it like:
-  //
-  //       $.sammy(function() {
-  //         // include the plugin
-  //         this.use(Sammy.Template);
-  //
-  //         this.get('#/', function() {
-  //           // the template is rendered in the current context.
-  //           this.user = {name: 'Aaron Quint'};
-  //           // partial calls template() because of the file extension
-  //           this.partial('user.template');
-  //         })
-  //       });
-  //
-  // You can also pass a second argument to use() that will alias the template
-  // method and therefore allow you to use a different extension for template files
-  // in <tt>partial()</tt>
-  //
-  //      // alias to 'tpl'
-  //      this.use(Sammy.Template, 'tpl');
-  //
-  //      // now .tpl files will be run through srender
-  //      this.get('#/', function() {
-  //        this.partial('myfile.tpl');
-  //      });
-  //
-  Sammy.Template = function(app, method_alias) {
-
-    // *Helper:* Uses simple templating to parse ERB like templates.
-    //
-    // ### Arguments
-    //
-    // * `template` A String template. '<% %>' tags are evaluated as Javascript and replaced with the elements in data.
-    // * `data` An Object containing the replacement values for the template.
-    //   data is extended with the <tt>EventContext</tt> allowing you to call its methods within the template.
-    // * `name` An optional String name to cache the template.
-    //
-    var template = function(template, data, name) {
-      // use name for caching
-      if (typeof name == 'undefined') name = template;
-      return srender(name, template, $.extend({}, this, data));
-    };
-
-    // set the default method name/extension
-    if (!method_alias) method_alias = 'template';
-    // create the helper at the method alias
-    app.helper(method_alias, template);
-
-  };
-
-})(jQuery);
-
-/*  js-model JavaScript library, version 0.8.4
- *  (c) 2010 Ben Pickles
- *
- *  Released under MIT license.
- */
-var Model = function(name, class_methods, instance_methods) {
-  class_methods = class_methods || {};
-  instance_methods = instance_methods || {};
-
-  var model = function(attributes) {
-    this.attributes = attributes || {};
-    this.changes = {};
-    this.errors = new Model.Errors(this);
-  };
-
-  jQuery.extend(model, Model.Callbacks, Model.ClassMethods, class_methods, {
-    _name: name,
-    collection: [],
-
-    chain: function(collection) {
-      return jQuery.extend({}, this, { collection: collection });
-    }
-  });
-
-  jQuery.extend(model.prototype, Model.Callbacks, Model.InstanceMethods,
-    instance_methods);
-
-  return model;
-};
-Model.Callbacks = {
-  callbacks: {},
-
-  bind: function(event, callback) {
-    this.callbacks[event] = this.callbacks[event] || [];
-    this.callbacks[event].push(callback);
-    return this;
-  },
-
-  trigger: function(name, data) {
-    var callbacks = this.callbacks[name];
-
-    if (callbacks) {
-      for (var i = 0; i < callbacks.length; i++) {
-        callbacks[i].apply(this, data || []);
-      }
-    }
-
-    return this;
-  },
-
-  unbind: function(event, callback) {
-    if (callback) {
-      var callbacks = this.callbacks[event] || [];
-
-      for (var i = 0; i < callbacks.length; i++) {
-        if (callbacks[i] === callback) {
-          this.callbacks[event].splice(i, 1);
-        }
-      }
-    } else {
-      delete this.callbacks[event];
-    }
-
-    return this;
-  }
-};
-Model.ClassMethods = {
-  add: function() {
-    var added = [];
-
-    for (var i = 0; i < arguments.length; i++) {
-      var model = arguments[i];
-      var existing_elem = this.detect(function() {
-        return this.id() !== null && this.id() == model.id();
-      });
-
-      if (!existing_elem) {
-        this.collection.push(model);
-        added.push(model);
-      }
-    }
-
-    if (added.length > 0) this.trigger("add", added);
-
-    return this;
-  },
-
-  all: function() {
-    return this.collection;
-  },
-
-  count: function() {
-    return this.collection.length;
-  },
-
-  detect: function(func) {
-    var model;
-    jQuery.each(this.all(), function(i) {
-      if (func.call(this, i)) {
-        model = this;
-        return false;
-      }
-    });
-    return model || null;
-  },
-
-  each: function(func) {
-    jQuery.each(this.all(), function(i) {
-      func.call(this, i);
-    });
-    return this;
-  },
-
-  find: function(id) {
-    return this.detect(function() {
-      return this.id() == id;
-    }) || null;
-  },
-
-  first: function() {
-    return this.all()[0] || null;
-  },
-
-  last: function() {
-    var all = this.all();
-    return all[all.length - 1] || null;
-  },
-
-  remove: function(id) {
-    var ids = _.invoke(this.collection, 'id');
-    var index = _.indexOf(ids, id);
-    if (index > -1) {
-      this.collection.splice(index, 1);
-      this.trigger("remove");
-      return true;
-    } else {
-      return false;
-    }
-  },
-
-  select: function(func) {
-    var selected = [];
-    jQuery.each(this.all(), function(i) {
-      if (func.call(this, i)) selected.push(this);
-    });
-    return this.chain(selected);
-  },
-
-  sort: function(func) {
-    var sorted = _.sortBy(this.all(), function(model, i) {
-      return func.call(model, i);
-    });
-    return this.chain(sorted);
-  }
-};
-Model.Errors = function(model) {
-  this.errors = {};
-  this.model = model;
-};
-
-Model.Errors.prototype = {
-  add: function(attribute, message) {
-    if (!this.errors[attribute]) this.errors[attribute] = [];
-    this.errors[attribute].push(message);
-  },
-
-  all: function() {
-    return this.errors;
-  },
-
-  clear: function() {
-    this.errors = {};
-  },
-
-  each: function(func) {
-    for (var attribute in this.errors) {
-      for (var i = 0; i < this.errors[attribute].length; i++) {
-        func.call(this, attribute, this.errors[attribute][i]);
-      }
-    }
-  },
-
-  on: function(attribute) {
-    return this.errors[attribute] || [];
-  },
-
-  size: function() {
-    var count = 0;
-    this.each(function() { count++; });
-    return count;
-  }
-};
-Model.InstanceMethods = {
-  attr: function(name, value) {
-    if (arguments.length === 0) {
-      return jQuery.extend({}, this.attributes, this.changes);
-    } else if (arguments.length === 2) {
-      if (_.isEqual(this.attributes[name], value)) {
-        delete this.changes[name];
-      } else {
-        this.changes[name] = value;
-      }
-      return this;
-    } else if (typeof name === "object") {
-      for (var key in name) {
-        this.attr(key, name[key]);
-      }
-      return this;
-    } else {
-      return (name in this.changes) ?
-        this.changes[name] :
-        this.attributes[name];
-    }
-  },
-
-  callPersistMethod: function(method, callback) {
-    var self = this;
-
-    var manageCollection = function() {
-      if (method === "create") {
-        self.constructor.add(self);
-      } else if (method === "destroy") {
-        self.constructor.remove(self.id());
-      }
-    };
-
-    var wrappedCallback = function(success) {
-      if (success) {
-        self.merge(self.changes).reset();
-
-        manageCollection();
-
-        self.trigger(method);
-      }
-
-      var value;
-
-      if (callback) value = callback.apply(self, arguments);
-
-      return value;
-    };
-
-    if (this.constructor.persistence) {
-      this.constructor.persistence[method](this, wrappedCallback);
-    } else {
-      wrappedCallback.call(this, true);
-    }
-  },
-
-  destroy: function(callback) {
-    this.callPersistMethod("destroy", callback);
-    return this;
-  },
-
-  id: function() {
-    return this.attributes.id || null;
-  },
-
-  merge: function(attributes) {
-    jQuery.extend(this.attributes, attributes);
-    return this;
-  },
-
-  newRecord: function() {
-    return this.id() === null;
-  },
-
-  reset: function() {
-    this.errors.clear();
-    this.changes = {};
-    return this;
-  },
-
-  save: function(callback) {
-    if (this.valid()) {
-      var method = this.newRecord() ? "create" : "update";
-      this.callPersistMethod(method, callback);
-    } else if (callback) {
-      callback(false);
-    }
-
-    return this;
-  },
-
-  update: function(attributes) {
-    this.merge(attributes).trigger("update");
-    return this;
-  },
-
-  valid: function() {
-    this.errors.clear();
-    this.validate();
-    return this.errors.size() === 0;
-  },
-
-  validate: function() {
-    return this;
-  }
-};
-Model.Log = function() {
-  if (window.console) window.console.log.apply(window.console, arguments);
-};
-Model.RestPersistence = function(resource, methods) {
-	var PARAM_NAME_MATCHER = /:([\w\d]+)/g;
-
-  var model_resource = function() {
-    this.resource = resource;
-		this.resource_param_names = [];
-    while ((param_name = PARAM_NAME_MATCHER.exec(resource)) !== null) {
-      this.resource_param_names.push(param_name[1]);
-    };
-  };
-
-  jQuery.extend(model_resource.prototype, {
-		path: function(model) {
-			var path = this.resource;
-			$.each(this.resource_param_names, function(i, param) {
-				path = path.replace(":" + param, model.attributes[param]);
-			});
-			return path;
-		},
-
-    create: function(model, callback) {
-      return this.xhr('POST', this.create_path(model), model, callback);
-    },
-
-    create_path: function(model) {
-      return this.path(model);
-    },
-
-    destroy: function(model, callback) {
-      return this.xhr('DELETE', this.destroy_path(model), model, callback);
-    },
-
-    destroy_path: function(model) {
-      return this.update_path(model);
-    },
-
-    params: function(model) {
-      var params;
-      if (model) {
-        var attributes = model.attr();
-        delete attributes.id;
-        params = {};
-        params[model.constructor._name.toLowerCase()] = attributes;
-      } else {
-        params = null;
-      }
-      return params;
-    },
-
-    parseResponseData: function(xhr) {
-      try {
-        return /\S/.test(xhr.responseText) ?
-          jQuery.parseJSON(xhr.responseText) :
-          null;
-      } catch(e) {
-        Model.Log(e);
-      }
-    },
-
-    update: function(model, callback) {
-      return this.xhr('PUT', this.update_path(model), model, callback);
-    },
-
-    update_path: function(model) {
-      return [this.path(model), model.id()].join('/');
-    },
-
-    xhr: function(method, url, model, callback) {
-      var self = this;
-      var data = method === "DELETE" ? null : this.params(model);
-
-      return jQuery.ajax({
-        type: method,
-        url: url,
-        dataType: "json",
-        data: data,
-        complete: function(xhr, textStatus) {
-          self.xhrComplete(xhr, textStatus, model, callback);
-        }
-      });
-    },
-
-    xhrComplete: function(xhr, textStatus, model, callback) {
-      var data = this.parseResponseData(xhr);
-      var success = textStatus === "success";
-
-      if (data) {
-        if (success) {
-          model.attr(data);
-        } else if (xhr.status === 422) {
-          model.errors.clear();
-
-          for (var attribute in data) {
-            for (var i = 0; i < data[attribute].length; i++) {
-              model.errors.add(attribute, data[attribute][i]);
-            }
-          }
-        }
-      }
-
-      if (callback) callback.call(model, success, xhr);
-    }
-  }, methods);
-
-  return new model_resource();
-};
-
 var Rooibos = {
-  init: function(element) {
+  update: function(selector) {
+    var element = $(selector);
 		/* UI buttons */
 		element.find("button, input:submit, .button").each(function() { jQuery(this).button(jQuery(this).metadata()); });
     /* UI buttonsets */
@@ -23866,59 +21494,8 @@ var Rooibos = {
     element.find(".progressbar").each(function() { jQuery(this).progressbar(jQuery(this).metadata()); });
     /* UI Accorions */
     element.find(".accordion").each(function() { jQuery(this).accordion(jQuery(this).metadata()); });
-    /* Flexible box model compatibility */
-    if (!jQuery.browser.webkit && !jQuery.browser.mozilla) {
-      element.find(".vbox").flow("vertical");
-      element.find(".hbox").flow("horizontal");
-      element.find(".vbox > .flex").flex("height", 1).children().flex("height", 1);
-      element.find(".hbox > .flex").flex("width", 1).children().flex("width", 1);
-      element.flexify();
-    }
   }
 };
-
-Sammy.Rooibos = function(app, method_alias) {
-  
-  this.bind("changed", function(e, data) {
-		Rooibos.init(data ? data["element"] : $("body"));
-	});
-  
-};
-
-jQuery.extend(Sammy.RenderContext.prototype, {
-  // executes `EventContext#swap()` with the `content`
-  swap: function() {
-    return this.then(function(content) {
-      this.event_context.swap(content);
-      this.event_context.trigger("changed", { element: this.event_context.$element() });
-    });
-  },
-  
-  // Same usage as `jQuery.fn.appendTo()` but uses `then()` to ensure order
-  appendTo: function(selector) {
-    return this.then(function(content) {
-      $(selector).append(content);
-      this.event_context.trigger("changed", { element: $(selector) });
-    });
-  },
-
-  // Same usage as `jQuery.fn.prependTo()` but uses `then()` to ensure order
-  prependTo: function(selector) {
-    return this.then(function(content) {
-      $(selector).prepend(content);
-      this.event_context.trigger("changed", { element: $(selector) });
-    });
-  },
-
-  // Replaces the `$(selector)` using `html()` with the previously loaded
-  // `content`
-  replace: function(selector) {
-    return this.then(function(content) {
-      $(selector).html(content);
-      this.event_context.trigger("changed", { element: $(selector) });
-    });
-  }
-});
 
 jQuery.metadata.setType("attr", "data");
 var loadingView;

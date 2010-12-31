@@ -3,18 +3,14 @@
 // vendor_dir: js/vendor
 
 modernizr
-mustache
 underscore
 jquery
+backbone
 jquery.ui
 jquery.ui.menu
 jquery.metadata
 jquery.hashchange
 jquery.uniform
-jquery.flexify
-sammy
-sammy.template
-js-model
 
 js/ui/display
 js/ui/loading
