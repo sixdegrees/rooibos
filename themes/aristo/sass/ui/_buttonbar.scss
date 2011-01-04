@@ -14,6 +14,10 @@
     height: $line-height - 1px;
   }
   
+  .ui-button.selected {
+    @include linear-gradient(color-stops(#a0a0a0, #e0e0e0), top);
+  }
+  
   .ui-button:hover {
     @include linear-gradient(color-stops(#e0e0e0, #a0a0a0), top);
   }
