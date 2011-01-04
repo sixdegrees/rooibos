@@ -13,4 +13,8 @@
     border-right: 1px solid #bdbdbd;
     height: $line-height - 1px;
   }
+  
+  .ui-button:hover {
+    @include linear-gradient(color-stops(#e0e0e0, #a0a0a0), top);
+  }
 }
