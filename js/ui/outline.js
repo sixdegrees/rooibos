@@ -14,7 +14,7 @@
       $(window).hashchange(function() {
         self.element.find("a").removeClass("selected");
         self.element.find(".ui-accordion-header").removeClass("selected");
-        var el = self.element.find("a[href=" + location.hash + "]")
+        var el = self.element.find("a[href='" + location.hash + "']")
         if (el.parent().hasClass("ui-accordion-header")) el.parent().addClass("selected");
         else el.addClass("selected");
       }).hashchange();
