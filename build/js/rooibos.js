@@ -21347,7 +21347,7 @@ $.extend( $.ui.tabs.prototype, {
 /*
  * jQuery UI Menu @VERSION
  * 
- * Copyright 2010, AUTHORS.txt
+ * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  *
@@ -21358,18 +21358,21 @@ $.extend( $.ui.tabs.prototype, {
  *	jquery.ui.widget.js
  */
 (function($) {
+	
+var idIncrement = 0;
 
 $.widget("ui.menu", {
 	_create: function() {
 		var self = this;
+		this.menuId = this.element.attr( "id" ) || "ui-menu-" + idIncrement++;
 		this.element
-			.addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
+			.addClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
 			.attr({
-				role: "listbox",
-				"aria-activedescendant": "ui-active-menuitem"
+				id: this.menuId,
+				role: "listbox"
 			})
-			.bind("click.menu", function( event ) {
-				if (self.options.disabled) {
+			.bind( "click.menu", function( event ) {
+				if ( self.options.disabled ) {
 					return false;
 				}
 				if ( !$( event.target ).closest( ".ui-menu-item a" ).length ) {
@@ -21378,17 +21381,35 @@ $.widget("ui.menu", {
 				// temporary
 				event.preventDefault();
 				self.select( event );
+			})
+			.bind( "mouseover.menu", function( event ) {
+				if ( self.options.disabled ) {
+					return;
+				}
+				var target = $( event.target ).closest( ".ui-menu-item" );
+				if ( target.length && target.parent()[0] === self.element[0] ) {
+					self.activate( event, target );
+				}
+			})
+			.bind("mouseout.menu", function( event ) {
+				if ( self.options.disabled ) {
+					return;
+				}
+				var target = $( event.target ).closest( ".ui-menu-item" );
+				if ( target.length && target.parent()[0] === self.element[0] ) {
+					self.deactivate( event );
+				}
 			});
 		this.refresh();
 		
-		if (!this.options.input) {
-			this.options.input = this.element.attr("tabIndex", 0);
+		if ( !this.options.input ) {
+			this.options.input = this.element.attr( "tabIndex", 0 );
 		}
-		this.options.input.bind("keydown.menu", function(event) {
-			if (self.options.disabled) {
+		this.options.input.bind( "keydown.menu", function( event ) {
+			if ( self.options.disabled ) {
 				return;
 			}
-			switch (event.keyCode) {
+			switch ( event.keyCode ) {
 			case $.ui.keyCode.PAGE_UP:
 				self.previousPage();
 				event.preventDefault();
@@ -21419,171 +21440,159 @@ $.widget("ui.menu", {
 	},
 	
 	destroy: function() {
-		$.Widget.prototype.destroy.apply(this, arguments);
+		$.Widget.prototype.destroy.apply( this, arguments );
 		
 		this.element
-			.removeClass("ui-menu ui-widget ui-widget-content ui-corner-all")
-			.removeAttr("tabIndex")
-			.removeAttr("role")
-			.removeAttr("aria-activedescendant");
+			.removeClass( "ui-menu ui-widget ui-widget-content ui-corner-all" )
+			.removeAttr( "tabIndex" )
+			.removeAttr( "role" )
+			.removeAttr( "aria-activedescendant" );
 		
-		this.element.children(".ui-menu-item")
-			.removeClass("ui-menu-item")
-			.removeAttr("role")
-			.children("a")
-			.removeClass("ui-corner-all")
-			.removeAttr("tabIndex")
-			.unbind(".menu");
+		this.element.children( ".ui-menu-item" )
+			.removeClass( "ui-menu-item" )
+			.removeAttr( "role" )
+			.children( "a" )
+			.removeClass( "ui-corner-all" )
+			.removeAttr( "tabIndex" )
+			.unbind( ".menu" );
 	},
 	
 	refresh: function() {
-		var self = this;
-
 		// don't refresh list items that are already adapted
-		var items = this.element.children("li:not(.ui-menu-item):has(a)")
-			.addClass("ui-menu-item")
-			.attr("role", "menuitem");
+		var items = this.element.children( "li:not(.ui-menu-item):has(a)" )
+			.addClass( "ui-menu-item" )
+			.attr( "role", "menuitem" );
 		
-		items.children("a")
-			.addClass("ui-corner-all")
-			.attr("tabIndex", -1)
-			// mouseenter doesn't work with event delegation
-			.bind("mouseenter.menu", function( event ) {
-				if (self.options.disabled) {
-					return;
-				}
-				self.activate( event, $(this).parent() );
-			})
-			.bind("mouseleave.menu", function() {
-				if (self.options.disabled) {
-					return;
-				}
-				self.deactivate();
-			});
+		items.children( "a" )
+			.addClass( "ui-corner-all" )
+			.attr( "tabIndex", -1 );
 	},
 
 	activate: function( event, item ) {
+		var self = this;
 		this.deactivate();
-		if (this._hasScroll()) {
-			var offset = item.offset().top - this.element.offset().top,
-				scroll = this.element.attr("scrollTop"),
-				elementHeight = this.element.height();
-			if (offset < 0) {
-				this.element.attr("scrollTop", scroll + offset);
-			} else if (offset > elementHeight) {
-				this.element.attr("scrollTop", scroll + offset - elementHeight + item.height());
+		if ( this._hasScroll() ) {
+			var borderTop = parseFloat( $.curCSS( this.element[0], "borderTopWidth", true) ) || 0,
+				paddingtop = parseFloat( $.curCSS( this.element[0], "paddingTop", true) ) || 0,
+				offset = item.offset().top - this.element.offset().top - borderTop - paddingtop,
+				scroll = this.element.attr( "scrollTop" ),
+				elementHeight = this.element.height(),
+				itemHeight = item.height();
+			if ( offset < 0 ) {
+				this.element.attr( "scrollTop", scroll + offset );
+			} else if ( offset + itemHeight > elementHeight ) {
+				this.element.attr( "scrollTop", scroll + offset - elementHeight + itemHeight );
 			}
 		}
-		this.active = item.eq(0)
-			.children("a")
-				.addClass("ui-state-hover")
-				.attr("id", "ui-active-menuitem")
+		this.active = item.first()
+			.children( "a" )
+				.addClass( "ui-state-hover" )
+				.attr( "id", function(index, id) {
+					return (self.itemId = id || self.menuId + "-activedescendant");
+				})
 			.end();
-		this._trigger("focus", event, { item: item });
+		// need to remove the attribute before adding it for the screenreader to pick up the change
+		// see http://groups.google.com/group/jquery-a11y/msg/929e0c1e8c5efc8f
+		this.element.removeAttr("aria-activedescenant").attr("aria-activedescenant", self.itemId);
+		this._trigger( "focus", event, { item: item } );
 	},
 
-	deactivate: function() {
-		if (!this.active) { return; }
+	deactivate: function(event) {
+		if (!this.active) {
+			return;
+		}
 
-		this.active.children("a")
-			.removeClass("ui-state-hover")
-			.removeAttr("id");
-		this._trigger("blur");
+		var self = this;
+		this.active.children( "a" ).removeClass( "ui-state-hover" );
+		// remove only generated id
+		$( "#" + self.menuId + "-activedescendant" ).removeAttr( "id" );
+		this.element.removeAttr( "aria-activedescenant" );
+		this._trigger( "blur", event );
 		this.active = null;
 	},
 
 	next: function(event) {
-		this._move("next", ".ui-menu-item:first", event);
+		this._move( "next", ".ui-menu-item", "first", event );
 	},
 
 	previous: function(event) {
-		this._move("prev", ".ui-menu-item:last", event);
+		this._move( "prev", ".ui-menu-item", "last", event );
 	},
 
 	first: function() {
-		return this.active && !this.active.prevAll(".ui-menu-item").length;
+		return this.active && !this.active.prevAll( ".ui-menu-item" ).length;
 	},
 
 	last: function() {
-		return this.active && !this.active.nextAll(".ui-menu-item").length;
+		return this.active && !this.active.nextAll( ".ui-menu-item" ).length;
 	},
 
-	_move: function(direction, edge, event) {
-		if (!this.active) {
-			this.activate(event, this.element.children(edge));
+	_move: function(direction, edge, filter, event) {
+		if ( !this.active ) {
+			this.activate( event, this.element.children(edge)[filter]() );
 			return;
 		}
-		var next = this.active[direction + "All"](".ui-menu-item").eq(0);
-		if (next.length) {
-			this.activate(event, next);
+		var next = this.active[ direction + "All" ]( ".ui-menu-item" ).eq( 0 );
+		if ( next.length ) {
+			this.activate( event, next );
 		} else {
-			this.activate(event, this.element.children(edge));
+			this.activate( event, this.element.children(edge)[filter]() );
 		}
 	},
-
-	// TODO merge with previousPage
-	nextPage: function(event) {
-		if (this._hasScroll()) {
-			// TODO merge with no-scroll-else
-			if (!this.active || this.last()) {
-				this.activate(event, this.element.children(":first"));
+	
+	nextPage: function( event ) {
+		if ( this._hasScroll() ) {
+			if ( !this.active || this.last() ) {
+				this.activate( event, this.element.children( ".ui-menu-item" ).first() );
 				return;
 			}
 			var base = this.active.offset().top,
 				height = this.element.height(),
-				result = this.element.children("li").filter(function() {
-					var close = $(this).offset().top - base - height + $(this).height();
-					// TODO improve approximation
-					return close < 10 && close > -10;
-				});
+				result;
+			this.active.nextAll( ".ui-menu-item" ).each( function() {
+				result = $( this );
+				return $( this ).offset().top - base - height < 0;
+			});
 
-			// TODO try to catch this earlier when scrollTop indicates the last page anyway
-			if (!result.length) {
-				result = this.element.children(":last");
-			}
-			this.activate(event, result);
+			this.activate( event, result );
 		} else {
-			this.activate(event, this.element.children(!this.active || this.last() ? ":first" : ":last"));
+			this.activate( event, this.element.children( ".ui-menu-item" )
+				[ !this.active || this.last() ? "first" : "last" ]() );
 		}
 	},
 
-	// TODO merge with nextPage
-	previousPage: function(event) {
-		if (this._hasScroll()) {
-			// TODO merge with no-scroll-else
-			if (!this.active || this.first()) {
-				this.activate(event, this.element.children(":last"));
+	previousPage: function( event ) {
+		if ( this._hasScroll() ) {
+			if ( !this.active || this.first() ) {
+				this.activate( event, this.element.children( ".ui-menu-item" ).last() );
 				return;
 			}
 
 			var base = this.active.offset().top,
-				height = this.element.height();
-				result = this.element.children("li").filter(function() {
-					var close = $(this).offset().top - base + height - $(this).height();
-					// TODO improve approximation
-					return close < 10 && close > -10;
-				});
+				height = this.element.height(),
+				result;
+			this.active.prevAll( ".ui-menu-item" ).each( function() {
+				result = $( this );
+				return $(this).offset().top - base + height > 0;
+			});
 
-			// TODO try to catch this earlier when scrollTop indicates the last page anyway
-			if (!result.length) {
-				result = this.element.children(":first");
-			}
-			this.activate(event, result);
+			this.activate( event, result );
 		} else {
-			this.activate(event, this.element.children(!this.active || this.first() ? ":last" : ":first"));
+			this.activate( event, this.element.children( ".ui-menu-item" )
+				[ !this.active || this.first() ? ":last" : ":first" ]() );
 		}
 	},
 
 	_hasScroll: function() {
-		return this.element.height() < this.element.attr("scrollHeight");
+		return this.element.height() < this.element.attr( "scrollHeight" );
 	},
 
 	select: function( event ) {
-		this._trigger("select", event, { item: this.active });
+		this._trigger( "select", event, { item: this.active } );
 	}
 });
 
-}(jQuery));
+}( jQuery ));
 
 /*
  * Metadata - jQuery plugin for parsing metadata from elements
@@ -22126,7 +22135,7 @@ $.fn.metadata = function( opts ){
 
 /*
 
-Uniform v1.7.3
+Uniform v1.7.5
 Copyright © 2009 Josh Pyles / Pixelmatrix Design LLC
 http://pixelmatrixdesign.com
 
@@ -22165,7 +22174,8 @@ Enjoy!
       hoverClass: 'hover',
       useID: true,
       idPrefix: 'uniform',
-      resetSelector: false
+      resetSelector: false,
+      autoHide: true
     },
     elements: []
   };
@@ -22203,7 +22213,7 @@ Enjoy!
     }
     
     function doButton(elem){
-      $el = elem;
+      var $el = $(elem);
       
       var divTag = $("<div>"),
           spanTag = $("<span>");
@@ -22214,19 +22224,17 @@ Enjoy!
       
       var btnText;
       
-      if($el.is("a")){
+      if($el.is("a") || $el.is("button")){
         btnText = $el.text();
-      }else if($el.is("button")){
-        btnText = $el.text();
-      }else if($el.is(":submit") || $el.is("input[type=button]")){
+      }else if($el.is(":submit") || $el.is(":reset") || $el.is("input[type=button]")){
         btnText = $el.attr("value");
       }
       
-      if(btnText == "") btnText = "Submit";
+      btnText = btnText == "" ? $el.is(":reset") ? "Reset" : "Submit" : btnText;
       
       spanTag.html(btnText);
       
-      $el.hide();
+      $el.css("opacity", 0);
       $el.wrap(divTag);
       $el.wrap(spanTag);
       
@@ -22242,6 +22250,7 @@ Enjoy!
         },
         "mouseleave.uniform": function(){
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         },
         "mousedown.uniform touchbegin.uniform": function(){
           divTag.addClass(options.activeClass);
@@ -22273,12 +22282,18 @@ Enjoy!
       
       $.uniform.noSelect(divTag);
       storeElement(elem);
+      
     }
 
     function doSelect(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.selectClass);
 
@@ -22290,7 +22305,7 @@ Enjoy!
       if(selected.length == 0){
         selected = elem.find("option:first");
       }
-      spanTag.html(selected.text());
+      spanTag.html(selected.html());
       
       elem.css('opacity', 0);
       elem.wrap(divTag);
@@ -22302,7 +22317,7 @@ Enjoy!
 
       elem.bind({
         "change.uniform": function() {
-          spanTag.text(elem.find(":selected").text());
+          spanTag.text(elem.find(":selected").html());
           divTag.removeClass(options.activeClass);
         },
         "focus.uniform": function() {
@@ -22326,9 +22341,10 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         },
         "keyup.uniform": function(){
-          spanTag.text(elem.find(":selected").text());
+          spanTag.text(elem.find(":selected").html());
         }
       });
       
@@ -22344,10 +22360,15 @@ Enjoy!
     }
 
     function doCheckbox(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
-
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
+      
       divTag.addClass(options.checkboxClass);
 
       //assign the id of the element
@@ -22393,6 +22414,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
       
@@ -22409,13 +22431,17 @@ Enjoy!
       }
 
       storeElement(elem);
-
     }
 
     function doRadio(elem){
-
+      var $el = $(elem);
+      
       var divTag = $('<div />'),
           spanTag = $('<span />');
+          
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.radioClass);
 
@@ -22447,7 +22473,8 @@ Enjoy!
             spanTag.removeClass(options.checkedClass);
           }else{
             //box was just checked, check span
-            $("."+options.radioClass + " span."+options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
+            var classes = options.radioClass.split(" ")[0];
+            $("." + classes + " span." + options.checkedClass + ":has([name='" + $(elem).attr('name') + "'])").removeClass(options.checkedClass);
             spanTag.addClass(options.checkedClass);
           }
         },
@@ -22464,6 +22491,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -22489,6 +22517,10 @@ Enjoy!
       var divTag = $('<div />'),
           filenameTag = $('<span>'+options.fileDefaultText+'</span>'),
           btnTag = $('<span>'+options.fileBtnText+'</span>');
+      
+      if(!$el.css("display") == "none" && options.autoHide){
+        divTag.hide();
+      }
 
       divTag.addClass(options.fileClass);
       filenameTag.addClass(options.filenameClass);
@@ -22556,6 +22588,7 @@ Enjoy!
         },
         "mouseleave.uniform": function() {
           divTag.removeClass(options.hoverClass);
+          divTag.removeClass(options.activeClass);
         }
       });
 
@@ -22579,6 +22612,7 @@ Enjoy!
       
       $.uniform.noSelect(filenameTag);
       $.uniform.noSelect(btnTag);
+      
       storeElement(elem);
 
     }
@@ -22605,7 +22639,7 @@ Enjoy!
           $(this).siblings("span").remove();
           //unwrap parent div
           $(this).unwrap();
-        }else if($(this).is("button, :submit, a, input[type='button']")){
+        }else if($(this).is("button, :submit, :reset, a, input[type='button']")){
           //unwrap from span and div
           $(this).unwrap().unwrap();
         }
@@ -22667,7 +22701,7 @@ Enjoy!
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
 
           //reset current selected text
-          spanTag.html($e.find(":selected").text());
+          spanTag.html($e.find(":selected").html());
 
           if($e.is(":disabled")){
             divTag.addClass(options.disabledClass);
@@ -22723,7 +22757,7 @@ Enjoy!
           }else{
             divTag.removeClass(options.disabledClass);
           }
-        }else if($e.is(":submit") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
+        }else if($e.is(":submit") || $e.is(":reset") || $e.is("button") || $e.is("a") || elem.is("input[type=button]")){
           var divTag = $e.closest("div");
           divTag.removeClass(options.hoverClass+" "+options.focusClass+" "+options.activeClass);
           
@@ -22734,6 +22768,7 @@ Enjoy!
           }
           
         }
+        
       });
     };
 
@@ -22762,7 +22797,7 @@ Enjoy!
           doInput(elem);
         }else if(elem.is("textarea")){
           doTextarea(elem);
-        }else if(elem.is("a") || elem.is(":submit") || elem.is("button") || elem.is("input[type=button]")){
+        }else if(elem.is("a") || elem.is(":submit") || elem.is(":reset") || elem.is("button") || elem.is("input[type=button]")){
           doButton(elem);
         }
           
@@ -22817,19 +22852,33 @@ function loading(text) {
       this.element.addClass("ui-outline");
       // Highlight selected element on hash change
       var self = this;
-      
+
       $(window).hashchange(function() {
-        self.element.find("a").removeClass("selected");
-        self.element.find(".ui-accordion-header").removeClass("selected");
+        self.element.find("a.selected").each(function(k, v) {
+          var regex = $(v).attr('href');
+
+          if (window.location.hash.match(regex) == null) {
+            $(v).removeClass("selected");
+          }
+        });
+
+        self.element.find(".ui-accordion-header.selected").each(function(k, v) {
+          var regex = $(v).find('a').attr('href');
+
+          if (window.location.hash.match(regex) == null) {
+            $(v).removeClass("selected");
+          }
+        });
+
         var el = self.element.find("a[href=" + location.hash + "]")
         if (el.parent().hasClass("ui-accordion-header")) el.parent().addClass("selected");
         else el.addClass("selected");
       }).hashchange();
     },
-    
+
     _createIcons: function() {
       $.ui.accordion.prototype._createIcons.apply(this);
-      
+
       // TODO : find a way to avoid making and then removing the arrows
       $('.ui-accordion-header', this.context).each(function() {
         if ($(this).next().html() == "") {
@@ -22837,7 +22886,7 @@ function loading(text) {
           $('a', this).addClass('ui-noicon')
         }
       });
-      
+
       var self = this;
       if (this.eventOption) {
         self.headers.find("span.ui-icon").bind( this.eventOption.split(" ").join(".accordion ") + ".accordion", function(event) {
@@ -22849,6 +22898,7 @@ function loading(text) {
     }
   });
 })(jQuery);
+
  /*
  * jQuery UI selectmenu
  *
