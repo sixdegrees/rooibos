@@ -11,8 +11,8 @@ var Rooibos = {
     element.find(".outline").each(function() { jQuery(this).outline(jQuery(this).metadata()); });
     /* UI Menu */
     element.find(".menu").each(function() { jQuery(this).menu(jQuery(this).metadata()); });
-    /* UI selectmenus */
-    element.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
+    // /* UI selectmenus */
+    // element.find("select").each(function() { jQuery(this).selectmenu(jQuery(this).metadata()); });
     /* Uniform controls */
     if (!jQuery.browser.webkit) element.find("input:checkbox:not(.ui-helper-hidden-accessible), input:radio:not(.ui-helper-hidden-accessible)").uniform();
     /* UI progress bars */
